@@ -91,10 +91,25 @@ Otwórz podgląd, poczekaj aż SW się zainstaluje (DevTools → Application →
 Service Workers), potem włącz "Offline" w DevTools i odśwież — routing i
 mini-kalkulator powinny nadal działać.
 
+## Ikony PWA (Etap 7 — prawie gotowy)
+
+Źródła SVG w `public/icons/` (Δ w tokenach apki), manifest pod PNG +
+maskable. Ostatni krok lokalnie, bo agent nie miał uprawnień shell:
+
+```bash
+resvg -w 192 -h 192 public/icons/icon.svg public/icons/icon-192.png
+resvg -w 512 -h 512 public/icons/icon.svg public/icons/icon-512.png
+resvg -w 512 -h 512 public/icons/icon-maskable.svg public/icons/icon-maskable-512.png
+resvg -w 180 -h 180 public/icons/icon.svg public/apple-touch-icon.png
+rm public/icons/icon-192.svg public/icons/icon-512.svg public/icons/icon-maskable.svg
+npm run build
+```
+
+Potem DevTools → Application → Manifest (instalowalność) i Lighthouse PWA.
+
 ## Co NIE jest jeszcze zrobione
 
-- **Ikony PWA są placeholderami** (SVG z „Δ”) — do podmiany na docelowe
-  PNG/maskable przed publikacją (wymóg niektórych przeglądarek/Android).
+Brak — wszystkie zaplanowane etapy dowiezione (ikony czekają tylko na render powyżej).
 
 ## Struktura
 

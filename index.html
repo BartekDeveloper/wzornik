@@ -1,13 +1,28 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#F6F7F3" />
+    <meta name="theme-color" content="#0D1117" />
     <meta name="description" content="Wzory i kalkulatory maturalne — działa offline, dokładność szkolna." />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:site_name" content="Wzornik Maturalny" />
+    <meta property="og:title" content="Wzornik Maturalny — wzory i kalkulatory maturalne offline" />
+    <meta property="og:description" content="Tablice CKE i solvery N-zmiennych z krokami. Matematyka i fizyka. Działa bez internetu." />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href="/" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="stylesheet" href="/fonts/fonts.css" />
+    <script>
+      try {
+        var s = JSON.parse(localStorage.getItem('wm:settings') || '{}');
+        document.documentElement.dataset.theme = s.theme === 'light' ? 'light' : 'dark';
+      } catch (e) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    </script>
     <title>Wzornik Maturalny</title>
   </head>
   <body>

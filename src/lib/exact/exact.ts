@@ -1,4 +1,4 @@
-import { Rational, ONE, ZERO, add, cmp, div, fromString, isZero, mul, neg, norm, of, sub, toNumber } from './rational'
+import { Rational, ONE, ZERO, add, cmp, div, fromString, isZero, mul, neg, norm, of, pow, sub, toNumber } from './rational'
 
 export type Irr =
   | { type: 'sqrt'; coef: Rational; radicand: bigint }
@@ -197,4 +197,99 @@ export function solveQuadratic(a: Rational, b: Rational, c: Rational): Quadratic
   if (s === 0) return { kind: 'one', delta, roots: [u] }
   const w = divRat(sqrtRational(deltaRat), twoA)
   return { kind: 'two', delta, roots: [subExact(u, w), addExact(u, w)] }
+}
+
+const HALF: Rational = { p: 1n, q: 2n }
+const SQRT2_2: Exact = { rat: ZERO, irr: { type: 'sqrt', coef: HALF, radicand: 2n } }
+const SQRT3_2: Exact = { rat: ZERO, irr: { type: 'sqrt', coef: HALF, radicand: 3n } }
+const SQRT3_3: Exact = { rat: ZERO, irr: { type: 'sqrt', coef: { p: 1n, q: 3n }, radicand: 3n } }
+
+function baseTrig(kind: 'sin' | 'cos' | 'tan', deg0306090: number): Exact {
+  const one = exactOf(ONE)
+  const half = exactOf(HALF)
+  switch (deg0306090) {
+    case 0:
+      if (kind === 'sin') return exactOf(ZERO)
+      if (kind === 'cos') return one
+      return exactOf(ZERO)
+    case 30:
+      if (kind === 'sin') return half
+      if (kind === 'cos') return SQRT3_2
+      return SQRT3_3
+    case 45:
+      if (kind === 'tan') return one
+      return SQRT2_2
+    case 60:
+      if (kind === 'sin') return SQRT3_2
+      if (kind === 'cos') return half
+      return { rat: ZERO, irr: { type: 'sqrt', coef: ONE, radicand: 3n } }
+    case 90:
+      if (kind === 'sin') return one
+      if (kind === 'cos') return exactOf(ZERO)
+      throw new Error('tangens nieokreślony dla 90° + k·180°')
+    default:
+      throw new Error('trygonometria: nieobsługiwany kąt bazowy')
+  }
+}
+
+export function trigExact(kind: 'sin' | 'cos' | 'tan', deg: number): Exact {
+  if (!Number.isFinite(deg)) throw new Error('trygonometria: zły kąt')
+  const d = ((deg % 360) + 360) % 360
+  const ref = d <= 90 ? d : d <= 180 ? 180 - d : d <= 270 ? d - 180 : 360 - d
+  if (![0, 30, 45, 60, 90].includes(ref)) {
+    const rad = (deg * Math.PI) / 180
+    const v = kind === 'sin' ? Math.sin(rad) : kind === 'cos' ? Math.cos(rad) : Math.tan(rad)
+    return approxOnly(v)
+  }
+  if (kind === 'tan' && (ref === 90 || d === 90 || d === 270)) {
+    throw new Error('tangens nieokreślony dla 90° + k·180°')
+  }
+  const sSin = d <= 180 ? 1 : -1
+  const sCos = d <= 90 || d >= 270 ? 1 : -1
+  if (kind === 'sin') {
+    const b = baseTrig('sin', ref)
+    return sSin === 1 ? b : negExact(b)
+  }
+  if (kind === 'cos') {
+    const b = baseTrig('cos', ref)
+    return sCos === 1 ? b : negExact(b)
+  }
+  const s = baseTrig('sin', ref)
+  const c = baseTrig('cos', ref)
+  const t = divExact(s, c)
+  const sign = sSin * sCos
+  return sign === 1 ? t : negExact(t)
+}
+
+function negExact(e: Exact): Exact {
+  return { rat: neg(e.rat), irr: negIrr(e.irr) }
+}
+
+export function divExact(a: Exact, b: Exact): Exact {
+  if (!b.irr) return divRat(a, b.rat)
+  if (b.irr.type === 'approx' || b.irr.type === 'pi') return approxOnly(approx(a) / approx(b))
+  if (a.irr?.type === 'approx') return approxOnly(approx(a) / approx(b))
+  const r = b.irr.radicand
+  const c2 = b.irr.coef
+  if (!isZero(b.rat)) return approxOnly(approx(a) / approx(b))
+  if (!a.irr) {
+    const coef = div(a.rat, mul(c2, { p: r, q: 1n }))
+    return { rat: ZERO, irr: { type: 'sqrt', coef, radicand: r } }
+  }
+  if (a.irr.type !== 'sqrt' || a.irr.radicand !== r || !isZero(a.rat)) {
+    return approxOnly(approx(a) / approx(b))
+  }
+  return exactOf(div(a.irr.coef, c2))
+}
+
+export function logExact(base: Rational, x: Rational): Exact {
+  if (cmp(base, ZERO) <= 0 || cmp(x, ZERO) <= 0) throw new Error('logarytm: podstawa i liczba dodatnie')
+  if (base.p === 1n && base.q === 1n) throw new Error('logarytm: podstawa różna od 1')
+  if (isZero(sub(x, ONE))) return exactOf(ZERO)
+  if (cmp(sub(x, base), ZERO) === 0) return exactOf(ONE)
+  const est = Math.round(Math.log(toNumber(x)) / Math.log(toNumber(base)))
+  if (Number.isInteger(est) && Math.abs(est) <= 1000) {
+    if (cmp(pow(base, est), x) === 0) return exactOf(of(est))
+  }
+  return approxOnly(Math.log(toNumber(x)) / Math.log(toNumber(base)))
 }

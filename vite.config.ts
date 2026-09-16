@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'Wzornik Maturalny',
         short_name: 'Wzornik',
         description: 'Wzory i kalkulatory maturalne — działa offline.',
-        theme_color: '#F6F7F3',
-        background_color: '#F6F7F3',
+        theme_color: '#0D1117',
+        background_color: '#0D1117',
         display: 'standalone',
         start_url: '/',
         icons: [

@@ -8,10 +8,12 @@ const props = defineProps<{ data: PlotData }>()
 const canvas = ref<HTMLCanvasElement | null>(null)
 let observer: ResizeObserver | null = null
 
-const INK = '#17211E'
-const GRID = '#D9E0DC'
-const ACC = '#B23B30'
 const HEIGHT = 250
+
+function cssVar(name: string, fallback: string): string {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return v === '' ? fallback : v
+}
 
 function draw(): void {
   const el = canvas.value
@@ -26,6 +28,9 @@ function draw(): void {
   ctx.clearRect(0, 0, cssW, HEIGHT)
 
   const s = sampleY(props.data)
+  const INK = cssVar('--color-ink', '#EBF1EA')
+  const GRID = cssVar('--color-grid', '#1E2621')
+  const ACC = cssVar('--color-accent', '#E0685A')
   const pad = 12
   const toPx = (x: number, y: number): [number, number] => [
     pad + ((x - s.xMin) / (s.xMax - s.xMin)) * (cssW - 2 * pad),
@@ -115,7 +120,15 @@ watch(() => props.data, draw)
 
 <template>
   <figure class="plot">
-    <canvas ref="canvas" class="plot__canvas"></canvas>
+    <canvas
+      ref="canvas"
+      class="plot__canvas"
+      role="img"
+      aria-label="Wykres funkcji. Punkty kluczowe wymienione poniżej wykresu."
+    ></canvas>
+    <ul class="sr-only">
+      <li v-for="p in data.points" :key="p.label">{{ p.label }}</li>
+    </ul>
     <figcaption class="plot__cap">Wykres funkcji z zaznaczonymi punktami</figcaption>
   </figure>
 </template>

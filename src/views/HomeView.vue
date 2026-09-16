@@ -6,11 +6,12 @@ import { solveQuadratic } from '../lib/exact/exact'
 import type { Quadratic } from '../lib/exact/exact'
 import { formatDecimal, formatExactText } from '../lib/exact/format'
 import { convert } from '../lib/units/units'
+import { loadSettings } from '../lib/settings'
 
 const aIn = ref(1)
 const bIn = ref(-5)
 const cIn = ref(6)
-const places = ref(2)
+const places = ref(loadSettings().places)
 
 function rat(v: number): Rational {
   if (!Number.isFinite(v)) return ZERO
@@ -164,7 +165,7 @@ const convResult = computed(() => {
 .demo__inputs select {
   width: 4.5rem;
   font-family: var(--font-mono);
-  font-size: 0.9375rem;
+  font-size: 1rem;
   padding: 0.35rem 0.5rem;
   border: 1px solid var(--color-line);
   border-radius: var(--radius);

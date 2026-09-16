@@ -85,6 +85,10 @@ export function toNumber(a: Rational): number {
   return Number(a.p) / Number(a.q)
 }
 
+export function isIntegerR(a: Rational): boolean {
+  return a.q === 1n
+}
+
 export function pow(base: Rational, exp: number): Rational {
   if (!Number.isInteger(exp)) throw new Error('wymierna: potęga musi być całkowita')
   if (exp === 0) return ONE
@@ -96,6 +100,25 @@ export function pow(base: Rational, exp: number): Rational {
     if (k % 2 === 1) r = mul(r, b)
     b = mul(b, b)
     k = Math.floor(k / 2)
+  }
+  return r
+}
+
+export function factorial(n: bigint): bigint {
+  if (n < 0n) throw new Error('silnia: tylko dla n ≥ 0')
+  if (n > 1000n) throw new Error('silnia: za duże n (limit 1000)')
+  let r = 1n
+  for (let i = 2n; i <= n; i++) r *= i
+  return r
+}
+
+export function binom(n: bigint, k: bigint): bigint {
+  if (n < 0n || k < 0n || k > n) throw new Error('kombinacje: wymagane 0 ≤ k ≤ n')
+  if (n > 1000n) throw new Error('kombinacje: za duże n (limit 1000)')
+  const kk = k > n - k ? n - k : k
+  let r = 1n
+  for (let i = 1n; i <= kk; i++) {
+    r = (r * (n - kk + i)) / i
   }
   return r
 }

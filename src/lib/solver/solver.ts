@@ -3,7 +3,7 @@ import type { Exact } from '../exact/exact'
 import type { FormulaDef, SolveStep } from '../formulas/types'
 
 export type SolverResult =
-  | { ok: true; unknown: string; unknownLabel: string; values: Exact[]; steps: SolveStep[] }
+  | { ok: true; unknown: string; unknownLabel: string; values: Exact[]; labels: string[]; steps: SolveStep[] }
   | { ok: false; error: string }
 
 function parseInput(label: string, raw: string): Exact {
@@ -24,7 +24,7 @@ export function solveFormula(def: FormulaDef, raw: Record<string, string>, place
         known[v.id] = parseInput(v.label, s)
       }
       const sol = def.solve(def.outputId, known, places)
-      return { ok: true, unknown: def.outputId, unknownLabel: def.outputLabel, values: sol.values, steps: sol.steps }
+      return { ok: true, unknown: def.outputId, unknownLabel: def.outputLabel, values: sol.values, labels: sol.labels ?? [], steps: sol.steps }
     }
     const empty = def.vars.filter((v) => (raw[v.id] ?? '').trim() === '')
     if (empty.length === 0) return { ok: false, error: 'zostaw jedno pole puste — to będzie niewiadoma' }
@@ -36,7 +36,7 @@ export function solveFormula(def: FormulaDef, raw: Record<string, string>, place
       known[v.id] = parseInput(v.label, (raw[v.id] ?? '').trim())
     }
     const sol = def.solve(unknown.id, known, places)
-    return { ok: true, unknown: unknown.id, unknownLabel: unknown.label, values: sol.values, steps: sol.steps }
+    return { ok: true, unknown: unknown.id, unknownLabel: unknown.label, values: sol.values, labels: sol.labels ?? [], steps: sol.steps }
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : 'Błąd obliczeń' }
   }

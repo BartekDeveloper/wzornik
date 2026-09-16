@@ -6,6 +6,7 @@ const props = defineProps<{
   formulaId: string
   nums: Record<string, number>
   highlight: string
+  caption?: string
 }>()
 
 const svg = computed(() => renderDiagram(props.formulaId, props.nums, props.highlight))
@@ -14,7 +15,7 @@ const svg = computed(() => renderDiagram(props.formulaId, props.nums, props.high
 <template>
   <figure v-if="svg" class="diagram">
     <div v-html="svg"></div>
-    <figcaption class="diagram__cap">Rysunek pomocniczy</figcaption>
+    <figcaption class="diagram__cap">{{ caption ?? 'Rysunek pomocniczy' }}</figcaption>
   </figure>
 </template>
 
@@ -32,6 +33,32 @@ const svg = computed(() => renderDiagram(props.formulaId, props.nums, props.high
   width: 100%;
   height: auto;
   display: block;
+}
+
+.diagram :deep(.e) {
+  stroke: var(--color-ink);
+  fill: none;
+}
+
+.diagram :deep(.es) {
+  stroke: var(--color-ink-soft);
+  fill: none;
+}
+
+.diagram :deep(.dot) {
+  fill: var(--color-ink);
+}
+
+.diagram :deep(text) {
+  fill: var(--color-ink);
+}
+
+.diagram :deep(.e.hl) {
+  stroke: var(--color-accent);
+}
+
+.diagram :deep(text.hl) {
+  fill: var(--color-accent);
 }
 
 .diagram__cap {

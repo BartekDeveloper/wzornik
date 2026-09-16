@@ -2,10 +2,11 @@
 import { computed, onUnmounted, reactive, ref, watch } from 'vue'
 import { getFormula } from '../lib/formulas/index'
 import { solveFormula } from '../lib/solver/solver'
-import { formatDecimal, formatLatex } from '../lib/exact/format'
+import { formatDecimal, formatLatex, trimNum } from '../lib/exact/format'
 import { approx, isApproxOnly, parseExact } from '../lib/exact/exact'
 import { linearPlot, quadraticPlot } from '../lib/plots/plot'
 import { addHistory, isFavorite, toggleFavorite } from '../lib/storage/db'
+import { loadSettings } from '../lib/settings'
 import Formula from '../components/Formula.vue'
 import FormulaDiagram from '../components/FormulaDiagram.vue'
 import FunctionPlot from '../components/FunctionPlot.vue'
@@ -15,7 +16,7 @@ const props = defineProps<{ subject?: string; formula?: string }>()
 const def = computed(() => (props.subject && props.formula ? getFormula(props.subject, props.formula) : undefined))
 
 const inputs = reactive<Record<string, string>>({})
-const places = ref(2)
+const places = ref(loadSettings().places)
 const isFav = ref(false)
 
 const favKey = computed(() =>
@@ -50,6 +51,8 @@ watch(
   { immediate: true },
 )
 
+const SUB = ['₁', '₂', '₃', '₄']
+
 const hasAnyInput = computed(() => Object.values(inputs).some((s) => s.trim() !== ''))
 
 const view = computed(() => {
@@ -63,7 +66,8 @@ const view = computed(() => {
     state: 'done' as const,
     unknownId: r.unknown,
     unknownLabel: r.unknownLabel,
-    values: r.values.map((v) => ({
+    values: r.values.map((v, i) => ({
+      label: r.labels[i] ?? (r.values.length > 1 ? `x${SUB[i] ?? `_${i + 1}`}` : r.unknownLabel),
       tex: formatLatex(v),
       dec: formatDecimal(v, places.value),
       approx: isApproxOnly(v),
@@ -91,6 +95,13 @@ const diagramNums = computed<Record<string, number> | null>(() => {
   return nums
 })
 
+const diagramCaption = computed<string | undefined>(() => {
+  const d = def.value
+  const n = diagramNums.value
+  if (!d || !n) return undefined
+  return `${d.name}: ${d.vars.map((v) => `${v.id} = ${trimNum(n[v.id] ?? NaN)}`).join(', ')}`
+})
+
 function numInput(id: string): number | null {
   try {
     const n = approx(parseExact((inputs[id] ?? '').trim()))
@@ -100,7 +111,8 @@ function numInput(id: string): number | null {
   }
 }
 
-const plotData = computed(() => {  const d = def.value
+const plotData = computed(() => {
+  const d = def.value
   if (!d) return null
   if (d.id === 'rownanie-kwadratowe') {
     const a = numInput('a')
@@ -154,7 +166,7 @@ onUnmounted(() => window.clearTimeout(saveTimer))
       <div class="solver__inputs">
         <label v-for="v in def.vars" :key="v.id">
           {{ v.label }}<span v-if="v.unit" class="unit"> [{{ v.unit }}]</span>
-          <input v-model="inputs[v.id]" inputmode="decimal" :placeholder="def.mode === 'nvar' ? 'niewiadoma?' : ''" />
+          <input v-model="inputs[v.id]" inputmode="decimal" />
         </label>
         <label>
           miejsca
@@ -165,7 +177,7 @@ onUnmounted(() => window.clearTimeout(saveTimer))
 
       <div v-if="view.state === 'idle'">
         <p v-if="view.hint" class="hint">Uzupełnij dane powyżej, a kroki pojawią się same.</p>
-        <p v-else class="error">{{ view.error }}</p>
+        <p v-else class="error" role="alert">{{ view.error }}</p>
       </div>
 
       <ol v-if="view.state === 'done'" class="steps">
@@ -176,9 +188,9 @@ onUnmounted(() => window.clearTimeout(saveTimer))
         </li>
       </ol>
 
-      <div v-if="view.state === 'done'" class="results">
+      <div v-if="view.state === 'done'" class="results" aria-live="polite">
         <p v-for="(r, i) in view.values" :key="i" class="results__row">
-          {{ view.values.length > 1 ? `x${i + 1}` : view.unknownLabel }} =
+          {{ r.label }} =
           <span class="result-value"><Formula :source="r.tex" /></span>
           <span v-if="!r.approx" class="badge">do zapisu</span>
           <span v-if="r.tex !== r.dec" class="approx">≈ {{ r.dec }}</span>
@@ -190,19 +202,20 @@ onUnmounted(() => window.clearTimeout(saveTimer))
         :formula-id="def.id"
         :nums="diagramNums"
         :highlight="view.unknownId"
+        :caption="diagramCaption"
       />
 
       <FunctionPlot v-if="plotData" :data="plotData" />
     </div>
 
     <p class="back">
-      <router-link :to="{ name: 'kalkulatory', params: { subject: def.subject } }">← wszystkie kalkulatory</router-link>
+      <router-link :to="{ name: 'wzornik', params: { subject: def.subject } }">← wszystkie wzory</router-link>
     </p>
   </section>
 
   <section v-else>
     <h2>Nie ma takiego kalkulatora</h2>
-    <p><router-link :to="{ name: 'kalkulatory' }">Wróć do listy kalkulatorów</router-link></p>
+    <p><router-link :to="{ name: 'wzornik' }">Wróć do wzornika</router-link></p>
   </section>
 </template>
 
@@ -262,7 +275,7 @@ onUnmounted(() => window.clearTimeout(saveTimer))
 .solver__inputs input {
   width: 6rem;
   font-family: var(--font-mono);
-  font-size: 0.9375rem;
+  font-size: 1rem;
   padding: 0.35rem 0.5rem;
   border: 1px solid var(--color-line);
   border-radius: var(--radius);

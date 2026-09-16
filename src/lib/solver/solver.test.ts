@@ -68,6 +68,24 @@ describe('solver matematyka', () => {
     expect(exactOf('matematyka', 'funkcja-liniowa', { a: '2', b: '-4' })).toEqual(['2'])
   })
 
+  it('potęga 2^10 → 1024', () => {
+    expect(exactOf('matematyka', 'potega', { p: '2', n: '10', w: '' })).toEqual(['1024'])
+  })
+
+  it('tales: b=4, c=6, d=8 → a=3', () => {
+    expect(exactOf('matematyka', 'tales', { a: '', b: '4', c: '6', d: '8' })).toEqual(['3'])
+  })
+
+  it('kombinacje C(49,6) → 13983816', () => {
+    expect(exactOf('matematyka', 'kombinacje', { n: '49', k: '6' })).toEqual(['13983816'])
+  })
+
+  it('horner: x³-6x²+11x-6 → 1, 2, 3', () => {
+    const r = run('matematyka', 'horner-pierwiastki', { a: '1', b: '-6', c: '11', d: '-6' })
+    if (!r.ok) throw new Error(r.error)
+    expect(r.values.map(formatExactText)).toEqual(['1', '2', '3'])
+  })
+
   it('delta przez rejestr: x²-5x+6 → 2 i 3', () => {    const r = run('matematyka', 'rownanie-kwadratowe', { a: '1', b: '-5', c: '6' })
     if (!r.ok) throw new Error(r.error)
     expect(r.values.map(formatExactText)).toEqual(['2', '3'])
@@ -86,6 +104,14 @@ describe('solver fizyka', () => {
 
   it('Ek=100 m=2 → v=10', () => {
     expect(exactOf('fizyka', 'energia-kinetyczna', { Ek: '100', m: '2', v: '' })).toEqual(['10'])
+  })
+
+  it('ohm: U=12, R=4 → I=3', () => {
+    expect(exactOf('fizyka', 'ohm', { I: '', U: '12', R: '4' })).toEqual(['3'])
+  })
+
+  it('archimedes: ρ=1000, V=2 → 20000', () => {
+    expect(exactOf('fizyka', 'archimedes', { Fw: '', ro: '1000', V: '2' })).toEqual(['20000'])
   })
 
   it('wymaga dokładnie jednej niewiadomej', () => {

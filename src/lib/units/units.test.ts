@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { convert } from './units'
+import { CATEGORIES, convert, unitsOf } from './units'
 
 describe('units', () => {
   it('converts 36 km/h to 10 m/s', () => {
@@ -10,7 +10,38 @@ describe('units', () => {
     expect(convert(1, 'km', 'm')).toBe(1000)
   })
 
-  it('rejects mismatched dimensions', () => {
+  it('converts hectares and ares', () => {
+    expect(convert(1, 'ha', 'm²')).toBe(10000)
+    expect(convert(3, 'a', 'm²')).toBe(300)
+  })
+
+  it('converts liters and milliliters', () => {
+    expect(convert(2, 'l', 'ml')).toBeCloseTo(2000, 8)
+    expect(convert(1, 'm³', 'l')).toBeCloseTo(1000, 8)
+  })
+
+  it('converts pressure', () => {
+    expect(convert(1, 'atm', 'kPa')).toBeCloseTo(101.325, 8)
+    expect(convert(1000, 'hPa', 'bar')).toBeCloseTo(1, 10)
+  })
+
+  it('converts energy and power', () => {
+    expect(convert(1, 'kWh', 'J')).toBe(3600000)
+    expect(convert(1, 'KM', 'W')).toBeCloseTo(735.5, 1)
+  })
+
+  it('converts temperature with offset', () => {
+    expect(convert(0, '°C', 'K')).toBeCloseTo(273.15, 8)
+    expect(convert(100, '°C', '°F')).toBeCloseTo(212, 8)
+    expect(convert(32, '°F', '°C')).toBeCloseTo(0, 8)
+  })
+
+  it('rejects mismatched categories', () => {
     expect(() => convert(1, 'm', 's')).toThrow()
+  })
+
+  it('lists units per category', () => {
+    expect(unitsOf('temperature')).toEqual(['°C', 'K', '°F'])
+    expect(CATEGORIES).toHaveLength(10)
   })
 })

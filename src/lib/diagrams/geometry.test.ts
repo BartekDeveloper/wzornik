@@ -22,7 +22,7 @@ describe('renderDiagram', () => {
 
   it('highlights the unknown edge', () => {
     const svg = renderDiagram('pitagoras', { a: 3, b: 4, c: 5 }, 'c')
-    expect(svg).toMatch(/stroke="#B23B30"/)
+    expect(svg).toMatch(/class="e hl"/)
     const plain = renderDiagram('pitagoras', { a: 3, b: 4, c: 5 }, 'a')
     expect(plain).not.toBe(svg)
   })

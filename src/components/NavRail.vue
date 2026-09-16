@@ -1,86 +1,89 @@
 <script setup lang="ts">
-const subjects = [
-  { slug: 'matematyka', label: 'Matematyka', accent: 'var(--subject-math)' },
-  { slug: 'fizyka', label: 'Fizyka', accent: 'var(--subject-physics)' },
-  { slug: 'chemia', label: 'Chemia', accent: 'var(--subject-chemistry)' },
-  { slug: 'geografia', label: 'Geografia', accent: 'var(--subject-geography)' }
+const quick = [
+  {
+    to: '/',
+    label: 'Wzory',
+    icon: 'M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14'
+  },
+  {
+    to: '/konwerter',
+    label: 'Miary',
+    icon: 'M4 7h13l-3.5-3.5M20 17H7l3.5 3.5'
+  },
+  {
+    to: '/historia',
+    label: 'Moje',
+    icon: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.8-5.4 2.8 1-6.1L3.2 9.5l6.1-.9z'
+  }
 ]
 </script>
 
 <template>
-  <nav class="rail" aria-label="Przedmioty">
-    <router-link to="/" class="rail__brand">Wzornik<br />Maturalny</router-link>
-
-    <div class="rail__group">
-      <span class="rail__group-label">Wzory</span>
+  <nav class="rail" aria-label="Nawigacja główna">
+    <div class="rail__quick" role="list">
       <router-link
-        v-for="s in subjects"
-        :key="s.slug"
-        :to="{ name: 'wzornik', params: { subject: s.slug } }"
-        class="rail__link"
-        :style="{ '--tab-accent': s.accent }"
-      >{{ s.label }}</router-link>
-    </div>
-
-    <div class="rail__group">
-      <span class="rail__group-label">Moje</span>
-      <router-link to="/historia" class="rail__link">Historia i ulubione</router-link>
-    </div>
-
-    <div class="rail__group">
-      <span class="rail__group-label">Kalkulatory</span>
-      <router-link
-        v-for="s in subjects"
-        :key="s.slug"
-        :to="{ name: 'kalkulatory', params: { subject: s.slug } }"
-        class="rail__link"
-        :style="{ '--tab-accent': s.accent }"
-      >{{ s.label }}</router-link>
+        v-for="q in quick"
+        :key="q.to"
+        :to="q.to"
+        class="rail__tab"
+        role="listitem"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="rail__icon">
+          <path :d="q.icon" />
+        </svg>
+        <span>{{ q.label }}</span>
+      </router-link>
     </div>
   </nav>
 </template>
 
 <style scoped>
 .rail {
-  width: var(--rail-width);
-  flex-shrink: 0;
-  padding: 2rem 1.25rem;
-  border-right: 1px solid var(--color-line);
-  min-height: 100vh;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  background: var(--color-paper-raised);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid var(--color-line);
+  padding: 0.25rem 0.5rem calc(0.25rem + env(safe-area-inset-bottom));
 }
 
-.rail__brand {
-  display: block;
-  font-family: var(--font-display);
-  font-size: var(--step-1);
-  font-weight: 600;
-  line-height: 1.2;
+.rail__quick {
+  display: flex;
+  justify-content: space-around;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.rail__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  min-height: 52px;
+  min-width: 72px;
+  justify-content: center;
   text-decoration: none;
-  color: var(--color-ink);
-  margin-bottom: 2.5rem;
-}
-
-.rail__group { margin-bottom: 2rem; }
-
-.rail__group-label {
-  display: block;
-  font-size: 0.8125rem;
   color: var(--color-ink-soft);
-  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
 }
 
-.rail__link {
-  display: block;
-  padding: 0.4rem 0 0.4rem 0.6rem;
-  border-left: 2px solid var(--color-line);
-  text-decoration: none;
-  color: var(--color-ink);
-  font-size: 0.9375rem;
+.rail__icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.rail__link:hover,
-.rail__link.router-link-active {
-  border-left-color: var(--tab-accent, var(--color-accent));
-  color: var(--tab-accent, var(--color-accent));
+.rail__tab.router-link-exact-active {
+  color: var(--color-accent);
+  font-weight: 500;
 }
 </style>

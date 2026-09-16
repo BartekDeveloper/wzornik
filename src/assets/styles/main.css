@@ -1,25 +1,25 @@
 /* ---------------------------------------------------------------
    Design tokens — Wzornik Maturalny
-   Reference: exam answer sheets / graph-paper notebooks, not a
-   generic SaaS dashboard. Ink-on-paper palette, a red-pen accent
-   for the active/correct state, faint grid backdrop.
+   Dark-first graphite: :root to motyw ciemny (domyślny),
+   [data-theme='light'] przywraca jasny. Szare, neutralne tło,
+   czerwony accent, szkło na kartach.
    --------------------------------------------------------------- */
 :root {
-  /* Color */
-  --color-paper: #F6F7F3;      /* base background — cool off-white, not cream */
-  --color-paper-raised: #FFFFFF;
-  --color-ink: #17211E;        /* primary text — deep green-black, not flat #111 */
-  --color-ink-soft: #4B564F;   /* secondary text */
-  --color-grid: #D9E0DC;       /* faint graph-paper rule lines */
-  --color-accent: #B23B30;     /* red-pen accent: active states, key results */
-  --color-accent-soft: #F1DAD6;
-  --color-line: #C9D1CB;       /* borders / dividers */
+  /* Color — graphite dark (default) */
+  --color-paper: #0D1117;
+  --color-paper-raised: rgba(22, 27, 34, 0.8);
+  --color-ink: #E6EDF3;
+  --color-ink-soft: #8B949E;
+  --color-grid: rgba(255, 255, 255, 0.055);
+  --color-accent: #E0685A;
+  --color-accent-soft: rgba(224, 104, 90, 0.14);
+  --color-line: rgba(255, 255, 255, 0.14);
 
-  /* Subject accents — used as small tab underlines, not full-card tints */
-  --subject-math: #1F3A5F;
-  --subject-physics: #6B4A9A;
-  --subject-chemistry: #2F6B4F;
-  --subject-geography: #8A5A2B;
+  /* Subject accents */
+  --subject-math: #79C0FF;
+  --subject-physics: #D2A8FF;
+  --subject-chemistry: #7BD0A0;
+  --subject-geography: #E5B566;
 
   /* Type */
   --font-display: 'Spectral', Georgia, serif;
@@ -34,16 +34,45 @@
 
   /* Layout */
   --content-max: 46rem;
-  --rail-width: 15rem;
-  --radius: 3px; /* sharp, index-card corners — not the rounded SaaS default */
+  --radius: 14px;
+  --radius-sm: 10px;
+  --tabbar-height: 4rem;
+  --topbar-height: 3.5rem;
+
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --color-paper: #F6F8FA;
+  --color-paper-raised: rgba(255, 255, 255, 0.86);
+  --color-ink: #1F2328;
+  --color-ink-soft: #57606A;
+  --color-grid: rgba(31, 35, 40, 0.07);
+  --color-accent: #B23B30;
+  --color-accent-soft: #F1DAD6;
+  --color-line: rgba(31, 35, 40, 0.16);
+
+  --subject-math: #1F3A5F;
+  --subject-physics: #6B4A9A;
+  --subject-chemistry: #2F6B4F;
+  --subject-geography: #8A5A2B;
+
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
 
-html, body {
+html {
   margin: 0;
   padding: 0;
   background: var(--color-paper);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  min-height: 100dvh;
   color: var(--color-ink);
   font-family: var(--font-body);
   font-size: var(--step-0);
@@ -51,13 +80,17 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-body {
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background-image:
     linear-gradient(var(--color-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
   background-size: 28px 28px;
   background-position: -1px -1px;
-  background-attachment: fixed;
 }
 
 h1, h2, h3 {
@@ -67,9 +100,15 @@ h1, h2, h3 {
   margin: 0 0 0.5em;
 }
 
-h1 { font-size: var(--step-4); }
-h2 { font-size: var(--step-3); }
-h3 { font-size: var(--step-2); }
+h1 { font-size: var(--step-3); }
+h2 { font-size: var(--step-2); }
+h3 { font-size: var(--step-1); }
+
+@media (min-width: 900px) {
+  h1 { font-size: var(--step-4); }
+  h2 { font-size: var(--step-3); }
+  h3 { font-size: var(--step-2); }
+}
 
 p { max-width: 38em; }
 
@@ -79,9 +118,58 @@ a { color: var(--color-ink); }
   font-family: var(--font-mono);
 }
 
+.demo,
+.cards li,
+.steps,
+.plot,
+.diagram,
+fieldset,
+.formula {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+}
+
+input,
+select,
+button {
+  border-radius: var(--radius-sm);
+}
+
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

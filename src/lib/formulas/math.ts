@@ -270,6 +270,7 @@ const rownanieKwadratowe: FormulaDef = {
     const [x1, x2] = q.roots
     return {
       values: [x1, x2],
+      labels: ['x₁', 'x₂'],
       steps: [
         { title: '1. Przekształcenie wzoru', body: 'x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a}, \\; \\Delta = b^2 - 4ac' },
         { title: '2. Podstawienie danych', body: `${subst} = ${dText}` },

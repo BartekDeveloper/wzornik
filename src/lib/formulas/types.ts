@@ -18,6 +18,7 @@ export interface SolveStep {
 export interface FormulaSolution {
   values: Exact[]
   steps: SolveStep[]
+  labels?: string[]
 }
 
 export interface FormulaDef {

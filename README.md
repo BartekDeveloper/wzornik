@@ -91,7 +91,52 @@ Otwórz podgląd, poczekaj aż SW się zainstaluje (DevTools → Application →
 Service Workers), potem włącz "Offline" w DevTools i odśwież — routing i
 mini-kalkulator powinny nadal działać.
 
-## Ikony PWA (Etap 7 — prawie gotowy)
+## Motyw, mobile i dostępność (Etap 8)
+
+- Ciemny motyw domyślny (WCAG 2.2 AA), jasny tylko w `/ustawieniach`
+  (motyw + miejsca po przecinku + reset danych). Motyw stawiany przed
+  pierwszym malowaniem — bez flasha.
+- Mobile-first: dolny pasek zakładek <900px, boczny rail na desktopie,
+  cele ≥44px, inputy 1rem.
+- Wzornik to globalny search z rankingiem (`delta` → równanie kwadratowe,
+  działa bez ogonków) + filtr przedmiotu.
+- A11y: skip-link, `aria-live` wyników, opisy diagramów, tekstowa
+  alternatywa wykresu, KaTeX z MathML. SEO: tytuły per route + meta OG.
+
+## Komplet CKE + konwerter (Etap 10)
+
+- ~111 wzorów: matma PP/PR i fizyka PP/PR (potęgi, logarytmy, trygonometria,
+  pochodne, granice, kombinatoryka, Vieta, Horner, soczewki, termodynamika,
+  elektrostatyka, Bohr, relatywistyka…). Poziom PR dopisany w temacie.
+- Silnik: silnia/kombinacje (BigInt), trygonometria (dokładne 30/45/60°),
+  logarytmy całkowite, usuwanie niewymierności z mianownika.
+- `/konwerter`: 10 kategorii (w tym temperatura °C/K/°F), live w obie
+  strony, przycisk ⇄.
+- Weryfikacja lokalna: `npm test && npm run build`.
+
+## Grafit, jeden layout, rozkłady (Etap 11)
+
+- Grafit `#0D1117` (zero zieleni), radius 14px, widoczne linie, siatka
+  fixed na full height (fix: tło na `html`, `body transparent`).
+- Jeden layout: topbar + dolne taby wszędzie, treść 46rem na środku.
+- Wzornik: sticky search, scroll w kontenerze kart (62dvh).
+- Wyniki z symbolami (`(a+b)³`, `x₁+x₂`, `p`, `w`…) zamiast `x1, x2`;
+  koniec placeholdera „niewiadoma?".
+- Nowe: wszystkie postacie kwadratowej, rozkład liczby na czynniki
+  pierwsze, rozkład wielomianu (Horner + deflacja z krotnościami).
+
+## Nawigacja i wygląd (Etap 9)
+
+- Jeden dział: `/` to wzornik (globalny search), solver pod
+  `/wzornik/:subject/:formula`; stare `/kalkulatory/*` redirectują.
+  Pliki `HomeView.vue` i `KalkulatoryView.vue` bez route — do ręcznego
+  usunięcia (`rm src/views/HomeView.vue src/views/KalkulatoryView.vue`).
+- Neutralny dark + glass (blur, subtelne bordery, cień); siatka jako
+  warstwa fixed na całą wysokość (obejście mobilnego buga
+  `background-attachment`).
+- Dolny tab-bar z ikonkami SVG (Wzory, Moje, Opcje).
+
+## Ikony PWA (Etap 7 — render lokalnie)
 
 Źródła SVG w `public/icons/` (Δ w tokenach apki), manifest pod PNG +
 maskable. Ostatni krok lokalnie, bo agent nie miał uprawnień shell:

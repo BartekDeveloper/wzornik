@@ -1,0 +1,89 @@
+/* ---------------------------------------------------------------
+   Design tokens — Wzornik Maturalny
+   Reference: exam answer sheets / graph-paper notebooks, not a
+   generic SaaS dashboard. Ink-on-paper palette, a red-pen accent
+   for the active/correct state, faint grid backdrop.
+   --------------------------------------------------------------- */
+:root {
+  /* Color */
+  --color-paper: #F6F7F3;      /* base background — cool off-white, not cream */
+  --color-paper-raised: #FFFFFF;
+  --color-ink: #17211E;        /* primary text — deep green-black, not flat #111 */
+  --color-ink-soft: #4B564F;   /* secondary text */
+  --color-grid: #D9E0DC;       /* faint graph-paper rule lines */
+  --color-accent: #B23B30;     /* red-pen accent: active states, key results */
+  --color-accent-soft: #F1DAD6;
+  --color-line: #C9D1CB;       /* borders / dividers */
+
+  /* Subject accents — used as small tab underlines, not full-card tints */
+  --subject-math: #1F3A5F;
+  --subject-physics: #6B4A9A;
+  --subject-chemistry: #2F6B4F;
+  --subject-geography: #8A5A2B;
+
+  /* Type */
+  --font-display: 'Spectral', Georgia, serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.625rem;
+  --step-3: 2.25rem;
+  --step-4: 3rem;
+
+  /* Layout */
+  --content-max: 46rem;
+  --rail-width: 15rem;
+  --radius: 3px; /* sharp, index-card corners — not the rounded SaaS default */
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: -1px -1px;
+  background-attachment: fixed;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0 0 0.5em;
+}
+
+h1 { font-size: var(--step-4); }
+h2 { font-size: var(--step-3); }
+h3 { font-size: var(--step-2); }
+
+p { max-width: 38em; }
+
+a { color: var(--color-ink); }
+
+.numeric, code, .result-value {
+  font-family: var(--font-mono);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

@@ -1,74 +1,74 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { ZERO, fromString } from '../lib/exact/rational'
-import type { Rational } from '../lib/exact/rational'
-import { solveQuadratic } from '../lib/exact/exact'
-import type { Quadratic } from '../lib/exact/exact'
-import { formatDecimal, formatExactText } from '../lib/exact/format'
-import { convert } from '../lib/units/units'
-import { loadSettings } from '../lib/settings'
+import { computed, ref } from "vue";
+import { ZERO, fromString } from "../lib/exact/rational";
+import type { Rational } from "../lib/exact/rational";
+import { solveQuadratic } from "../lib/exact/exact";
+import type { Quadratic } from "../lib/exact/exact";
+import { formatDecimal, formatExactText } from "../lib/exact/format";
+import { convert } from "../lib/units/units";
+import { loadSettings } from "../lib/settings";
 
-const aIn = ref(1)
-const bIn = ref(-5)
-const cIn = ref(6)
-const places = ref(loadSettings().places)
+const aIn = ref(1);
+const bIn = ref(-5);
+const cIn = ref(6);
+const places = ref(loadSettings().places);
 
 function rat(v: number): Rational {
-  if (!Number.isFinite(v)) return ZERO
-  return fromString(String(v))
+  if (!Number.isFinite(v)) return ZERO;
+  return fromString(String(v));
 }
 
 const result = computed<{ solution: Quadratic | null; error: string }>(() => {
   try {
-    return { solution: solveQuadratic(rat(aIn.value), rat(bIn.value), rat(cIn.value)), error: '' }
+    return { solution: solveQuadratic(rat(aIn.value), rat(bIn.value), rat(cIn.value)), error: "" };
   } catch (e) {
-    return { solution: null, error: e instanceof Error ? e.message : 'Błąd obliczeń' }
+    return { solution: null, error: e instanceof Error ? e.message : "Błąd obliczeń" };
   }
-})
+});
 
 const deltaExact = computed(() => {
-  const s = result.value.solution
-  if (!s || !('delta' in s)) return '—'
-  return formatExactText(s.delta)
-})
+  const s = result.value.solution;
+  if (!s || !("delta" in s)) return "—";
+  return formatExactText(s.delta);
+});
 
 const deltaDec = computed(() => {
-  const s = result.value.solution
-  if (!s || !('delta' in s)) return ''
-  return formatDecimal(s.delta, places.value)
-})
+  const s = result.value.solution;
+  if (!s || !("delta" in s)) return "";
+  return formatDecimal(s.delta, places.value);
+});
 
 const roots = computed(() => {
-  const s = result.value.solution
-  if (!s) return []
+  const s = result.value.solution;
+  if (!s) return [];
   return s.roots.map((r, i) => ({
-    name: s.roots.length > 1 ? `x${i + 1}` : 'x',
+    name: s.roots.length > 1 ? `x${i + 1}` : "x",
     exact: formatExactText(r),
     dec: formatDecimal(r, places.value),
-  }))
-})
+  }));
+});
 
-const convValue = ref(36)
-const convFrom = ref('km/h')
-const convTo = ref('m/s')
-const unitOptions = ['mm', 'cm', 'm', 'km', 'g', 'kg', 't', 's', 'min', 'h', 'm/s', 'km/h']
+const convValue = ref(36);
+const convFrom = ref("km/h");
+const convTo = ref("m/s");
+const unitOptions = ["mm", "cm", "m", "km", "g", "kg", "t", "s", "min", "h", "m/s", "km/h"];
 
 const convResult = computed(() => {
-  if (!Number.isFinite(convValue.value)) return '—'
+  if (!Number.isFinite(convValue.value)) return "—";
   try {
-    return `${Number(convert(convValue.value, convFrom.value, convTo.value).toFixed(6))} ${convTo.value}`
+    return `${Number(convert(convValue.value, convFrom.value, convTo.value).toFixed(6))} ${convTo.value}`;
   } catch (e) {
-    return e instanceof Error ? e.message : 'Błąd'
+    return e instanceof Error ? e.message : "Błąd";
   }
-})
+});
 </script>
 
 <template>
   <section class="hero">
     <h1>Wzornik Maturalny</h1>
     <p class="hero__lede">
-      Wzory z tablic CKE i kalkulatory do każdego z nich — działa całkowicie
-      offline, prosto z telefonu na maturze w domu.
+      Wzory z tablic CKE i kalkulatory do każdego z nich — działa całkowicie offline, prosto z
+      telefonu na maturze w domu.
     </p>
 
     <div class="demo" aria-label="Przykład: równanie kwadratowe">
@@ -82,7 +82,9 @@ const convResult = computed(() => {
       </div>
 
       <div class="demo__steps" v-if="result.solution">
-        <p>Δ = b² − 4ac = {{ deltaExact }}<span v-if="deltaDec"> ≈ {{ deltaDec }}</span></p>
+        <p>
+          Δ = b² − 4ac = {{ deltaExact }}<span v-if="deltaDec"> ≈ {{ deltaDec }}</span>
+        </p>
         <template v-for="r in roots" :key="r.name">
           <p>
             {{ r.name }} = <span class="result-value">{{ r.exact }}</span>
@@ -90,8 +92,12 @@ const convResult = computed(() => {
             <span class="approx">≈ {{ r.dec }}</span>
           </p>
         </template>
-        <p v-if="result.solution.kind === 'none'" class="demo__no-solution">Δ &lt; 0 — brak rozwiązań rzeczywistych.</p>
-        <p v-if="result.solution.kind === 'linear'" class="demo__note">a = 0 — to równanie liniowe, nie kwadratowe.</p>
+        <p v-if="result.solution.kind === 'none'" class="demo__no-solution">
+          Δ &lt; 0 — brak rozwiązań rzeczywistych.
+        </p>
+        <p v-if="result.solution.kind === 'linear'" class="demo__note">
+          a = 0 — to równanie liniowe, nie kwadratowe.
+        </p>
       </div>
       <p v-else class="demo__no-solution">{{ result.error }}</p>
     </div>
@@ -113,12 +119,15 @@ const convResult = computed(() => {
         </label>
       </div>
       <div class="demo__steps">
-        <p>= <span class="result-value">{{ convResult }}</span></p>
+        <p>
+          = <span class="result-value">{{ convResult }}</span>
+        </p>
       </div>
     </div>
 
     <p class="hero__next">
-      To jeden z ~100 wzorów, które trafią do <router-link :to="{ name: 'wzornik' }">wzornika</router-link>
+      To jeden z ~100 wzorów, które trafią do
+      <router-link :to="{ name: 'wzornik' }">wzornika</router-link>
       — każdy z własnym solverem i rozbiciem na kroki.
     </p>
   </section>

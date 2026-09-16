@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { FORMULAS, SUBJECTS, formulasBySubject } from '../lib/formulas/index'
-import Formula from '../components/Formula.vue'
+import { computed } from "vue";
+import { FORMULAS, SUBJECTS, formulasBySubject } from "../lib/formulas/index";
+import Formula from "../components/Formula.vue";
 
-const props = defineProps<{ subject?: string }>()
+const props = defineProps<{ subject?: string }>();
 
-const subjectLabel = computed(() => SUBJECTS.find((s) => s.id === props.subject)?.label ?? '')
+const subjectLabel = computed(() => SUBJECTS.find((s) => s.id === props.subject)?.label ?? "");
 
 const groups = computed(() => {
-  const list = props.subject ? formulasBySubject(props.subject) : FORMULAS
-  const map = new Map<string, typeof list>()
+  const list = props.subject ? formulasBySubject(props.subject) : FORMULAS;
+  const map = new Map<string, typeof list>();
   for (const f of list) {
-    const g = map.get(f.topic) ?? []
-    g.push(f)
-    map.set(f.topic, g)
+    const g = map.get(f.topic) ?? [];
+    g.push(f);
+    map.set(f.topic, g);
   }
-  return [...map.entries()]
-})
+  return [...map.entries()];
+});
 </script>
 
 <template>
@@ -26,7 +26,9 @@ const groups = computed(() => {
       <p>Wybierz przedmiot, aby zobaczyć dostępne kalkulatory.</p>
       <ul class="subjects">
         <li v-for="s in SUBJECTS" :key="s.id">
-          <router-link :to="{ name: 'kalkulatory', params: { subject: s.id } }">{{ s.label }}</router-link>
+          <router-link :to="{ name: 'kalkulatory', params: { subject: s.id } }">{{
+            s.label
+          }}</router-link>
           <span class="count">({{ formulasBySubject(s.id).length }})</span>
         </li>
       </ul>

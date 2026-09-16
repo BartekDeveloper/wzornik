@@ -10,7 +10,9 @@ dla przyszłego silnika solvera.
 ```bash
 npm install
 npm run dev
-npm test        # 125 testów (vitest)
+npm test            # 125 testów (vitest)
+npm run lint        # oxlint
+npm run format:check  # oxfmt (zapis: npm run format:write)
 ```
 
 ## Solver N-zmiennych (Etap 2 — gotowy)
@@ -91,6 +93,31 @@ Otwórz podgląd, poczekaj aż SW się zainstaluje (DevTools → Application →
 Service Workers), potem włącz "Offline" w DevTools i odśwież — routing i
 mini-kalkulator powinny nadal działać.
 
+## CI, GitHub Pages i pre-commit
+
+Live: https://bartekdeveloper.github.io/wzornik/ (`base /wzornik/`).
+
+- **CI** (`.github/workflows/ci.yml`): każdy push/PR — oxlint, oxfmt
+  check, vitest, build. Bez zielonego CI nie mergować.
+- **Deploy** (`.github/workflows/deploy.yml`): push na `main` buduje
+  z `PAGES_BASE=/wzornik/`, dokleja `dist/404.html` (fallback dla
+  głębokich linków SPA) i publikuje. Raz w repo włącz Pages:
+  Settings → Pages → Source: **GitHub Actions**.
+- **Pre-commit** (`.husky/pre-commit`): `lint + format:check + test`.
+  Po pierwszym klonie: `npm install`, potem `git config core.hooksPath .husky`.
+  Husky nie jest w `prepare` celowo — zero magii przy instalacji.
+- Pierwsze uruchomienie formatera znormalizuje cudzysłowy w repo:
+  `npm run format:write`, commit. Potem `format:check` pilnuje stylu.
+
+Pierwsza publikacja (repo nie ma jeszcze historii):
+
+```bash
+git init -b main
+git add -A && git commit -m "feat: wzornik maturalny PWA"
+git remote add origin git@github.com:bartekdeveloper/wzornik.git
+git push -u origin main
+```
+
 ## Motyw, mobile i dostępność (Etap 8)
 
 - Ciemny motyw domyślny (WCAG 2.2 AA), jasny tylko w `/ustawieniach`
@@ -154,7 +181,8 @@ Potem DevTools → Application → Manifest (instalowalność) i Lighthouse PWA.
 
 ## Co NIE jest jeszcze zrobione
 
-Brak — wszystkie zaplanowane etapy dowiezione (ikony czekają tylko na render powyżej).
+- Pierwszy push + włączenie Pages (Source: GitHub Actions) + jedno
+  `npm run format:write` normalizujące styl — potem CI pilnuje reszty.
 
 ## Struktura
 

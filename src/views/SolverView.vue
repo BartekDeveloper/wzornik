@@ -1,69 +1,75 @@
 <script setup lang="ts">
-import { computed, onUnmounted, reactive, ref, watch } from 'vue'
-import { getFormula } from '../lib/formulas/index'
-import { solveFormula } from '../lib/solver/solver'
-import { formatDecimal, formatLatex, trimNum } from '../lib/exact/format'
-import { approx, isApproxOnly, parseExact } from '../lib/exact/exact'
-import { linearPlot, quadraticPlot } from '../lib/plots/plot'
-import { addHistory, isFavorite, toggleFavorite } from '../lib/storage/db'
-import { loadSettings } from '../lib/settings'
-import Formula from '../components/Formula.vue'
-import FormulaDiagram from '../components/FormulaDiagram.vue'
-import FunctionPlot from '../components/FunctionPlot.vue'
+import { computed, onUnmounted, reactive, ref, watch } from "vue";
+import { getFormula } from "../lib/formulas/index";
+import { solveFormula } from "../lib/solver/solver";
+import { formatDecimal, formatLatex, trimNum } from "../lib/exact/format";
+import { approx, isApproxOnly, parseExact } from "../lib/exact/exact";
+import { linearPlot, quadraticPlot } from "../lib/plots/plot";
+import { addHistory, isFavorite, toggleFavorite } from "../lib/storage/db";
+import { loadSettings } from "../lib/settings";
+import Formula from "../components/Formula.vue";
+import FormulaDiagram from "../components/FormulaDiagram.vue";
+import FunctionPlot from "../components/FunctionPlot.vue";
 
-const props = defineProps<{ subject?: string; formula?: string }>()
+const props = defineProps<{ subject?: string; formula?: string }>();
 
-const def = computed(() => (props.subject && props.formula ? getFormula(props.subject, props.formula) : undefined))
+const def = computed(() =>
+  props.subject && props.formula ? getFormula(props.subject, props.formula) : undefined,
+);
 
-const inputs = reactive<Record<string, string>>({})
-const places = ref(loadSettings().places)
-const isFav = ref(false)
+const inputs = reactive<Record<string, string>>({});
+const places = ref(loadSettings().places);
+const isFav = ref(false);
 
 const favKey = computed(() =>
-  props.subject && props.formula ? `${props.subject}/${props.formula}` : '',
-)
+  props.subject && props.formula ? `${props.subject}/${props.formula}` : "",
+);
 
 async function toggleFav(): Promise<void> {
-  if (!favKey.value) return
+  if (!favKey.value) return;
   try {
-    isFav.value = await toggleFavorite(favKey.value)
+    isFav.value = await toggleFavorite(favKey.value);
   } catch {
-    isFav.value = false
+    isFav.value = false;
   }
 }
 
 watch(
   def,
   (d) => {
-    for (const k of Object.keys(inputs)) delete inputs[k]
-    if (d) for (const v of d.vars) inputs[v.id] = ''
-    isFav.value = false
+    for (const k of Object.keys(inputs)) delete inputs[k];
+    if (d) for (const v of d.vars) inputs[v.id] = "";
+    isFav.value = false;
     if (d && favKey.value) {
       isFavorite(favKey.value)
         .then((v) => {
-          isFav.value = v
+          isFav.value = v;
         })
         .catch(() => {
-          isFav.value = false
-        })
+          isFav.value = false;
+        });
     }
   },
   { immediate: true },
-)
+);
 
-const SUB = ['₁', '₂', '₃', '₄']
+const SUB = ["₁", "₂", "₃", "₄"];
 
-const hasAnyInput = computed(() => Object.values(inputs).some((s) => s.trim() !== ''))
+const hasAnyInput = computed(() => Object.values(inputs).some((s) => s.trim() !== ""));
 
 const view = computed(() => {
-  const d = def.value
-  if (!d) return { state: 'missing' as const }
-  const r = solveFormula(d, { ...inputs }, places.value)
+  const d = def.value;
+  if (!d) return { state: "missing" as const };
+  const r = solveFormula(d, { ...inputs }, places.value);
   if (!r.ok) {
-    return { state: 'idle' as const, error: hasAnyInput.value ? r.error : '', hint: !hasAnyInput.value }
+    return {
+      state: "idle" as const,
+      error: hasAnyInput.value ? r.error : "",
+      hint: !hasAnyInput.value,
+    };
   }
   return {
-    state: 'done' as const,
+    state: "done" as const,
     unknownId: r.unknown,
     unknownLabel: r.unknownLabel,
     values: r.values.map((v, i) => ({
@@ -74,71 +80,72 @@ const view = computed(() => {
     })),
     steps: r.steps,
     first: r.values[0],
-  }
-})
+  };
+});
 
 const diagramNums = computed<Record<string, number> | null>(() => {
-  const d = def.value
-  const st = view.value
-  if (!d || st.state !== 'done' || d.mode !== 'nvar') return null
-  const nums: Record<string, number> = {}
+  const d = def.value;
+  const st = view.value;
+  if (!d || st.state !== "done" || d.mode !== "nvar") return null;
+  const nums: Record<string, number> = {};
   for (const v of d.vars) {
     try {
-      const e = v.id === st.unknownId && st.first ? st.first : parseExact((inputs[v.id] ?? '').trim())
-      const n = approx(e)
-      if (!Number.isFinite(n) || n <= 0) return null
-      nums[v.id] = n
+      const e =
+        v.id === st.unknownId && st.first ? st.first : parseExact((inputs[v.id] ?? "").trim());
+      const n = approx(e);
+      if (!Number.isFinite(n) || n <= 0) return null;
+      nums[v.id] = n;
     } catch {
-      return null
+      return null;
     }
   }
-  return nums
-})
+  return nums;
+});
 
 const diagramCaption = computed<string | undefined>(() => {
-  const d = def.value
-  const n = diagramNums.value
-  if (!d || !n) return undefined
-  return `${d.name}: ${d.vars.map((v) => `${v.id} = ${trimNum(n[v.id] ?? NaN)}`).join(', ')}`
-})
+  const d = def.value;
+  const n = diagramNums.value;
+  if (!d || !n) return undefined;
+  return `${d.name}: ${d.vars.map((v) => `${v.id} = ${trimNum(n[v.id] ?? NaN)}`).join(", ")}`;
+});
 
 function numInput(id: string): number | null {
   try {
-    const n = approx(parseExact((inputs[id] ?? '').trim()))
-    return Number.isFinite(n) ? n : null
+    const n = approx(parseExact((inputs[id] ?? "").trim()));
+    return Number.isFinite(n) ? n : null;
   } catch {
-    return null
+    return null;
   }
 }
 
 const plotData = computed(() => {
-  const d = def.value
-  if (!d) return null
-  if (d.id === 'rownanie-kwadratowe') {
-    const a = numInput('a')
-    const b = numInput('b')
-    const c = numInput('c')
-    if (a === null || b === null || c === null) return null
-    if (a !== 0) return quadraticPlot(a, b, c)
-    return b !== 0 ? linearPlot(b, c) : null
+  const d = def.value;
+  if (!d) return null;
+  if (d.id === "rownanie-kwadratowe") {
+    const a = numInput("a");
+    const b = numInput("b");
+    const c = numInput("c");
+    if (a === null || b === null || c === null) return null;
+    if (a !== 0) return quadraticPlot(a, b, c);
+    return b !== 0 ? linearPlot(b, c) : null;
   }
-  if (d.id === 'funkcja-liniowa') {
-    const a = numInput('a')
-    const b = numInput('b')
-    if (a === null || b === null) return null
-    return linearPlot(a, b)
+  if (d.id === "funkcja-liniowa") {
+    const a = numInput("a");
+    const b = numInput("b");
+    if (a === null || b === null) return null;
+    return linearPlot(a, b);
   }
-  return null
-})
+  return null;
+});
 
-let saveTimer: number | undefined
+let saveTimer: number | undefined;
 
 watch(view, (v) => {
-  window.clearTimeout(saveTimer)
-  const d = def.value
-  if (v.state !== 'done' || !hasAnyInput.value || !d) return
-  const snapshot = { ...inputs }
-  const result = v.values.map((r) => r.tex).join('; ')
+  window.clearTimeout(saveTimer);
+  const d = def.value;
+  if (v.state !== "done" || !hasAnyInput.value || !d) return;
+  const snapshot = { ...inputs };
+  const result = v.values.map((r) => r.tex).join("; ");
   saveTimer = window.setTimeout(() => {
     void addHistory({
       subject: d.subject,
@@ -146,19 +153,26 @@ watch(view, (v) => {
       formulaName: d.name,
       inputs: snapshot,
       result,
-    }).catch(() => {})
-  }, 1500)
-})
+    }).catch(() => {});
+  }, 1500);
+});
 
-onUnmounted(() => window.clearTimeout(saveTimer))
+onUnmounted(() => window.clearTimeout(saveTimer));
 </script>
 
 <template>
   <section v-if="def">
-    <p class="topic">{{ def.subject === 'matematyka' ? 'Matematyka' : 'Fizyka' }} · {{ def.topic }}</p>
+    <p class="topic">
+      {{ def.subject === "matematyka" ? "Matematyka" : "Fizyka" }} · {{ def.topic }}
+    </p>
     <h2>{{ def.name }}</h2>
-    <button class="fav" :aria-pressed="isFav" @click="toggleFav" :title="isFav ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'">
-      {{ isFav ? '★' : '☆' }} Ulubione
+    <button
+      class="fav"
+      :aria-pressed="isFav"
+      @click="toggleFav"
+      :title="isFav ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'"
+    >
+      {{ isFav ? "★" : "☆" }} Ulubione
     </button>
     <p class="formula"><Formula :source="def.latex" /></p>
 
@@ -173,7 +187,9 @@ onUnmounted(() => window.clearTimeout(saveTimer))
           <input type="number" v-model.number="places" min="0" max="12" />
         </label>
       </div>
-      <p class="hint" v-if="def.mode === 'nvar'">Zostaw jedno pole puste — to będzie niewiadoma. Możesz wpisać π, np. 25π.</p>
+      <p class="hint" v-if="def.mode === 'nvar'">
+        Zostaw jedno pole puste — to będzie niewiadoma. Możesz wpisać π, np. 25π.
+      </p>
 
       <div v-if="view.state === 'idle'">
         <p v-if="view.hint" class="hint">Uzupełnij dane powyżej, a kroki pojawią się same.</p>
@@ -209,7 +225,9 @@ onUnmounted(() => window.clearTimeout(saveTimer))
     </div>
 
     <p class="back">
-      <router-link :to="{ name: 'wzornik', params: { subject: def.subject } }">← wszystkie wzory</router-link>
+      <router-link :to="{ name: 'wzornik', params: { subject: def.subject } }"
+        >← wszystkie wzory</router-link
+      >
     </p>
   </section>
 
@@ -238,7 +256,7 @@ onUnmounted(() => window.clearTimeout(saveTimer))
   margin-bottom: 1rem;
 }
 
-.fav[aria-pressed='true'] {
+.fav[aria-pressed="true"] {
   color: var(--color-accent);
   border-color: var(--color-accent);
 }

@@ -1,33 +1,27 @@
 <script setup lang="ts">
 const quick = [
   {
-    to: '/',
-    label: 'Wzory',
-    icon: 'M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14'
+    to: "/",
+    label: "Wzory",
+    icon: "M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14",
   },
   {
-    to: '/konwerter',
-    label: 'Miary',
-    icon: 'M4 7h13l-3.5-3.5M20 17H7l3.5 3.5'
+    to: "/konwerter",
+    label: "Miary",
+    icon: "M4 7h13l-3.5-3.5M20 17H7l3.5 3.5",
   },
   {
-    to: '/historia',
-    label: 'Moje',
-    icon: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.8-5.4 2.8 1-6.1L3.2 9.5l6.1-.9z'
-  }
-]
+    to: "/historia",
+    label: "Moje",
+    icon: "M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.8-5.4 2.8 1-6.1L3.2 9.5l6.1-.9z",
+  },
+];
 </script>
 
 <template>
   <nav class="rail" aria-label="Nawigacja główna">
     <div class="rail__quick" role="list">
-      <router-link
-        v-for="q in quick"
-        :key="q.to"
-        :to="q.to"
-        class="rail__tab"
-        role="listitem"
-      >
+      <router-link v-for="q in quick" :key="q.to" :to="q.to" class="rail__tab" role="listitem">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="rail__icon">
           <path :d="q.icon" />
         </svg>

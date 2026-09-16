@@ -1,86 +1,89 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { CATEGORIES, convert, unitsOf } from '../lib/units/units'
-import type { Category } from '../lib/units/units'
-import { trimNum } from '../lib/exact/format'
+import { computed, ref, watch } from "vue";
+import { CATEGORIES, convert, unitsOf } from "../lib/units/units";
+import type { Category } from "../lib/units/units";
+import { trimNum } from "../lib/exact/format";
 
-const cat = ref<Category>('speed')
-const leftVal = ref('36')
-const rightVal = ref('')
-const leftUnit = ref('km/h')
-const rightUnit = ref('m/s')
-const lastEdited = ref<'left' | 'right'>('left')
-const error = ref('')
+const cat = ref<Category>("speed");
+const leftVal = ref("36");
+const rightVal = ref("");
+const leftUnit = ref("km/h");
+const rightUnit = ref("m/s");
+const lastEdited = ref<"left" | "right">("left");
+const error = ref("");
 
-const units = computed(() => unitsOf(cat.value))
+const units = computed(() => unitsOf(cat.value));
 
 function parseNum(s: string): number | null {
-  const t = s.trim().replace(',', '.')
-  if (t === '') return null
-  const v = Number(t)
-  return Number.isFinite(v) ? v : null
+  const t = s.trim().replace(",", ".");
+  if (t === "") return null;
+  const v = Number(t);
+  return Number.isFinite(v) ? v : null;
 }
 
 function convertLeft(): void {
-  error.value = ''
-  const v = parseNum(leftVal.value)
+  error.value = "";
+  const v = parseNum(leftVal.value);
   if (v === null) {
-    rightVal.value = ''
-    return
+    rightVal.value = "";
+    return;
   }
   try {
-    rightVal.value = trimNum(convert(v, leftUnit.value, rightUnit.value))
+    rightVal.value = trimNum(convert(v, leftUnit.value, rightUnit.value));
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Błąd'
+    error.value = e instanceof Error ? e.message : "Błąd";
   }
 }
 
 function convertRight(): void {
-  error.value = ''
-  const v = parseNum(rightVal.value)
+  error.value = "";
+  const v = parseNum(rightVal.value);
   if (v === null) {
-    leftVal.value = ''
-    return
+    leftVal.value = "";
+    return;
   }
   try {
-    leftVal.value = trimNum(convert(v, rightUnit.value, leftUnit.value))
+    leftVal.value = trimNum(convert(v, rightUnit.value, leftUnit.value));
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Błąd'
+    error.value = e instanceof Error ? e.message : "Błąd";
   }
 }
 
 function swap(): void {
-  const uv = leftUnit.value
-  leftUnit.value = rightUnit.value
-  rightUnit.value = uv
-  const vv = leftVal.value
-  leftVal.value = rightVal.value
-  rightVal.value = vv
+  const uv = leftUnit.value;
+  leftUnit.value = rightUnit.value;
+  rightUnit.value = uv;
+  const vv = leftVal.value;
+  leftVal.value = rightVal.value;
+  rightVal.value = vv;
 }
 
 watch(cat, () => {
-  const u = unitsOf(cat.value)
-  leftUnit.value = u[0] ?? ''
-  rightUnit.value = u[1] ?? u[0] ?? ''
-  lastEdited.value = 'left'
-  convertLeft()
-})
+  const u = unitsOf(cat.value);
+  leftUnit.value = u[0] ?? "";
+  rightUnit.value = u[1] ?? u[0] ?? "";
+  lastEdited.value = "left";
+  convertLeft();
+});
 
 watch([leftVal, leftUnit, rightUnit], () => {
-  if (lastEdited.value === 'left') convertLeft()
-})
+  if (lastEdited.value === "left") convertLeft();
+});
 
 watch([rightVal], () => {
-  if (lastEdited.value === 'right') convertRight()
-})
+  if (lastEdited.value === "right") convertRight();
+});
 
-convertLeft()
+convertLeft();
 </script>
 
 <template>
   <section>
     <h1>Konwerter jednostek</h1>
-    <p>Działa offline. Najpierw wybierz kategorię, potem jednostki pod liczbami. Strzałka zamienia strony.</p>
+    <p>
+      Działa offline. Najpierw wybierz kategorię, potem jednostki pod liczbami. Strzałka zamienia
+      strony.
+    </p>
 
     <label class="cat">
       Kategoria

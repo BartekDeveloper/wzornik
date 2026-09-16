@@ -1,54 +1,54 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { clearHistory, getFavorites, getHistory, toggleFavorite } from '../lib/storage/db'
-import type { FavoriteEntry, HistoryEntry } from '../lib/storage/db'
-import Formula from '../components/Formula.vue'
+import { onMounted, ref } from "vue";
+import { clearHistory, getFavorites, getHistory, toggleFavorite } from "../lib/storage/db";
+import type { FavoriteEntry, HistoryEntry } from "../lib/storage/db";
+import Formula from "../components/Formula.vue";
 
-const history = ref<HistoryEntry[]>([])
-const favorites = ref<FavoriteEntry[]>([])
+const history = ref<HistoryEntry[]>([]);
+const favorites = ref<FavoriteEntry[]>([]);
 
 async function reload(): Promise<void> {
   try {
-    history.value = await getHistory(30)
+    history.value = await getHistory(30);
   } catch {
-    history.value = []
+    history.value = [];
   }
   try {
-    favorites.value = await getFavorites()
+    favorites.value = await getFavorites();
   } catch {
-    favorites.value = []
+    favorites.value = [];
   }
 }
 
 async function clear(): Promise<void> {
-  await clearHistory().catch(() => {})
-  await reload()
+  await clearHistory().catch(() => {});
+  await reload();
 }
 
 async function unfav(key: string): Promise<void> {
-  await toggleFavorite(key).catch(() => {})
-  await reload()
+  await toggleFavorite(key).catch(() => {});
+  await reload();
 }
 
 function favParts(key: string): { subject: string; formula: string } {
-  const [subject, formula] = key.split('/')
-  return { subject: subject ?? '', formula: formula ?? '' }
+  const [subject, formula] = key.split("/");
+  return { subject: subject ?? "", formula: formula ?? "" };
 }
 
 function fmtDate(ts: number): string {
-  return new Date(ts).toLocaleString('pl-PL', { dateStyle: 'short', timeStyle: 'short' })
+  return new Date(ts).toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" });
 }
 
 function fmtInputs(inputs: Record<string, string>): string {
   return Object.entries(inputs)
-    .filter(([, v]) => v.trim() !== '')
+    .filter(([, v]) => v.trim() !== "")
     .map(([k, v]) => `${k} = ${v}`)
-    .join(', ')
+    .join(", ");
 }
 
 onMounted(() => {
-  void reload()
-})
+  void reload();
+});
 </script>
 
 <template>
@@ -70,7 +70,9 @@ onMounted(() => {
       <ul class="cards">
         <li v-for="h in history" :key="h.id">
           <p class="cards__meta">
-            <router-link :to="{ name: 'solver', params: { subject: h.subject, formula: h.formulaId } }">
+            <router-link
+              :to="{ name: 'solver', params: { subject: h.subject, formula: h.formulaId } }"
+            >
               {{ h.formulaName }}
             </router-link>
             · {{ fmtDate(h.ts) }}

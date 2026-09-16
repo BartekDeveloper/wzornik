@@ -1,49 +1,51 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { FORMULAS, SUBJECTS } from '../lib/formulas/index'
-import type { FormulaDef } from '../lib/formulas/types'
-import { searchFormulas } from '../lib/search/search'
-import { getFavorites, toggleFavorite } from '../lib/storage/db'
-import Formula from '../components/Formula.vue'
+import { computed, onMounted, ref } from "vue";
+import { FORMULAS, SUBJECTS } from "../lib/formulas/index";
+import type { FormulaDef } from "../lib/formulas/types";
+import { searchFormulas } from "../lib/search/search";
+import { getFavorites, toggleFavorite } from "../lib/storage/db";
+import Formula from "../components/Formula.vue";
 
-const props = defineProps<{ subject?: string }>()
+const props = defineProps<{ subject?: string }>();
 
-const query = ref('')
-const filter = ref('')
+const query = ref("");
+const filter = ref("");
 
-const availableSubjects = computed(() => SUBJECTS.filter((s) => FORMULAS.some((f) => f.subject === s.id)))
+const availableSubjects = computed(() =>
+  SUBJECTS.filter((s) => FORMULAS.some((f) => f.subject === s.id)),
+);
 
-const activeSubject = computed(() => (filter.value !== '' ? filter.value : props.subject))
+const activeSubject = computed(() => (filter.value !== "" ? filter.value : props.subject));
 
-const results = computed(() => searchFormulas(query.value, activeSubject.value || undefined))
+const results = computed(() => searchFormulas(query.value, activeSubject.value || undefined));
 
-const favs = ref<Set<string>>(new Set())
+const favs = ref<Set<string>>(new Set());
 
 function keyOf(f: FormulaDef): string {
-  return `${f.subject}/${f.id}`
+  return `${f.subject}/${f.id}`;
 }
 
 async function refreshFavs(): Promise<void> {
-  const list = await getFavorites().catch(() => [])
-  favs.value = new Set(list.map((f) => f.key))
+  const list = await getFavorites().catch(() => []);
+  favs.value = new Set(list.map((f) => f.key));
 }
 
 async function toggleFav(f: FormulaDef): Promise<void> {
-  await toggleFavorite(keyOf(f)).catch(() => {})
-  await refreshFavs()
+  await toggleFavorite(keyOf(f)).catch(() => {});
+  await refreshFavs();
 }
 
 onMounted(() => {
-  void refreshFavs()
-})
+  void refreshFavs();
+});
 </script>
 
 <template>
   <section>
     <h1>Wzornik</h1>
     <p>
-      Wszystkie wzory w jednym miejscu. Wpisz np. „delta", „koło" albo „energia" —
-      trafisz prosto we wzór z linkiem do kalkulatora.
+      Wszystkie wzory w jednym miejscu. Wpisz np. „delta", „koło" albo „energia" — trafisz prosto we
+      wzór z linkiem do kalkulatora.
     </p>
     <input
       v-model="query"
@@ -73,12 +75,18 @@ onMounted(() => {
     <ul class="cards">
       <li v-for="f in results" :key="`${f.subject}/${f.id}`">
         <div class="cards__top">
-          <p class="cards__topic">{{ f.subject === 'matematyka' ? 'Matematyka' : 'Fizyka' }} · {{ f.topic }}</p>
+          <p class="cards__topic">
+            {{ f.subject === "matematyka" ? "Matematyka" : "Fizyka" }} · {{ f.topic }}
+          </p>
           <button
             class="heart"
             :class="{ active: favs.has(`${f.subject}/${f.id}`) }"
             :aria-pressed="favs.has(`${f.subject}/${f.id}`)"
-            :aria-label="favs.has(`${f.subject}/${f.id}`) ? `Usuń ${f.name} z ulubionych` : `Dodaj ${f.name} do ulubionych`"
+            :aria-label="
+              favs.has(`${f.subject}/${f.id}`)
+                ? `Usuń ${f.name} z ulubionych`
+                : `Dodaj ${f.name} do ulubionych`
+            "
             @click="toggleFav(f)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">

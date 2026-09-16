@@ -1,3 +1,3 @@
-export * from './rational'
-export * from './exact'
-export * from './format'
+export * from "./rational";
+export * from "./exact";
+export * from "./format";

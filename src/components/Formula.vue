@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { renderLatex } from '../lib/katex'
-import 'katex/dist/katex.min.css'
+import { computed } from "vue";
+import { renderLatex } from "../lib/katex";
+import "katex/dist/katex.min.css";
 
-const props = defineProps<{ source: string; display?: boolean }>()
+const props = defineProps<{ source: string; display?: boolean }>();
 
-const html = computed(() => renderLatex(props.source, props.display ?? false))
+const html = computed(() => renderLatex(props.source, props.display ?? false));
 </script>
 
 <template>

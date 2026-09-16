@@ -1,42 +1,44 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { clearHistory, getFavorites, toggleFavorite } from '../lib/storage/db'
-import { applyTheme, loadSettings, saveSettings } from '../lib/settings'
-import type { Settings } from '../lib/settings'
+import { computed, ref } from "vue";
+import { clearHistory, getFavorites, toggleFavorite } from "../lib/storage/db";
+import { applyTheme, loadSettings, saveSettings } from "../lib/settings";
+import type { Settings } from "../lib/settings";
 
-const settings = ref<Settings>(loadSettings())
-const saved = ref(false)
-let timer: number | undefined
+const settings = ref<Settings>(loadSettings());
+const saved = ref(false);
+let timer: number | undefined;
 
 function persist(): void {
-  saveSettings(settings.value)
-  applyTheme(settings.value.theme)
-  saved.value = true
-  window.clearTimeout(timer)
+  saveSettings(settings.value);
+  applyTheme(settings.value.theme);
+  saved.value = true;
+  window.clearTimeout(timer);
   timer = window.setTimeout(() => {
-    saved.value = false
-  }, 1500)
+    saved.value = false;
+  }, 1500);
 }
 
 async function resetData(): Promise<void> {
-  await clearHistory().catch(() => {})
+  await clearHistory().catch(() => {});
   for (const f of await getFavorites().catch(() => [])) {
-    await toggleFavorite(f.key).catch(() => {})
+    await toggleFavorite(f.key).catch(() => {});
   }
-  await persistReload()
+  await persistReload();
 }
 
-const dataCleared = ref(false)
+const dataCleared = ref(false);
 
 async function persistReload(): Promise<void> {
-  dataCleared.value = true
-  window.clearTimeout(timer)
+  dataCleared.value = true;
+  window.clearTimeout(timer);
   timer = window.setTimeout(() => {
-    dataCleared.value = false
-  }, 2000)
+    dataCleared.value = false;
+  }, 2000);
 }
 
-const themeLabel = computed(() => (settings.value.theme === 'dark' ? 'Ciemny (domyślny)' : 'Jasny'))
+const themeLabel = computed(() =>
+  settings.value.theme === "dark" ? "Ciemny (domyślny)" : "Jasny",
+);
 </script>
 
 <template>
@@ -61,7 +63,13 @@ const themeLabel = computed(() => (settings.value.theme === 'dark' ? 'Ciemny (do
         <legend>Dokładność</legend>
         <label>
           Miejsca po przecinku
-          <input v-model.number="settings.places" type="number" min="0" max="12" @change="persist" />
+          <input
+            v-model.number="settings.places"
+            type="number"
+            min="0"
+            max="12"
+            @change="persist"
+          />
         </label>
       </fieldset>
     </form>
@@ -98,7 +106,7 @@ label {
   font-size: 1rem;
 }
 
-input[type='number'] {
+input[type="number"] {
   width: 4.5rem;
   font-family: var(--font-mono);
   font-size: 1rem;
@@ -109,7 +117,7 @@ input[type='number'] {
   color: var(--color-ink);
 }
 
-input[type='radio'] {
+input[type="radio"] {
   width: 1.25rem;
   height: 1.25rem;
   accent-color: var(--color-accent);

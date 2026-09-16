@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { renderDiagram } from '../lib/diagrams/geometry'
+import { computed } from "vue";
+import { renderDiagram } from "../lib/diagrams/geometry";
 
 const props = defineProps<{
-  formulaId: string
-  nums: Record<string, number>
-  highlight: string
-  caption?: string
-}>()
+  formulaId: string;
+  nums: Record<string, number>;
+  highlight: string;
+  caption?: string;
+}>();
 
-const svg = computed(() => renderDiagram(props.formulaId, props.nums, props.highlight))
+const svg = computed(() => renderDiagram(props.formulaId, props.nums, props.highlight));
 </script>
 
 <template>
   <figure v-if="svg" class="diagram">
     <div v-html="svg"></div>
-    <figcaption class="diagram__cap">{{ caption ?? 'Rysunek pomocniczy' }}</figcaption>
+    <figcaption class="diagram__cap">{{ caption ?? "Rysunek pomocniczy" }}</figcaption>
   </figure>
 </template>
 

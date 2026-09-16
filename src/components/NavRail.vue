@@ -23,6 +23,11 @@ const subjects = [
     </div>
 
     <div class="rail__group">
+      <span class="rail__group-label">Moje</span>
+      <router-link to="/historia" class="rail__link">Historia i ulubione</router-link>
+    </div>
+
+    <div class="rail__group">
       <span class="rail__group-label">Kalkulatory</span>
       <router-link
         v-for="s in subjects"

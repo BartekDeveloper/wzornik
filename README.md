@@ -10,7 +10,7 @@ dla przyszłego silnika solvera.
 ```bash
 npm install
 npm run dev
-npm test        # 33 testy: silnik Exact + jednostki + solver (vitest)
+npm test        # 125 testów (vitest)
 ```
 
 ## Solver N-zmiennych (Etap 2 — gotowy)
@@ -44,6 +44,22 @@ zakodowanymi wariantami algebraicznymi — puste pole inputu to niewiadoma:
   kula. Proporcje z danych, niewiadoma na czerwono.
 - `FormulaDiagram.vue` w widoku solvera — rysuje się z inputów
   i rozwiązanej niewiadomej, tylko przy pełnym sukcesie.
+
+## Wykresy funkcji (Etap 5 — gotowy)
+
+- `src/lib/plots/plot.ts` — viewport, próbkowanie, zera, wierzchołek,
+  punkt (0, c); czysta matematyka na liczbach, testowana bez DOM.
+- `FunctionPlot.vue` — Canvas 2D z HiDPI, adaptacyjną siatką i etykietami.
+- Nowa formuła `funkcja-liniowa` (miejsce zerowe + gałęzie
+  tożsamość/sprzeczność); wykres pod deltą i funkcją liniową.
+
+## Historia i ulubione (Etap 6 — gotowy)
+
+- `src/lib/storage/db.ts` — IndexedDB: historia (limit 100, przycinanie
+  najstarszych) i ulubione (`subject/id`).
+- Solver zapisuje udane wyniki z debounce 1,5s + gwiazdka ulubionych.
+- Widok `/historia` (link w nawigacji): ulubione z linkami, historia
+  z wynikami renderowanymi przez KaTeX.
 
 ## Silnik dokładności (Etap 1 — gotowy)
 
@@ -79,8 +95,6 @@ mini-kalkulator powinny nadal działać.
 
 - **Ikony PWA są placeholderami** (SVG z „Δ”) — do podmiany na docelowe
   PNG/maskable przed publikacją (wymóg niektórych przeglądarek/Android).
-- Wykresy funkcji (Canvas) — kolejny etap.
-- Historia obliczeń i ulubione (IndexedDB) — kolejny etap.
 
 ## Struktura
 

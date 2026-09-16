@@ -64,8 +64,11 @@ describe('solver matematyka', () => {
     expect(exactOf('matematyka', 'objetosc-kuli', { V: '', r: '3' })).toEqual(['36π'])
   })
 
-  it('delta przez rejestr: x²-5x+6 → 2 i 3', () => {
-    const r = run('matematyka', 'rownanie-kwadratowe', { a: '1', b: '-5', c: '6' })
+  it('funkcja liniowa 2x-4 → x₀=2', () => {
+    expect(exactOf('matematyka', 'funkcja-liniowa', { a: '2', b: '-4' })).toEqual(['2'])
+  })
+
+  it('delta przez rejestr: x²-5x+6 → 2 i 3', () => {    const r = run('matematyka', 'rownanie-kwadratowe', { a: '1', b: '-5', c: '6' })
     if (!r.ok) throw new Error(r.error)
     expect(r.values.map(formatExactText)).toEqual(['2', '3'])
     expect(r.steps).toHaveLength(3)

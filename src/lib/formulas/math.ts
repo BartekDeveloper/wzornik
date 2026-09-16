@@ -1,4 +1,4 @@
-import { ONE, ZERO, add, cmp, div, mul, of, pow, sub } from '../exact/rational'
+import { ONE, ZERO, add, cmp, div, isZero, mul, neg, of, pow, sub } from '../exact/rational'
 import { approx, approxOnly, cbrtRational, exactOf, mulRat, solveQuadratic, sqrtRational, stripPi } from '../exact/exact'
 import type { Exact } from '../exact/exact'
 import { formatLatex, formatRatLatex } from '../exact/format'
@@ -582,6 +582,54 @@ const poleKuli: FormulaDef = {
   },
 }
 
+const funkcjaLiniowa: FormulaDef = {
+  id: 'funkcja-liniowa',
+  subject: 'matematyka',
+  topic: 'Funkcje',
+  name: 'Miejsce zerowe funkcji liniowej',
+  latex: 'y = ax + b',
+  vars: [
+    { id: 'a', label: 'a' },
+    { id: 'b', label: 'b' },
+  ],
+  mode: 'fixed',
+  outputId: 'x0',
+  outputLabel: 'x₀',
+  solve(_unknown, known, places): FormulaSolution {
+    const a = asRational(known['a'], 'a')
+    const b = asRational(known['b'], 'b')
+    if (isZero(a)) {
+      if (isZero(b)) {
+        return {
+          values: [],
+          steps: [
+            { title: '1. Sprawdzenie', body: 'a = 0' },
+            { title: '2. Podstawienie danych', body: `0 \\cdot x + ${L(b)} = 0` },
+            { title: '3. Wynik', body: '0 = 0', note: 'tożsamość — każda liczba jest miejscem zerowym' },
+          ],
+        }
+      }
+      return {
+        values: [],
+        steps: [
+          { title: '1. Sprawdzenie', body: 'a = 0' },
+          { title: '2. Podstawienie danych', body: `0 \\cdot x + ${L(b)} = 0` },
+          { title: '3. Wynik', body: `${L(b)} = 0`, note: 'sprzeczność — brak miejsc zerowych' },
+        ],
+      }
+    }
+    const v = exactOf(div(neg(b), a))
+    return {
+      values: [v],
+      steps: [
+        { title: '1. Przekształcenie wzoru', body: 'x_0 = -\\frac{b}{a}' },
+        { title: '2. Podstawienie danych', body: `x_0 = -\\frac{${L(b)}}{${L(a)}}` },
+        { title: '3. Wynik', body: resultLatex('x_0', v, places) },
+      ],
+    }
+  },
+}
+
 export const MATH_FORMULAS: FormulaDef[] = [
   pitagoras,
   poleTrojkata,
@@ -589,6 +637,7 @@ export const MATH_FORMULAS: FormulaDef[] = [
   poleKola,
   obwodKola,
   rownanieKwadratowe,
+  funkcjaLiniowa,
   procent,
   ciagArytmetyczny,
   ciagGeometryczny,

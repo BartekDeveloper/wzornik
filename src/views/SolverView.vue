@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onUnmounted, reactive, ref, watch } from 'vue'
 import { getFormula } from '../lib/formulas/index'
 import { solveFormula } from '../lib/solver/solver'
 import { formatDecimal, formatLatex } from '../lib/exact/format'
 import { approx, isApproxOnly, parseExact } from '../lib/exact/exact'
+import { linearPlot, quadraticPlot } from '../lib/plots/plot'
+import { addHistory, isFavorite, toggleFavorite } from '../lib/storage/db'
 import Formula from '../components/Formula.vue'
 import FormulaDiagram from '../components/FormulaDiagram.vue'
+import FunctionPlot from '../components/FunctionPlot.vue'
 
 const props = defineProps<{ subject?: string; formula?: string }>()
 
@@ -13,12 +16,36 @@ const def = computed(() => (props.subject && props.formula ? getFormula(props.su
 
 const inputs = reactive<Record<string, string>>({})
 const places = ref(2)
+const isFav = ref(false)
+
+const favKey = computed(() =>
+  props.subject && props.formula ? `${props.subject}/${props.formula}` : '',
+)
+
+async function toggleFav(): Promise<void> {
+  if (!favKey.value) return
+  try {
+    isFav.value = await toggleFavorite(favKey.value)
+  } catch {
+    isFav.value = false
+  }
+}
 
 watch(
   def,
   (d) => {
     for (const k of Object.keys(inputs)) delete inputs[k]
     if (d) for (const v of d.vars) inputs[v.id] = ''
+    isFav.value = false
+    if (d && favKey.value) {
+      isFavorite(favKey.value)
+        .then((v) => {
+          isFav.value = v
+        })
+        .catch(() => {
+          isFav.value = false
+        })
+    }
   },
   { immediate: true },
 )
@@ -63,12 +90,64 @@ const diagramNums = computed<Record<string, number> | null>(() => {
   }
   return nums
 })
+
+function numInput(id: string): number | null {
+  try {
+    const n = approx(parseExact((inputs[id] ?? '').trim()))
+    return Number.isFinite(n) ? n : null
+  } catch {
+    return null
+  }
+}
+
+const plotData = computed(() => {  const d = def.value
+  if (!d) return null
+  if (d.id === 'rownanie-kwadratowe') {
+    const a = numInput('a')
+    const b = numInput('b')
+    const c = numInput('c')
+    if (a === null || b === null || c === null) return null
+    if (a !== 0) return quadraticPlot(a, b, c)
+    return b !== 0 ? linearPlot(b, c) : null
+  }
+  if (d.id === 'funkcja-liniowa') {
+    const a = numInput('a')
+    const b = numInput('b')
+    if (a === null || b === null) return null
+    return linearPlot(a, b)
+  }
+  return null
+})
+
+let saveTimer: number | undefined
+
+watch(view, (v) => {
+  window.clearTimeout(saveTimer)
+  const d = def.value
+  if (v.state !== 'done' || !hasAnyInput.value || !d) return
+  const snapshot = { ...inputs }
+  const result = v.values.map((r) => r.tex).join('; ')
+  saveTimer = window.setTimeout(() => {
+    void addHistory({
+      subject: d.subject,
+      formulaId: d.id,
+      formulaName: d.name,
+      inputs: snapshot,
+      result,
+    }).catch(() => {})
+  }, 1500)
+})
+
+onUnmounted(() => window.clearTimeout(saveTimer))
 </script>
 
 <template>
   <section v-if="def">
     <p class="topic">{{ def.subject === 'matematyka' ? 'Matematyka' : 'Fizyka' }} · {{ def.topic }}</p>
     <h2>{{ def.name }}</h2>
+    <button class="fav" :aria-pressed="isFav" @click="toggleFav" :title="isFav ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'">
+      {{ isFav ? '★' : '☆' }} Ulubione
+    </button>
     <p class="formula"><Formula :source="def.latex" /></p>
 
     <div class="solver">
@@ -112,6 +191,8 @@ const diagramNums = computed<Record<string, number> | null>(() => {
         :nums="diagramNums"
         :highlight="view.unknownId"
       />
+
+      <FunctionPlot v-if="plotData" :data="plotData" />
     </div>
 
     <p class="back">
@@ -130,6 +211,23 @@ const diagramNums = computed<Record<string, number> | null>(() => {
   color: var(--color-ink-soft);
   font-size: 0.875rem;
   margin: 0 0 0.25rem;
+}
+
+.fav {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.fav[aria-pressed='true'] {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .formula {

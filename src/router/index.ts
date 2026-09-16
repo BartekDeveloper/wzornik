@@ -31,6 +31,11 @@ const router = createRouter({
       props: true
     },
     {
+      path: '/historia',
+      name: 'historia',
+      component: () => import('../views/HistoriaView.vue')
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('../views/NotFoundView.vue')

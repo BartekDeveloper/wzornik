@@ -10,7 +10,24 @@ dla przyszłego silnika solvera.
 ```bash
 npm install
 npm run dev
+npm test        # 17 testów silnika Exact + jednostek (vitest)
 ```
+
+## Silnik dokładności (Etap 1 — gotowy)
+
+Czysty TypeScript w `src/lib/`, zero zależności runtime (celowo bez mathjs —
+oszczędza ~600KB w paczce offline):
+
+- `src/lib/exact/rational.ts` — liczby wymierne na `BigInt` (mianownik > 0,
+  skrócone przez NWD). `0.1 + 0.2 = 3/10`, nie `0.30000000000000004`.
+- `src/lib/exact/exact.ts` — typ `Exact` (`rat + irr`): pierwiastki trzymane
+  symbolicznie (`√12 → 2√3`), `π` symbolicznie, solver `solveQuadratic`
+  z gałęziami `two/one/none/linear`.
+- `src/lib/exact/format.ts` — `formatExactText` / `formatLatex` (pod KaTeX
+  w Etapie 3) / `formatDecimal` + reguła „do zapisu" (całkowite > ułamek >
+  `a√b` / `kπ`, dziesiętne tylko jako przybliżenie).
+- `src/lib/units/units.ts` — konwersje SI MVP: długość, masa, czas,
+  prędkość (`36 km/h → 10 m/s`), z kontrolą zgodności wymiarów.
 
 ## Test trybu offline
 
@@ -36,9 +53,10 @@ mini-kalkulator powinny nadal działać.
   wizyta bez internetu wyświetli fallbacki systemowe zamiast Spectral/Plex.
 - **Ikony PWA są placeholderami** (SVG z „Δ”) — do podmiany na docelowe
   PNG/maskable przed publikacją (wymóg niektórych przeglądarek/Android).
-- Wzornik i kalkulatory to puste widoki — dane wzorów, silnik solvera
-  (mathjs, Fraction/BigNumber dla dokładności), KaTeX i rysunki SVG to
-  kolejne etapy, nie ma ich w tym szkielecie.
+- Wzornik i kalkulatory to puste widoki — dane wzorów CKE, KaTeX i rysunki
+  SVG to kolejne etapy. Silnik solvera (liczby wymierne, pierwiastki
+  symboliczne, jednostki) jest gotowy i przetestowany — strona główna
+  pokazuje go na przykładzie delty.
 
 ## Struktura
 

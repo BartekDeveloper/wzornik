@@ -3,8 +3,9 @@ import { computed, reactive, ref, watch } from 'vue'
 import { getFormula } from '../lib/formulas/index'
 import { solveFormula } from '../lib/solver/solver'
 import { formatDecimal, formatLatex } from '../lib/exact/format'
-import { isApproxOnly } from '../lib/exact/exact'
+import { approx, isApproxOnly, parseExact } from '../lib/exact/exact'
 import Formula from '../components/Formula.vue'
+import FormulaDiagram from '../components/FormulaDiagram.vue'
 
 const props = defineProps<{ subject?: string; formula?: string }>()
 
@@ -33,6 +34,7 @@ const view = computed(() => {
   }
   return {
     state: 'done' as const,
+    unknownId: r.unknown,
     unknownLabel: r.unknownLabel,
     values: r.values.map((v) => ({
       tex: formatLatex(v),
@@ -40,7 +42,26 @@ const view = computed(() => {
       approx: isApproxOnly(v),
     })),
     steps: r.steps,
+    first: r.values[0],
   }
+})
+
+const diagramNums = computed<Record<string, number> | null>(() => {
+  const d = def.value
+  const st = view.value
+  if (!d || st.state !== 'done' || d.mode !== 'nvar') return null
+  const nums: Record<string, number> = {}
+  for (const v of d.vars) {
+    try {
+      const e = v.id === st.unknownId && st.first ? st.first : parseExact((inputs[v.id] ?? '').trim())
+      const n = approx(e)
+      if (!Number.isFinite(n) || n <= 0) return null
+      nums[v.id] = n
+    } catch {
+      return null
+    }
+  }
+  return nums
 })
 </script>
 
@@ -84,6 +105,13 @@ const view = computed(() => {
           <span v-if="r.tex !== r.dec" class="approx">≈ {{ r.dec }}</span>
         </p>
       </div>
+
+      <FormulaDiagram
+        v-if="view.state === 'done' && diagramNums"
+        :formula-id="def.id"
+        :nums="diagramNums"
+        :highlight="view.unknownId"
+      />
     </div>
 
     <p class="back">

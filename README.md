@@ -37,6 +37,14 @@ zakodowanymi wariantami algebraicznymi — puste pole inputu to niewiadoma:
   Plex Mono; latin + latin-ext) — offline od pierwszej wizyty, zero CDN.
 - `/wzornik` ma wyszukiwarkę kontekstową (np. „delt" → równanie kwadratowe).
 
+## Diagramy SVG (Etap 4 — gotowy)
+
+- `src/lib/diagrams/geometry.ts` — czyste funkcje: Pitagoras (znacznik kąta
+  prostego), trójkąt z wysokością, prostokąt, koło, prostopadłościan (rzut),
+  kula. Proporcje z danych, niewiadoma na czerwono.
+- `FormulaDiagram.vue` w widoku solvera — rysuje się z inputów
+  i rozwiązanej niewiadomej, tylko przy pełnym sukcesie.
+
 ## Silnik dokładności (Etap 1 — gotowy)
 
 Czysty TypeScript w `src/lib/`, zero zależności runtime (celowo bez mathjs —
@@ -71,7 +79,8 @@ mini-kalkulator powinny nadal działać.
 
 - **Ikony PWA są placeholderami** (SVG z „Δ”) — do podmiany na docelowe
   PNG/maskable przed publikacją (wymóg niektórych przeglądarek/Android).
-- Rysunki SVG do geometrii (trójkąty, wykresy) — kolejny etap.
+- Wykresy funkcji (Canvas) — kolejny etap.
+- Historia obliczeń i ulubione (IndexedDB) — kolejny etap.
 
 ## Struktura
 

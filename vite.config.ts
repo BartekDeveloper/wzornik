@@ -27,19 +27,10 @@ export default defineConfig({
       },
       workbox: {
         // Precache the whole app shell so navigation works with no network at all.
-        globPatterns: ['**/*.{js,css,html,svg,woff2}'],
-        runtimeCaching: [
-          {
-            // Google Fonts fallback cache, in case fonts are ever loaded remotely
-            // during development. Production build should self-host fonts.
-            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'fonts-cache',
-              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 }
-            }
-          }
-        ],
+        // woff are KaTeX fonts bundled from its CSS (ttf skipped: legacy only);
+        // app fonts live in public/fonts as woff2.
+        globPatterns: ['**/*.{js,css,html,svg,woff2,woff}'],
+        runtimeCaching: [],
         // Bump this (or rely on precache manifest hashing) on every release so
         // clients on an old cached shell pick up the update instead of getting stuck.
         cleanupOutdatedCaches: true,

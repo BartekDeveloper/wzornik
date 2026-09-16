@@ -84,3 +84,18 @@ export function isZero(a: Rational): boolean {
 export function toNumber(a: Rational): number {
   return Number(a.p) / Number(a.q)
 }
+
+export function pow(base: Rational, exp: number): Rational {
+  if (!Number.isInteger(exp)) throw new Error('wymierna: potęga musi być całkowita')
+  if (exp === 0) return ONE
+  if (exp < 0) return div(ONE, pow(base, -exp))
+  let r = ONE
+  let b = base
+  let k = exp
+  while (k > 0) {
+    if (k % 2 === 1) r = mul(r, b)
+    b = mul(b, b)
+    k = Math.floor(k / 2)
+  }
+  return r
+}

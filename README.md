@@ -10,8 +10,32 @@ dla przyszłego silnika solvera.
 ```bash
 npm install
 npm run dev
-npm test        # 17 testów silnika Exact + jednostek (vitest)
+npm test        # 33 testy: silnik Exact + jednostki + solver (vitest)
 ```
+
+## Solver N-zmiennych (Etap 2 — gotowy)
+
+20 wzorów w `src/lib/formulas/` (12 matematyka + 8 fizyka), każdy z ręcznie
+zakodowanymi wariantami algebraicznymi — puste pole inputu to niewiadoma:
+
+- Matematyka: Pitagoras, pola (trójkąt/prostokąt/koło/kula), obwód koła,
+  równanie kwadratowe, procenty, ciągi, objętości.
+- Fizyka: prędkość, ruch jednostajnie przyspieszony, F=ma, Ek/Ep, gęstość,
+  ciśnienie, praca.
+- Inputy rozumieją `π` (`25π`), ułamki (`1/3`) i przecinki (`2,5`).
+  Warianty z odwracaniem π wracają wynikiem tylko przybliżonym z notką.
+- Kroki z szablonu: przekształcenie → podstawienie → wynik (latex jako
+  tekst do czasu KaTeX w Etapie 3).
+
+## Renderowanie wzorów (Etap 3 — gotowy)
+
+- `src/components/Formula.vue` + `src/lib/katex.ts` — KaTeX z fallbackiem
+  do `<code>` przy nieparsowalnym wejściu. Kroki solvera to czysty latex
+  (notki tekstowe osobno), ważność sprawdzana testem dla wszystkich
+  61 wariantów (`latex.test.ts`).
+- Fonty aplikacji self-hosted: `public/fonts/*.woff2` (Spectral, Plex Sans,
+  Plex Mono; latin + latin-ext) — offline od pierwszej wizyty, zero CDN.
+- `/wzornik` ma wyszukiwarkę kontekstową (np. „delt" → równanie kwadratowe).
 
 ## Silnik dokładności (Etap 1 — gotowy)
 
@@ -43,20 +67,11 @@ Otwórz podgląd, poczekaj aż SW się zainstaluje (DevTools → Application →
 Service Workers), potem włącz "Offline" w DevTools i odśwież — routing i
 mini-kalkulator powinny nadal działać.
 
-## Co NIE jest jeszcze zrobione (świadomie, zgodnie z ustaloną kolejnością)
+## Co NIE jest jeszcze zrobione
 
-- **Fonty ładowane z Google Fonts CDN** (`index.html`) — działają offline
-  dopiero *po* pierwszym udanym pobraniu, bo cache'ują się dopiero w runtime.
-  Przed pierwszym wdrożeniem produkcyjnym: pobrać `.woff2` i dołączyć jako
-  pliki statyczne w `public/fonts/`, podmienić `@font-face` w
-  `main.css`, dodać do `globPatterns` w `vite.config.ts`. Inaczej pierwsza
-  wizyta bez internetu wyświetli fallbacki systemowe zamiast Spectral/Plex.
 - **Ikony PWA są placeholderami** (SVG z „Δ”) — do podmiany na docelowe
   PNG/maskable przed publikacją (wymóg niektórych przeglądarek/Android).
-- Wzornik i kalkulatory to puste widoki — dane wzorów CKE, KaTeX i rysunki
-  SVG to kolejne etapy. Silnik solvera (liczby wymierne, pierwiastki
-  symboliczne, jednostki) jest gotowy i przetestowany — strona główna
-  pokazuje go na przykładzie delty.
+- Rysunki SVG do geometrii (trójkąty, wykresy) — kolejny etap.
 
 ## Struktura
 

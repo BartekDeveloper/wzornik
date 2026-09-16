@@ -3,6 +3,13 @@ import { cmp, isZero, ZERO } from './rational'
 import type { Exact } from './exact'
 import { approx } from './exact'
 
+export function trimNum(v: number): string {
+  if (!Number.isFinite(v)) return '—'
+  const s = v.toFixed(6)
+  const t = s.includes('.') ? s.replace(/\.?0+$/, '') : s
+  return t === '-0' ? '0' : t
+}
+
 export function formatRatText(r: Rational): string {
   return r.q === 1n ? r.p.toString() : `${r.p.toString()}/${r.q.toString()}`
 }
@@ -12,12 +19,12 @@ export function formatRatLatex(r: Rational): string {
 }
 
 function irrUnitText(e: Exact): string {
-  if (!e.irr) return ''
+  if (!e.irr || e.irr.type === 'approx') return ''
   return e.irr.type === 'sqrt' ? `√${e.irr.radicand.toString()}` : 'π'
 }
 
 function irrUnitLatex(e: Exact): string {
-  if (!e.irr) return ''
+  if (!e.irr || e.irr.type === 'approx') return ''
   return e.irr.type === 'sqrt' ? `\\sqrt{${e.irr.radicand.toString()}}` : '\\pi'
 }
 
@@ -36,6 +43,7 @@ function coefLatex(coef: Rational, unit: string): string {
 }
 
 export function formatExactText(e: Exact): string {
+  if (e.irr?.type === 'approx') return `≈ ${trimNum(e.irr.value)}`
   const ratZero = isZero(e.rat)
   if (!e.irr) return formatRatText(e.rat)
   const unit = irrUnitText(e)
@@ -47,6 +55,7 @@ export function formatExactText(e: Exact): string {
 }
 
 export function formatLatex(e: Exact): string {
+  if (e.irr?.type === 'approx') return `\\approx ${trimNum(e.irr.value)}`
   const ratZero = isZero(e.rat)
   if (!e.irr) return formatRatLatex(e.rat)
   const unit = irrUnitLatex(e)

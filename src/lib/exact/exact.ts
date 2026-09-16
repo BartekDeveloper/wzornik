@@ -1,8 +1,9 @@
-import { Rational, ZERO, add, cmp, div, isZero, mul, neg, norm, of, sub, toNumber } from './rational'
+import { Rational, ONE, ZERO, add, cmp, div, fromString, isZero, mul, neg, norm, of, sub, toNumber } from './rational'
 
 export type Irr =
   | { type: 'sqrt'; coef: Rational; radicand: bigint }
   | { type: 'pi'; coef: Rational }
+  | { type: 'approx'; value: number }
 
 export interface Exact {
   rat: Rational
@@ -11,6 +12,34 @@ export interface Exact {
 
 export function exactOf(r: Rational): Exact {
   return { rat: r, irr: null }
+}
+
+export function approxOnly(v: number): Exact {
+  if (!Number.isFinite(v)) throw new Error('dokładne: wynik nie jest liczbą')
+  return { rat: ZERO, irr: { type: 'approx', value: v } }
+}
+
+export function isApproxOnly(e: Exact): boolean {
+  return e.irr?.type === 'approx'
+}
+
+export function parseExact(s: string): Exact {
+  const t = s.trim().replace(',', '.').replace(/\s+/g, '').toLowerCase().replace('π', 'pi')
+  if (t === '') throw new Error('dokładne: puste wejście')
+  const m = /^(.*?)pi$/.exec(t)
+  if (m) {
+    const raw = m[1].replace(/\*$/, '')
+    const coef = raw === '' || raw === '+' ? ONE : raw === '-' ? neg(ONE) : fromString(raw)
+    return { rat: ZERO, irr: { type: 'pi', coef } }
+  }
+  return { rat: fromString(s), irr: null }
+}
+
+export function stripPi(e: Exact): Rational {
+  if (!isZero(e.rat) || !e.irr || e.irr.type !== 'pi') {
+    throw new Error('π nie skraca się z danymi')
+  }
+  return e.irr.coef
 }
 
 export function isqrt(n: bigint): bigint {
@@ -57,9 +86,40 @@ export function sqrtRational(r: Rational): Exact {
   return { rat: ZERO, irr: { type: 'sqrt', coef, radicand: inside } }
 }
 
+function icbrt(n: bigint): bigint | null {
+  if (n === 0n) return 0n
+  const neg = n < 0n
+  const a = neg ? -n : n
+  if (a > 1_000_000_000_000_000n) return null
+  const c = BigInt(Math.round(Math.cbrt(Number(a))))
+  for (const d of [c - 2n, c - 1n, c, c + 1n, c + 2n]) {
+    if (d >= 0n && d * d * d === a) return neg ? -d : d
+  }
+  return null
+}
+
+export function cbrtRational(r: Rational): Exact {
+  const cn = icbrt(r.p)
+  const cd = icbrt(r.q)
+  if (cn === null || cd === null || cd === 0n) {
+    throw new Error('pierwiastek sześcienny nie wychodzi dokładnie')
+  }
+  return { rat: norm(cn, cd), irr: null }
+}
+
+function irrValue(x: Irr | null): number {
+  if (!x) return 0
+  if (x.type === 'sqrt') return toNumber(x.coef) * Math.sqrt(Number(x.radicand))
+  if (x.type === 'pi') return toNumber(x.coef) * Math.PI
+  return x.value
+}
+
 function addIrr(x: Irr | null, y: Irr | null): Irr | null {
   if (!x) return y
   if (!y) return x
+  if (x.type === 'approx' || y.type === 'approx') {
+    return { type: 'approx', value: irrValue(x) + irrValue(y) }
+  }
   if (x.type === 'sqrt' && y.type === 'sqrt') {
     if (x.radicand !== y.radicand) throw new Error('dokładne: różne liczby pod pierwiastkiem')
     const coef = add(x.coef, y.coef)
@@ -74,6 +134,7 @@ function addIrr(x: Irr | null, y: Irr | null): Irr | null {
 
 function negIrr(x: Irr | null): Irr | null {
   if (!x) return null
+  if (x.type === 'approx') return { type: 'approx', value: -x.value }
   return { ...x, coef: neg(x.coef) }
 }
 
@@ -87,33 +148,32 @@ export function subExact(a: Exact, b: Exact): Exact {
 
 export function mulRat(e: Exact, r: Rational): Exact {
   if (isZero(r)) return { rat: ZERO, irr: null }
+  const irr = e.irr
+  if (irr?.type === 'approx') return approxOnly(irr.value * toNumber(r))
   return {
     rat: mul(e.rat, r),
-    irr: e.irr ? { ...e.irr, coef: mul(e.irr.coef, r) } : null,
+    irr: irr ? { ...irr, coef: mul(irr.coef, r) } : null,
   }
 }
 
 export function divRat(e: Exact, r: Rational): Exact {
   if (isZero(r)) throw new Error('dokładne: dzielenie przez zero')
+  const irr = e.irr
+  if (irr?.type === 'approx') return approxOnly(irr.value / toNumber(r))
   return {
     rat: div(e.rat, r),
-    irr: e.irr ? { ...e.irr, coef: div(e.irr.coef, r) } : null,
+    irr: irr ? { ...irr, coef: div(irr.coef, r) } : null,
   }
 }
 
 export function approx(e: Exact): number {
-  let v = toNumber(e.rat)
-  if (e.irr) {
-    if (e.irr.type === 'sqrt') v += toNumber(e.irr.coef) * Math.sqrt(Number(e.irr.radicand))
-    else v += toNumber(e.irr.coef) * Math.PI
-  }
-  return v
+  return toNumber(e.rat) + irrValue(e.irr)
 }
 
 export type BestForm = 'int' | 'frac' | 'sqrt' | 'pi'
 
 export function bestForm(e: Exact): BestForm {
-  if (!e.irr) return e.rat.q === 1n ? 'int' : 'frac'
+  if (!e.irr || e.irr.type === 'approx') return e.rat.q === 1n ? 'int' : 'frac'
   return e.irr.type
 }
 

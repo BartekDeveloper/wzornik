@@ -1,7 +1,8 @@
 import { FORMULAS } from "../formulas/index";
 import type { FormulaDef } from "../formulas/types";
+import { buildFuzzyIndex, fuzzyScore } from "./fuzzy";
 
-const KEYWORDS: Record<string, string[]> = {
+export const KEYWORDS: Record<string, string[]> = {
   pitagoras: ["pitagoras", "przeciwprostokątna", "przyprostokątna"],
   "pole-trojkata": ["pole", "trójkąt", "podstawa", "wysokość"],
   "pole-prostokata": ["pole", "prostokąt", "bok"],
@@ -47,6 +48,13 @@ const KEYWORDS: Record<string, string[]> = {
   "rozklad-liczby": ["czynniki pierwsze", "rozkład", "dzielniki", "liczba pierwsza"],
   "rozklad-wielomianu": ["rozkład wielomianu", "czynniki", "horner", "iloczynowa"],
   "katy-okrag": ["kąt środkowy", "kąt wpisany"],
+  "zamiana-miary": ["stopnie", "radiany", "miara łukowa", "zamiana"],
+  "kat-trojkat": ["trzeci kąt", "suma kątów trójkąta"],
+  "kat-miedzy-prostymi": ["kąt między prostymi", "nachylenie"],
+  "trojkaty-podobne": ["podobieństwo", "skala", "trójkąty podobne"],
+  "kat-z-bokow": ["kąt z boków", "arcsin", "arccos", "arctan"],
+  "suma-katow": ["suma kątów", "wielokąt"],
+  "znak-wielomianu": ["znak wielomianu", "nierówność wielomianowa", "wężyk"],
   "pole-trapez": ["pole", "trapez"],
   "pole-rombu": ["pole", "romb", "przekątne"],
   "pole-rownoleglobok": ["pole", "równoległobok"],
@@ -124,7 +132,7 @@ const KEYWORDS: Record<string, string[]> = {
   "energia-rel": ["relatywistyka", "czynnik lorentza"],
 };
 
-function norm(s: string): string {
+export function norm(s: string): string {
   return s
     .toLowerCase()
     .replace(/ł/g, "l")
@@ -148,9 +156,28 @@ export function searchFormulas(query: string, subject?: string): FormulaDef[] {
   const q = norm(query.trim());
   const pool = subject ? FORMULAS.filter((f) => f.subject === subject) : [...FORMULAS];
   if (q === "") return pool;
+  const fuzzy = fuzzyScore(fuzzyIndex(), query);
   return pool
-    .map((f) => ({ f, s: score(f, q) }))
+    .map((f) => {
+      const base = score(f, q);
+      const bonus = base === 0 ? (fuzzy.get(f.subject + "/" + f.id) ?? 0) : 0;
+      return { f, s: base + bonus };
+    })
     .filter((r) => r.s > 0)
     .sort((a, b) => b.s - a.s)
     .map((r) => r.f);
+}
+
+let cached: ReturnType<typeof buildFuzzyIndex> | null = null;
+
+function fuzzyIndex() {
+  if (!cached) {
+    cached = buildFuzzyIndex(
+      FORMULAS.map((f) => ({
+        id: f.subject + "/" + f.id,
+        text: [f.id, f.name, f.topic, ...(KEYWORDS[f.id] ?? [])].join(" "),
+      })),
+    );
+  }
+  return cached;
 }

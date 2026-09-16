@@ -27,14 +27,22 @@ export function solveFormula(
   places = 2,
 ): SolverResult {
   try {
+    const selects: Record<string, string> = {};
+    for (const v of def.vars) {
+      if (v.kind !== "select") continue;
+      const opts = v.options ?? [];
+      const s = (raw[v.id] ?? "").trim();
+      selects[v.id] = opts.includes(s) ? s : (opts[0] ?? "");
+    }
     if (def.mode === "fixed") {
       const known: Record<string, Exact> = {};
       for (const v of def.vars) {
+        if (v.kind === "select") continue;
         const s = (raw[v.id] ?? "").trim();
         if (s === "") return { ok: false, error: `uzupełnij pole ${v.label}` };
         known[v.id] = parseInput(v.label, s);
       }
-      const sol = def.solve(def.outputId, known, places);
+      const sol = def.solve(def.outputId, known, places, selects);
       return {
         ok: true,
         unknown: def.outputId,
@@ -44,7 +52,7 @@ export function solveFormula(
         steps: sol.steps,
       };
     }
-    const empty = def.vars.filter((v) => (raw[v.id] ?? "").trim() === "");
+    const empty = def.vars.filter((v) => v.kind !== "select" && (raw[v.id] ?? "").trim() === "");
     if (empty.length === 0)
       return { ok: false, error: "zostaw jedno pole puste — to będzie niewiadoma" };
     if (empty.length > 1)
@@ -52,10 +60,10 @@ export function solveFormula(
     const unknown = empty[0];
     const known: Record<string, Exact> = {};
     for (const v of def.vars) {
-      if (v.id === unknown.id) continue;
+      if (v.id === unknown.id || v.kind === "select") continue;
       known[v.id] = parseInput(v.label, (raw[v.id] ?? "").trim());
     }
-    const sol = def.solve(unknown.id, known, places);
+    const sol = def.solve(unknown.id, known, places, selects);
     return {
       ok: true,
       unknown: unknown.id,

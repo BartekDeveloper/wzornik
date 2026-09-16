@@ -16,14 +16,20 @@ z telefonu.
 - **Kroki rozwiązania** — przekształcenie, podstawienie, wynik, renderowane
   w KaTeX.
 - **Wykresy i rysunki** — parabola z zerami i wierzchołkiem, trójkąty, bryły.
-- **Konwerter jednostek** — 10 kategorii (długość, masa, czas, prędkość,
-  pole, objętość, ciśnienie, energia, moc, temperatura), liczy w obie
+- **Konwerter jednostek** — 11 kategorii (długość, masa, czas, prędkość,
+  pole, objętość, ciśnienie, energia, moc, temperatura, kąt), liczy w obie
   strony na żywo.
+- **Nierówności z wyborem znaku** — `> ≥ < ≤ ≠` dla funkcji kwadratowej
+  i wielomianów 3. stopnia (tabela znaków z krotnościami pierwiastków).
+- **Kąty na bogato** — zamiana °/rad, trzeci kąt trójkąta, kąt między
+  prostymi, podobieństwo, kąt z boków (arcsin/arccos/arctan), suma kątów.
 - **Historia i ulubione** — zapisywane na urządzeniu (IndexedDB), serduszko
   na każdej karcie.
 - **Ciemny motyw** (jasny w ustawieniach), wyszukiwarka bez ogonków
-  (`delta` znajduje równanie kwadratowe), pełne PWA — instaluje się
-  i chodzi bez internetu.
+  (`delta` znajduje równanie kwadratowe, literówki też — fuzzy BK-Trie),
+  pełne PWA — instaluje się i chodzi bez internetu.
+- **Szukanie wzorem** — wklej `4x^2-2x+10=0`, a aplikacja rozpozna funkcję
+  kwadratową i uzupełni `a, b, c` (liniowe też; działa też z pola we wzorze).
 
 ## Start
 
@@ -62,6 +68,10 @@ Pre-commit (husky) odpala `lint + format:check + test`. Po klonie:
 Push na `main` buduje i publikuje na GitHub Pages (workflow `deploy`,
 CI na każdym pushu/PR). Fork pod inną ścieżkę? Ustaw `PAGES_BASE`
 w workflow — reszta (router, manifest, precache) podąża sama.
+Sitemapę (`public/sitemap.xml`) i `robots.txt` trzymamy w repo ręcznie
+(statyczny SPA, ~120 URL-i), a test `sitemap.test.ts` pilnuje, żeby każda
+zarejestrowana formuła miała w niej wpis — nowy wzór = dopisz URL
+do sitemapy.
 
 ---
 

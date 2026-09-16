@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed, onUnmounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getFormula } from "../lib/formulas/index";
 import { solveFormula } from "../lib/solver/solver";
+import { parseEquation } from "../lib/parse-formula";
 import { formatDecimal, formatLatex, trimNum } from "../lib/exact/format";
 import { approx, isApproxOnly, parseExact } from "../lib/exact/exact";
 import { linearPlot, quadraticPlot } from "../lib/plots/plot";
 import { addHistory, isFavorite, toggleFavorite } from "../lib/storage/db";
 import { loadSettings } from "../lib/settings";
+import { getDescription } from "../lib/descriptions";
 import Formula from "../components/Formula.vue";
 import FormulaDiagram from "../components/FormulaDiagram.vue";
 import FunctionPlot from "../components/FunctionPlot.vue";
@@ -17,9 +20,42 @@ const def = computed(() =>
   props.subject && props.formula ? getFormula(props.subject, props.formula) : undefined,
 );
 
+const description = computed(() => (props.formula ? getDescription(props.formula) : undefined));
+
 const inputs = reactive<Record<string, string>>({});
 const places = ref(loadSettings().places);
 const isFav = ref(false);
+const quick = ref("");
+const quickError = ref("");
+const route = useRoute();
+const router = useRouter();
+
+function applyFill(raw: string): boolean {
+  const parsed = parseEquation(raw);
+  if (!parsed || !def.value) return false;
+  if (parsed.id !== def.value.id) {
+    void router.push({
+      name: "solver",
+      params: { subject: parsed.subject, formula: parsed.id },
+      query: { fill: raw },
+    });
+    return true;
+  }
+  for (const v of def.value.vars) {
+    if (v.kind === "select") continue;
+    const val = parsed.values[v.id];
+    if (val !== undefined) inputs[v.id] = val;
+  }
+  return true;
+}
+
+function applyQuick(): void {
+  quickError.value = "";
+  if (quick.value.trim() === "") return;
+  if (!applyFill(quick.value.trim())) {
+    quickError.value = "Nie rozpoznano równania — spróbuj np. 4x^2-2x+10=0";
+  }
+}
 
 const favKey = computed(() =>
   props.subject && props.formula ? `${props.subject}/${props.formula}` : "",
@@ -38,7 +74,9 @@ watch(
   def,
   (d) => {
     for (const k of Object.keys(inputs)) delete inputs[k];
-    if (d) for (const v of d.vars) inputs[v.id] = "";
+    if (d) for (const v of d.vars) inputs[v.id] = v.kind === "select" ? (v.options?.[0] ?? "") : "";
+    const fill = route.query.fill;
+    if (typeof fill === "string" && fill !== "") applyFill(fill);
     isFav.value = false;
     if (d && favKey.value) {
       isFavorite(favKey.value)
@@ -175,12 +213,32 @@ onUnmounted(() => window.clearTimeout(saveTimer));
       {{ isFav ? "★" : "☆" }} Ulubione
     </button>
     <p class="formula"><Formula :source="def.latex" /></p>
+    <details v-if="description" class="about">
+      <summary>Do czego ten wzór</summary>
+      <p>{{ description }}</p>
+    </details>
 
     <div class="solver">
+      <div class="quick">
+        <input
+          v-model="quick"
+          class="quick__input"
+          inputmode="text"
+          enterkeyhint="go"
+          placeholder="Wklej całe równanie, np. 4x^2-2x+10=0"
+          aria-label="Wklej całe równanie, żeby uzupełnić pola"
+          @keyup.enter="applyQuick"
+        />
+        <button class="quick__go" @click="applyQuick">Wypełnij</button>
+      </div>
+      <p v-if="quickError" class="error" role="alert">{{ quickError }}</p>
       <div class="solver__inputs">
         <label v-for="v in def.vars" :key="v.id">
           {{ v.label }}<span v-if="v.unit" class="unit"> [{{ v.unit }}]</span>
-          <input v-model="inputs[v.id]" inputmode="decimal" />
+          <select v-if="v.kind === 'select'" v-model="inputs[v.id]" :aria-label="v.label">
+            <option v-for="o in v.options ?? []" :key="o" :value="o">{{ o }}</option>
+          </select>
+          <input v-else v-model="inputs[v.id]" inputmode="decimal" />
         </label>
         <label>
           miejsca
@@ -270,9 +328,58 @@ onUnmounted(() => window.clearTimeout(saveTimer));
   font-size: 1.125rem;
 }
 
+.about {
+  max-width: var(--content-max);
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+  color: var(--color-ink-soft);
+}
+
+.about summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.about p {
+  margin: 0.25rem 0 0;
+}
+
 .solver {
   margin-top: 1.5rem;
   max-width: var(--content-max);
+}
+
+.quick {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.quick__input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+}
+
+.quick__go {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-accent);
+  cursor: pointer;
 }
 
 .solver__inputs {
@@ -292,6 +399,16 @@ onUnmounted(() => window.clearTimeout(saveTimer));
 
 .solver__inputs input {
   width: 6rem;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+}
+
+.solver__inputs select {
   font-family: var(--font-mono);
   font-size: 1rem;
   padding: 0.35rem 0.5rem;

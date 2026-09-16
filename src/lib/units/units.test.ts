@@ -40,8 +40,15 @@ describe("units", () => {
     expect(() => convert(1, "m", "s")).toThrow();
   });
 
+  it("converts angles", () => {
+    expect(convert(180, "°", "rad")).toBeCloseTo(Math.PI, 10);
+    expect(convert(Math.PI, "rad", "°")).toBeCloseTo(180, 8);
+    expect(convert(200, "grad", "°")).toBeCloseTo(180, 8);
+  });
+
   it("lists units per category", () => {
     expect(unitsOf("temperature")).toEqual(["°C", "K", "°F"]);
-    expect(CATEGORIES).toHaveLength(10);
+    expect(unitsOf("angle")).toEqual(["°", "rad", "grad"]);
+    expect(CATEGORIES).toHaveLength(11);
   });
 });

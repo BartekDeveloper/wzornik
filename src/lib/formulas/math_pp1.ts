@@ -314,18 +314,26 @@ const nierownoscKwadratowa: FormulaDef = {
   id: "nierownosc-kwadratowa",
   subject: "matematyka",
   topic: "Nierówności",
-  name: "Nierówność kwadratowa (ax²+bx+c > 0)",
-  latex: "ax^2 + bx + c > 0",
+  name: "Nierówność kwadratowa",
+  latex: "ax^2 + bx + c \\;\\; (>, \\ge, <, \\le, \\ne \\; 0)",
   vars: [
     { id: "a", label: "a" },
     { id: "b", label: "b" },
     { id: "c", label: "c" },
+    {
+      id: "op",
+      label: "znak",
+      kind: "select",
+      options: [">", "≥", "<", "≤", "≠"],
+    },
   ],
   mode: "fixed",
   outputId: "x",
   outputLabel: "x",
-  solve(_unknown, known, places): FormulaSolution {
+  solve(_unknown, known, places, selects): FormulaSolution {
     void places;
+    const op = selects?.["op"] ?? ">";
+    const opLatex = op === "≥" ? "\\ge" : op === "≤" ? "\\le" : op === "≠" ? "\\ne" : op;
     const a = asRational(known["a"], "a");
     const b = asRational(known["b"], "b");
     const c = asRational(known["c"], "c");
@@ -333,45 +341,86 @@ const nierownoscKwadratowa: FormulaDef = {
       { title: "1. Miejsca zerowe", body: "\\Delta = b^2 - 4ac" },
       {
         title: "2. Podstawienie danych",
-        body: `\\Delta = ${L(b)}^2 - 4 \\cdot ${L(a)} \\cdot ${L(c)}`,
+        body: `\\Delta = ${L(b)}^2 - 4 \\cdot ${L(a)} \\cdot ${L(c)}, \\; ax^2+bx+c ${opLatex} 0`,
       },
     ];
     const interval = (body: string, note?: string): FormulaSolution => ({
       values: [],
       steps: [...head, { title: "3. Wynik", body, note }],
     });
+    const constCase = (holds: boolean): FormulaSolution =>
+      holds
+        ? interval("x \\in \\mathbb{R}", "nierówność zawsze prawdziwa")
+        : interval("\\varnothing", "nierówność nigdy nie zachodzi");
     if (isZero(a)) {
       if (isZero(b)) {
-        return cmp(c, ZERO) > 0
-          ? interval("x \\in \\mathbb{R}", "nierówność zawsze prawdziwa")
-          : interval("\\varnothing", "nierówność nigdy nie zachodzi");
+        const v = cmp(c, ZERO);
+        return constCase(
+          op === ">"
+            ? v > 0
+            : op === "≥"
+              ? v >= 0
+              : op === "<"
+                ? v < 0
+                : op === "≤"
+                  ? v <= 0
+                  : v !== 0,
+        );
       }
       const x0 = exactOf(div(neg(c), b));
       const Lx = formatLatex(x0);
-      return cmp(b, ZERO) > 0
-        ? interval(`x \\in (${Lx}, +\\infty)`)
-        : interval(`x \\in (-\\infty, ${Lx})`);
+      const asc = cmp(b, ZERO) > 0;
+      if (op === "≠") return interval(`x \\in \\mathbb{R} \\setminus \\{${Lx}\\}`);
+      if (op === ">")
+        return asc ? interval(`x \\in (${Lx}, +\\infty)`) : interval(`x \\in (-\\infty, ${Lx})`);
+      if (op === "≥")
+        return asc ? interval(`x \\in [${Lx}, +\\infty)`) : interval(`x \\in (-\\infty, ${Lx}]`);
+      if (op === "<")
+        return asc ? interval(`x \\in (-\\infty, ${Lx})`) : interval(`x \\in (${Lx}, +\\infty)`);
+      return asc ? interval(`x \\in (-\\infty, ${Lx}]`) : interval(`x \\in [${Lx}, +\\infty)`);
     }
     const q = solveQuadratic(a, b, c);
     const up = cmp(a, ZERO) > 0;
     if (q.kind === "none") {
-      return up
-        ? interval("x \\in \\mathbb{R}", "parabola cała nad osią (Δ < 0, a > 0)")
-        : interval("\\varnothing", "parabola cała pod osią (Δ < 0, a < 0)");
+      const holds = up
+        ? op === ">" || op === "≥" || op === "≠"
+        : op === "<" || op === "≤" || op === "≠";
+      return holds
+        ? interval("x \\in \\mathbb{R}", "znak stały (Δ < 0)")
+        : interval("\\varnothing", "znak stały, przeciwny do znaku (Δ < 0)");
     }
     if (q.kind === "one" || q.kind === "linear") {
       const x0 = formatLatex(q.roots[0]);
-      return up
-        ? interval(
-            `x \\in \\mathbb{R} \\setminus \\{${x0}\\}`,
-            "pierwiastek podwójny nie spełnia >",
-          )
-        : interval("\\varnothing", "wartości niedodatnie (Δ = 0, a < 0)");
+      if (op === "≠") return interval(`x \\in \\mathbb{R} \\setminus \\{${x0}\\}`);
+      if (up) {
+        if (op === ">") return interval(`x \\in \\mathbb{R} \\setminus \\{${x0}\\}`);
+        if (op === "≥") return interval("x \\in \\mathbb{R}", "zero w jednym punkcie się liczy");
+        if (op === "<") return interval("\\varnothing");
+        return interval(`x \\in \\{${x0}\\}`, "tylko pierwiastek podwójny");
+      }
+      if (op === ">") return interval("\\varnothing");
+      if (op === "≥") return interval(`x \\in \\{${x0}\\}`, "tylko pierwiastek podwójny");
+      if (op === "<") return interval(`x \\in \\mathbb{R} \\setminus \\{${x0}\\}`);
+      return interval("x \\in \\mathbb{R}", "zero w jednym punkcie się liczy");
     }
     const [x1, x2] = q.roots.map(formatLatex);
-    return up
-      ? interval(`x \\in (-\\infty, ${x1}) \\cup (${x2}, +\\infty)`)
-      : interval(`x \\in (${x1}, ${x2})`);
+    const outside = (closed: boolean): string =>
+      closed
+        ? `x \\in (-\\infty, ${x1}] \\cup [${x2}, +\\infty)`
+        : `x \\in (-\\infty, ${x1}) \\cup (${x2}, +\\infty)`;
+    const inside = (closed: boolean): string =>
+      closed ? `x \\in [${x1}, ${x2}]` : `x \\in (${x1}, ${x2})`;
+    if (op === "≠") return interval(`x \\in \\mathbb{R} \\setminus \\{${x1}, ${x2}\\}`);
+    if (up) {
+      if (op === ">") return interval(outside(false));
+      if (op === "≥") return interval(outside(true));
+      if (op === "<") return interval(inside(false));
+      return interval(inside(true));
+    }
+    if (op === ">") return interval(inside(false));
+    if (op === "≥") return interval(inside(true));
+    if (op === "<") return interval(outside(false));
+    return interval(outside(true));
   },
 };
 
@@ -967,6 +1016,119 @@ const rozkladWielomianu: FormulaDef = {
   },
 };
 
+const znakWielomianu: FormulaDef = {
+  id: "znak-wielomianu",
+  subject: "matematyka",
+  topic: "Nierówności",
+  name: "Znak wielomianu 3. stopnia",
+  latex: "ax^3+bx^2+cx+d \\;\\; (>, \\ge, <, \\le, \\ne \\; 0)",
+  vars: [
+    { id: "a", label: "a" },
+    { id: "b", label: "b" },
+    { id: "c", label: "c" },
+    { id: "d", label: "d" },
+    {
+      id: "op",
+      label: "znak",
+      kind: "select",
+      options: [">", "≥", "<", "≤", "≠"],
+    },
+  ],
+  mode: "fixed",
+  outputId: "x",
+  outputLabel: "x",
+  solve(_unknown, known, places, selects): FormulaSolution {
+    void places;
+    const op = selects?.["op"] ?? ">";
+    const g = (id: string): Rational => asRational(known[id], id);
+    const [a, b, c, d] = [g("a"), g("b"), g("c"), g("d")];
+    if (isZero(a)) throw new Error("a ≠ 0 — to nie jest wielomian 3. stopnia");
+    const Lcm = [a.q, b.q, c.q, d.q].reduce((x, y) => (x / gcd(x, y)) * y, 1n);
+    const A = a.p * (Lcm / a.q);
+    const B = b.p * (Lcm / b.q);
+    const C = c.p * (Lcm / c.q);
+    const D = d.p * (Lcm / d.q);
+    if (D === 0n) throw new Error("d = 0 — wyłącz x przed nawias");
+    let coeffs: Rational[] = [
+      { p: A, q: 1n },
+      { p: B, q: 1n },
+      { p: C, q: 1n },
+      { p: D, q: 1n },
+    ];
+    const mult = new Map<string, { r: Rational; k: number }>();
+    for (const r of rationalRoots(A, B, C, D)) {
+      while (coeffs.length > 1 && cmp(evalPoly(coeffs, r), ZERO) === 0) {
+        const key = `${r.p}/${r.q}`;
+        const prev = mult.get(key);
+        mult.set(key, { r, k: (prev?.k ?? 0) + 1 });
+        coeffs = deflate(coeffs, r);
+      }
+    }
+    if (mult.size === 0)
+      throw new Error("brak pierwiastków wymiernych — nie umiem wyznaczyć znaku");
+    let restSign: 1 | -1 = 1;
+    if (coeffs.length === 3) {
+      const A2 = coeffs[0];
+      const B2 = coeffs[1];
+      const C2 = coeffs[2];
+      if (A2 === undefined || B2 === undefined || C2 === undefined)
+        throw new Error("błąd wewnętrzny");
+      const q = solveQuadratic(A2, B2, C2);
+      if (q.kind !== "none" && q.roots.some((r) => !r.irr))
+        throw new Error("reszta ma pierwiastki niewymierne — znak niejednoznaczny");
+      restSign = cmp(A2, ZERO) > 0 ? 1 : -1;
+    } else if (coeffs.length !== 1) {
+      throw new Error("nieoczekiwana reszta z dzielenia");
+    } else {
+      const c0 = coeffs[0];
+      if (c0 === undefined) throw new Error("błąd wewnętrzny");
+      restSign = c0.p > 0n ? 1 : -1;
+    }
+    const dir: 1 | -1 = A > 0n ? 1 : -1;
+    const distinct = [...mult.values()].sort((p, q) => cmp(sub(p.r, q.r), ZERO));
+    const pts = distinct.map(({ r }) => formatLatex({ rat: r, irr: null }));
+    const bounds: string[] = ["-\\infty", ...pts, "+\\infty"];
+    const parts: string[] = [];
+    const closed = op === "≥" || op === "≤";
+    const wantPos = op === ">" || op === "≥";
+    const wantNeg = op === "<" || op === "≤";
+    for (let i = 0; i <= distinct.length; i++) {
+      let s = dir * restSign;
+      for (let j = i; j < distinct.length; j++) {
+        const dj = distinct[j];
+        if (dj && dj.k % 2 === 1) s *= -1;
+      }
+      const take = op === "≠" ? true : wantPos ? s > 0 : wantNeg ? s < 0 : false;
+      if (!take) continue;
+      const lo = bounds[i] ?? "";
+      const hi = bounds[i + 1] ?? "";
+      const loClosed = closed && lo !== "-\\infty";
+      const hiClosed = closed && hi !== "+\\infty";
+      parts.push(`${loClosed ? "[" : "("}${lo}, ${hi}${hiClosed ? "]" : ")"}`);
+    }
+    const rootsList = distinct.map(({ r }) => formatLatex({ rat: r, irr: null })).join(", ");
+    let body: string;
+    let note: string | undefined;
+    if (op === "≠") {
+      body = `x \\in \\mathbb{R} \\setminus \\{${rootsList}\\}`;
+    } else if (parts.length === 0) {
+      body = "\\varnothing";
+      note = "żaden przedział nie spełnia znaku";
+    } else {
+      body = `x \\in ${parts.join(" \\cup ")}`;
+      note = `pierwiastki: ${rootsList}`;
+    }
+    return {
+      values: [],
+      steps: [
+        { title: "1. Pierwiastki i krotności", body: `W(x) = 0 \\Rightarrow ${rootsList}` },
+        { title: "2. Tabela znaków", body: `wsp. wiodący ${A > 0n ? "dodatni" : "ujemny"}` },
+        { title: "3. Wynik", body, note },
+      ],
+    };
+  },
+};
+
 export const MATH_PP1: FormulaDef[] = [
   potega,
   pierwiastek,
@@ -985,4 +1147,5 @@ export const MATH_PP1: FormulaDef[] = [
   postacieKwadratowej,
   rozkladLiczby,
   rozkladWielomianu,
+  znakWielomianu,
 ];

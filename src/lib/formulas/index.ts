@@ -3,6 +3,7 @@ import { MATH_FORMULAS } from "./math";
 import { PHYSICS_FORMULAS } from "./physics";
 import { MATH_PP1 } from "./math_pp1";
 import { MATH_PP2 } from "./math_pp2";
+import { MATH_KATY } from "./math_katy";
 import { MATH_PR } from "./math_pr";
 import { PHYSICS_PP } from "./physics_pp";
 import { PHYSICS_PR } from "./physics_pr";
@@ -11,6 +12,7 @@ export const FORMULAS: FormulaDef[] = [
   ...MATH_FORMULAS,
   ...MATH_PP1,
   ...MATH_PP2,
+  ...MATH_KATY,
   ...MATH_PR,
   ...PHYSICS_FORMULAS,
   ...PHYSICS_PP,

@@ -8,7 +8,8 @@ export type Category =
   | "pressure"
   | "energy"
   | "power"
-  | "temperature";
+  | "temperature"
+  | "angle";
 
 export interface CategoryDef {
   id: Category;
@@ -26,6 +27,7 @@ export const CATEGORIES: CategoryDef[] = [
   { id: "energy", label: "Energia" },
   { id: "power", label: "Moc" },
   { id: "temperature", label: "Temperatura" },
+  { id: "angle", label: "Kąt" },
 ];
 
 export interface UnitDef {
@@ -99,6 +101,9 @@ const TABLE: UnitDef[] = [
     toBase: (v) => ((v - 32) * 5) / 9 + 273.15,
     fromBase: (v) => ((v - 273.15) * 9) / 5 + 32,
   },
+  { symbol: "°", cat: "angle", ...lin(Math.PI / 180) },
+  { symbol: "rad", cat: "angle", ...lin(1) },
+  { symbol: "grad", cat: "angle", ...lin(Math.PI / 200) },
 ];
 
 const BY_SYMBOL = new Map(TABLE.map((u) => [u.symbol, u]));

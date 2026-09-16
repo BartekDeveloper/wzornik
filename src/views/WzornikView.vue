@@ -4,6 +4,8 @@ import { FORMULAS, SUBJECTS } from "../lib/formulas/index";
 import type { FormulaDef } from "../lib/formulas/types";
 import { searchFormulas } from "../lib/search/search";
 import { getFavorites, toggleFavorite } from "../lib/storage/db";
+import { looksLikeEquation, parseEquation } from "../lib/parse-formula";
+import type { ParsedEquation } from "../lib/parse-formula";
 import Formula from "../components/Formula.vue";
 
 const props = defineProps<{ subject?: string }>();
@@ -18,6 +20,11 @@ const availableSubjects = computed(() =>
 const activeSubject = computed(() => (filter.value !== "" ? filter.value : props.subject));
 
 const results = computed(() => searchFormulas(query.value, activeSubject.value || undefined));
+
+const recognized = computed<ParsedEquation | null>(() => {
+  if (!looksLikeEquation(query.value)) return null;
+  return parseEquation(query.value);
+});
 
 const favs = ref<Set<string>>(new Set());
 
@@ -41,12 +48,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <section>
-    <h1>Wzornik</h1>
-    <p>
-      Wszystkie wzory w jednym miejscu. Wpisz np. „delta", „koło" albo „energia" — trafisz prosto we
-      wzór z linkiem do kalkulatora.
-    </p>
+  <section class="wzornik">
+    <h1 class="sr-only">Wzornik</h1>
     <input
       v-model="query"
       class="search"
@@ -71,6 +74,25 @@ onMounted(() => {
       >
         {{ s.label }}
       </button>
+    </div>
+    <div v-if="recognized" class="found" role="status">
+      <p>
+        Rozpoznano równanie — to
+        <strong>{{
+          recognized.id === "rownanie-kwadratowe" ? "funkcja kwadratowa" : "funkcja liniowa"
+        }}</strong
+        >.
+      </p>
+      <router-link
+        class="found__go"
+        :to="{
+          name: 'solver',
+          params: { subject: recognized.subject, formula: recognized.id },
+          query: { fill: query.trim() },
+        }"
+      >
+        Rozwiąż z automatu →
+      </router-link>
     </div>
     <ul class="cards">
       <li v-for="f in results" :key="`${f.subject}/${f.id}`">
@@ -107,10 +129,13 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.wzornik {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--topbar-height) - var(--tabbar-height) - 3rem);
+}
+
 .search {
-  position: sticky;
-  top: calc(var(--topbar-height) + 0.5rem);
-  z-index: 10;
   width: 100%;
   max-width: 28rem;
   font-family: var(--font-body);
@@ -147,14 +172,37 @@ onMounted(() => {
   border-color: var(--color-accent);
 }
 
+.found {
+  max-width: var(--content-max);
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-paper-raised);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+}
+
+.found p {
+  margin: 0 0 0.5rem;
+}
+
+.found__go {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
 .cards {
   list-style: none;
-  padding: 0.25rem;
+  padding: 0.25rem 0.25rem 2rem;
   margin: 0;
   display: grid;
   gap: 1rem;
+  align-content: start;
   max-width: var(--content-max);
-  max-height: 62dvh;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 

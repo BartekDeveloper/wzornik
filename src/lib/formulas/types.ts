@@ -7,6 +7,8 @@ export interface FormulaVar {
   id: string;
   label: string;
   unit?: string;
+  kind?: "text" | "select";
+  options?: string[];
 }
 
 export interface SolveStep {
@@ -31,7 +33,12 @@ export interface FormulaDef {
   mode: "nvar" | "fixed";
   outputId: string;
   outputLabel: string;
-  solve(unknown: string, known: Record<string, Exact>, places: number): FormulaSolution;
+  solve(
+    unknown: string,
+    known: Record<string, Exact>,
+    places: number,
+    selects?: Record<string, string>,
+  ): FormulaSolution;
 }
 
 export const APPROX_PI_NOTE =

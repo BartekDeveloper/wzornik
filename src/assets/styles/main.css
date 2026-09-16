@@ -75,6 +75,7 @@ body {
   padding: 0;
   background: transparent;
   min-height: 100dvh;
+  overflow-y: hidden;
   color: var(--color-ink);
   font-family: var(--font-body);
   font-size: var(--step-0);

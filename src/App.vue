@@ -82,5 +82,7 @@ import NavRail from "./components/NavRail.vue";
   max-width: var(--content-max);
   margin: 0 auto;
   padding: 1.5rem 1.25rem calc(var(--tabbar-height) + 1.5rem);
+  overflow-y: auto;
+  max-height: calc(100dvh - var(--topbar-height) - var(--tabbar-height));
 }
 </style>

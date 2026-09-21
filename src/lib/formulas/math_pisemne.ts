@@ -102,8 +102,8 @@ const dzielenie: FormulaDef = {
   mode: "fixed",
   outputId: "quot",
   outputLabel: "iloraz",
-  solve(_unknown, known, _places): FormulaSolution {
-    const steps = divWritten(decInput(known, "a"), decInput(known, "b"));
+  solve(_unknown, known, places): FormulaSolution {
+    const steps = divWritten(decInput(known, "a"), decInput(known, "b"), Math.max(0, places));
     return { values: [], steps };
   },
 };

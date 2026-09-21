@@ -256,20 +256,50 @@ export function mulWritten(aStr: string, bStr: string): WrittenStep[] {
   ];
 }
 
-export function divWritten(aStr: string, bStr: string): WrittenStep[] {
+function digitsWithPoint(digits: number[], pointPos: number): string {
+  const s = digits.join("");
+  if (pointPos <= 0 || pointPos >= digits.length) return s;
+  return `${s.slice(0, pointPos)}.${s.slice(pointPos)}`;
+}
+
+export function divWritten(aStr: string, bStr: string, maxFrac = 2): WrittenStep[] {
   const a = parseNumber(aStr);
   const b = parseNumber(bStr);
-  if (fracLen(a) > 0 || fracLen(b) > 0) {
-    throw new Error("dzielenie pisemne: tylko liczby całkowite (przecinek w dzieleniu — wkrótce)");
-  }
   if (b.digits.every((d) => d === "0")) throw new Error("dzielenie przez zero");
-  const dividend = a.digits.map((d) => parseInt(d, 10));
+  const steps: WrittenStep[] = [];
+  const k = fracLen(b);
+  const dd: number[] = [...a.digits.map((d) => parseInt(d, 10)), ...Array(k).fill(0)];
+  const pointPos = a.decimalIndex + k;
   const divNum = dividendToNumber(b.digits);
+  if (k > 0 || fracLen(a) > 0) {
+    steps.push({
+      title: "1. Przesunięcie przecinka",
+      body: `${digitsWithPoint(
+        a.digits.map((d) => parseInt(d, 10)),
+        a.decimalIndex,
+      )} : ${digitsWithPoint(
+        b.digits.map((d) => parseInt(d, 10)),
+        b.decimalIndex,
+      )} = ${digitsWithPoint(dd, pointPos)} : ${b.digits.join("")} \\; (\\times 10^{${Math.max(k, 0)}})`,
+    });
+  }
   const quotient: number[] = [];
   let work: number[] = [];
   const trail: string[] = [];
-  for (const d of dividend) {
-    work.push(d);
+  let i = 0;
+  let fracCount = 0;
+  for (;;) {
+    if (i >= dd.length && (digitsToNumber(work) === 0 || quotient.length - pointPos >= maxFrac)) {
+      break;
+    }
+    if (i < dd.length) {
+      work.push(dd[i]);
+      i++;
+    } else {
+      if (fracCount >= maxFrac) break;
+      work.push(0);
+      fracCount++;
+    }
     while (work.length > 1 && work[0] === 0) work = work.slice(1);
     const wNum = digitsToNumber(work);
     if (wNum < divNum) {
@@ -283,20 +313,27 @@ export function divWritten(aStr: string, bStr: string): WrittenStep[] {
     trail.push(`${wNum} - ${prod} = ${remainder}`);
     work = remainder > 0 ? numberToDigits(remainder) : [];
   }
-  while (quotient.length > 1 && quotient[0] === 0) quotient.shift();
+  const intDigits = quotient.slice(0, pointPos);
+  while (intDigits.length > 1 && intDigits[0] === 0) intDigits.shift();
+  const fracDigits = quotient.slice(pointPos);
+  while (fracDigits.length > 0 && fracDigits[fracDigits.length - 1] === 0) fracDigits.pop();
+  const qStr =
+    fracDigits.length > 0 ? `${intDigits.join("")}.${fracDigits.join("")}` : intDigits.join("");
   const remainder = digitsToNumber(work);
   const lines = ["\\begin{aligned}"];
-  lines.push(`& ${a.digits.join(" ")} : ${b.digits.join(" ")} = ${quotient.join(" ")} \\\\`);
+  lines.push(
+    `& ${digitsWithPoint(dd, pointPos)} : ${b.digits.join("")} = ${qStr.split("").join(" ")} \\\\`,
+  );
   for (const t of trail) lines.push(`& ${t} \\\\`);
-  lines.push(`& \\text{reszta } ${remainder} \\\\`);
+  if (remainder !== 0) lines.push(`& \\text{reszta } ${remainder} \\\\`);
   lines.push("\\end{aligned}");
-  return [
-    { title: "1. Dzielenie pod kreską", body: lines.join("\n") },
-    {
-      title: "2. Wynik",
-      body: `= ${quotient.join("")}${remainder !== 0 ? ` \\text{ r } ${remainder}` : ""}`,
-    },
-  ];
+  steps.push({ title: `${steps.length + 1}. Dzielenie pod kreską`, body: lines.join("\n") });
+  steps.push({
+    title: `${steps.length + 1}. Wynik`,
+    body: `= ${qStr}${remainder !== 0 ? ` \\text{ r } ${remainder}` : ""}`,
+    note: remainder !== 0 ? `reszta ${remainder} (ograniczono do ${maxFrac} miejsc)` : undefined,
+  });
+  return steps;
 }
 
 function dividendToNumber(d: string[]): number {

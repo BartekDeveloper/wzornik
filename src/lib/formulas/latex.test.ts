@@ -273,6 +273,7 @@ const CASES: [string, string, Record<string, string>][] = [
   ["matematyka", "odejmowanie-pisemne", { a: "456", b: "123" }],
   ["matematyka", "mnozenie-pisemne", { a: "123", b: "45" }],
   ["matematyka", "dzielenie-pisemne", { a: "1234", b: "12" }],
+  ["matematyka", "dzielenie-pisemne", { a: "12.5", b: "2.5" }],
   ["geografia", "skala-mapy", { M: "", drzecz: "100000", dmapy: "1" }],
   ["geografia", "skala-mapy", { M: "100000", drzecz: "", dmapy: "1" }],
   ["geografia", "skala-mapy", { M: "100000", drzecz: "100000", dmapy: "" }],

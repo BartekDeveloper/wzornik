@@ -68,6 +68,30 @@ describe("divWritten", () => {
     expect(steps[steps.length - 1].body).toBe("= 12");
   });
 
+  it("przesuwa przecinek 12.5 : 2.5 = 5", () => {
+    const steps = divWritten("12.5", "2.5");
+    expect(steps[steps.length - 1].body).toBe("= 5");
+    expect(steps[0].title).toMatch(/Przesuni/);
+  });
+
+  it("stawia przecinek 1 : 8 = 0.125", () => {
+    const steps = divWritten("1", "8", 3);
+    expect(steps[steps.length - 1].body).toBe("= 0.125");
+  });
+
+  it("dzieli 7 : 2 = 3.5", () => {
+    const steps = divWritten("7", "2");
+    expect(steps[steps.length - 1].body).toBe("= 3.5");
+  });
+
+  it("ucina do limitu miejsc z resztą", () => {
+    const steps = divWritten("12.34", "1.2", 2);
+    const last = steps[steps.length - 1];
+    expect(last.body).toContain("10.28");
+    expect(last.body).toContain("\\text{ r }");
+    expect(last.note).toContain("reszta");
+  });
+
   it("rzuca przy dzieleniu przez zero", () => {
     expect(() => divWritten("10", "0")).toThrow();
   });

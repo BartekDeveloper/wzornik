@@ -399,14 +399,22 @@ const rownanieWykladnicze: FormulaDef = {
     if (cmp(b, ZERO) <= 0) throw new Error("b > 0 — inaczej brak rozwiązań");
     const value = logExact(a, b);
     const note = value.irr?.type === "approx" ? "wynik tylko przybliżony" : undefined;
-    return {
-      values: [value],
-      steps: [
-        { title: "1. Logarytmowanie", body: "x = \\log_a b" },
-        { title: "2. Podstawienie danych", body: `x = \\log_{${L(a)}} ${L(b)}` },
-        { title: "3. Wynik", body: resultLatex("x", value, places), note },
-      ],
-    };
+    const steps: FormulaSolution["steps"] = [
+      { title: "1. Logarytmowanie", body: "x = \\log_a b" },
+      { title: "2. Podstawienie danych", body: `x = \\log_{${L(a)}} ${L(b)}` },
+    ];
+    if (!value.irr) {
+      steps.push({
+        title: "3. Sprawdzenie",
+        body: `${L(a)}^{${formatLatex(value)}} = ${L(b)}`,
+      });
+    }
+    steps.push({
+      title: `${steps.length + 1}. Wynik`,
+      body: resultLatex("x", value, places),
+      note,
+    });
+    return { values: [value], steps };
   },
 };
 
@@ -437,14 +445,22 @@ const rownanieLogarytmiczne: FormulaDef = {
       value = approxOnly(Math.pow(approx(exactOf(a)), approx(exactOf(c))));
       note = "wynik tylko przybliżony";
     }
-    return {
-      values: [value],
-      steps: [
-        { title: "1. Definicja", body: "x = a^c" },
-        { title: "2. Podstawienie danych", body: `x = ${L(a)}^{${L(c)}}` },
-        { title: "3. Wynik", body: resultLatex("x", value, places), note },
-      ],
-    };
+    const steps: FormulaSolution["steps"] = [
+      { title: "1. Definicja", body: "x = a^c" },
+      { title: "2. Podstawienie danych", body: `x = ${L(a)}^{${L(c)}}` },
+    ];
+    if (isIntegerR(c) && Number(c.p) >= 2 && Number(c.p) <= 6 && c.p >= 0n) {
+      steps.push({
+        title: "3. Rozpisanie",
+        body: `x = ${Array(Number(c.p)).fill(L(a)).join(" \\cdot ")}`,
+      });
+    }
+    steps.push({
+      title: `${steps.length + 1}. Wynik`,
+      body: resultLatex("x", value, places),
+      note,
+    });
+    return { values: [value], steps };
   },
 };
 

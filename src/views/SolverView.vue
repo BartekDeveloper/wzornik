@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, reactive, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { getFormula, SUBJECTS } from "../lib/formulas/index";
 import { solveFormula } from "../lib/solver/solver";
 import { parseEquation } from "../lib/parse-formula";
@@ -31,33 +31,39 @@ const places = ref(loadSettings().places);
 const isFav = ref(false);
 const quick = ref("");
 const quickError = ref("");
+const quickSuggest = ref<{ subject: string; id: string; name: string; fill: string } | null>(null);
 const route = useRoute();
-const router = useRouter();
 
 function applyFill(raw: string): boolean {
   const parsed = parseEquation(raw);
   if (!parsed || !def.value) return false;
   if (parsed.id !== def.value.id) {
-    void router.push({
-      name: "solver",
-      params: { subject: parsed.subject, formula: parsed.id },
-      query: { fill: raw },
-    });
-    return true;
+    quickSuggest.value = {
+      subject: parsed.subject,
+      id: parsed.id,
+      name: getFormula(parsed.subject, parsed.id)?.name ?? parsed.id,
+      fill: raw,
+    };
+    return false;
   }
+  quickSuggest.value = null;
   for (const v of def.value.vars) {
     if (v.kind === "select") continue;
     const val = parsed.values[v.id];
     if (val !== undefined) inputs[v.id] = val;
+  }
+  for (const [k, v] of Object.entries(parsed.selects ?? {})) {
+    if (def.value.vars.some((x) => x.id === k && x.kind === "select")) inputs[k] = v;
   }
   return true;
 }
 
 function applyQuick(): void {
   quickError.value = "";
+  quickSuggest.value = null;
   if (quick.value.trim() === "") return;
-  if (!applyFill(quick.value.trim())) {
-    quickError.value = "Nie rozpoznano równania — spróbuj np. 4x^2-2x+10=0";
+  if (!applyFill(quick.value.trim()) && !quickSuggest.value) {
+    quickError.value = "Nie rozpoznano zapisu dla tego wzoru — wpisz liczby w pola powyżej.";
   }
 }
 
@@ -234,6 +240,17 @@ onUnmounted(() => window.clearTimeout(saveTimer));
         <button class="quick__go" @click="applyQuick">Wypełnij</button>
       </div>
       <p v-if="quickError" class="error" role="alert">{{ quickError }}</p>
+      <p v-if="quickSuggest" class="suggest" role="status">
+        To pasuje do wzoru „{{ quickSuggest.name }}”.
+        <router-link
+          :to="{
+            name: 'solver',
+            params: { subject: quickSuggest.subject, formula: quickSuggest.id },
+            query: { fill: quickSuggest.fill },
+          }"
+          >Przejdź tam →</router-link
+        >
+      </p>
       <div class="solver__inputs">
         <label v-for="v in def.vars" :key="v.id">
           {{ v.label }}<span v-if="v.unit" class="unit"> [{{ v.unit }}]</span>
@@ -427,6 +444,11 @@ onUnmounted(() => window.clearTimeout(saveTimer));
 .hint {
   color: var(--color-ink-soft);
   font-size: 0.875rem;
+}
+
+.suggest {
+  font-size: 0.9375rem;
+  color: var(--color-ink);
 }
 
 .error {

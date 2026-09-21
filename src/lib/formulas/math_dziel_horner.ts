@@ -1,8 +1,9 @@
-import { add, div, isZero, mul, neg } from "../exact/rational";
+import { div, isZero, neg } from "../exact/rational";
 import type { Rational } from "../exact/rational";
 import { formatRatLatex } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
 import { asRational } from "./types";
+import { hornerColumnSteps, hornerRow, hornerTableLatex } from "./poly";
 
 const L = formatRatLatex;
 
@@ -44,15 +45,10 @@ const dzielenieWielomianow: FormulaDef = {
     if (isZero(p)) throw new Error("dzielenie przez stałą: podziel każdy współczynnik");
     const steps: FormulaSolution["steps"] = [];
     const n = W.length;
-    const quotient: Rational[] = [];
-    let rem: Rational[] = [W[0]];
-    for (let i = 1; i < n; i++) {
-      const qi = div(rem[rem.length - 1], p);
-      quotient.push(qi);
-      const next = add(W[i], mul(neg(qi), q0));
-      rem.push(next);
-    }
-    const remainder = rem[rem.length - 1];
+    const x0 = div(neg(q0), p);
+    const { results } = hornerRow(W, x0);
+    const quotient = results.slice(0, -1).map((c) => div(c, p));
+    const remainder = results[results.length - 1];
     const term = (c: Rational, pw: number): string => {
       if (isZero(c)) return "";
       const cs = L(c);
@@ -72,12 +68,15 @@ const dzielenieWielomianow: FormulaDef = {
       : `${L(p) === "1" ? "" : L(p) === "-1" ? "-" : L(p)}x ${q0.p >= 0 ? "+" : ""}${L(q0)}`;
     steps.push({ title: "1. Wielomiany", body: `W(x) = ${wPoly}, \\; P(x) = ${pPoly}` });
     steps.push({
-      title: "2. Dzielenie długie (schemat)",
-      body: `\\begin{aligned} W &: [${W.map(L).join(", ")}] \\\\ P &: [${L(p)}, ${L(q0)}] \\\\ Q &: [${quotient.map(L).join(", ")}] \\\\ R &: ${L(remainder)} \\end{aligned}`,
+      title: "2. Sprowadzenie do (x - x_0)",
+      body: `P(x) = ${pPoly} = ${L(p)}(x - ${L(x0)}), \\; x_0 = ${L(x0)}`,
     });
+    steps.push({ title: "3. Tabelka Hornera", body: hornerTableLatex(W, x0) });
+    for (const s of hornerColumnSteps(W, x0)) steps.push(s);
     steps.push({
-      title: "3. Wynik",
+      title: "Wynik",
       body: `W(x) = (${pPoly})(${qPoly})${isZero(remainder) ? "" : ` + ${L(remainder)}`}`,
+      note: isZero(remainder) ? "dzieli się bez reszty" : undefined,
     });
     return { values: [], steps };
   },
@@ -118,19 +117,15 @@ const schematHornera: FormulaDef = {
     const x0 = asRational(known["x0"], "x₀");
     const steps: FormulaSolution["steps"] = [];
     const n = coeffs.length;
-    const result: Rational[] = [coeffs[0]];
-    for (let i = 1; i < n; i++) {
-      result.push(add(coeffs[i], mul(result[i - 1], x0)));
-    }
-    const remainder = result[n - 1];
-    const quotient = result.slice(0, -1);
+    const { results } = hornerRow(coeffs, x0);
+    const remainder = results[n - 1];
+    const quotient = results.slice(0, -1);
+    steps.push({ title: "1. Tabelka Hornera", body: hornerTableLatex(coeffs, x0) });
+    for (const s of hornerColumnSteps(coeffs, x0)) steps.push(s);
     steps.push({
-      title: "1. Schemat Hornera",
-      body: `\\begin{aligned} x_0 &= ${L(x0)} \\\\ a &= ${coeffs.map(L).join(" & ")} \\\\ wiersz &= ${result.map(L).join(" & ")} \\end{aligned}`,
-    });
-    steps.push({
-      title: "2. Wynik",
+      title: "Wynik",
       body: `W(${L(x0)}) = ${L(remainder)}, \\; Q = [${quotient.map(L).join(", ")}]`,
+      note: isZero(remainder) ? `x_0 = ${L(x0)} jest pierwiastkiem` : undefined,
     });
     return { values: [], steps };
   },

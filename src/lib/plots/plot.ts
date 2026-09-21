@@ -19,6 +19,58 @@ export interface SampledPlot extends PlotData {
   yMax: number;
 }
 
+export interface ViewState {
+  cx: number;
+  cy: number;
+  halfW: number;
+  halfH: number;
+}
+
+export interface ViewBounds {
+  xMin: number;
+  xMax: number;
+  yMin: number;
+  yMax: number;
+}
+
+export function initialView(data: PlotData): { view: ViewState; bounds: ViewBounds } {
+  const s = sampleY(data);
+  return {
+    view: {
+      cx: (s.xMin + s.xMax) / 2,
+      cy: (s.yMin + s.yMax) / 2,
+      halfW: (s.xMax - s.xMin) / 2,
+      halfH: (s.yMax - s.yMin) / 2,
+    },
+    bounds: { xMin: s.xMin, xMax: s.xMax, yMin: s.yMin, yMax: s.yMax },
+  };
+}
+
+export function clampView(v: ViewState, b: ViewBounds): ViewState {
+  const xr = b.xMax - b.xMin;
+  const yr = b.yMax - b.yMin;
+  const exMin = b.xMin - 0.5 * xr;
+  const exMax = b.xMax + 0.5 * xr;
+  const eyMin = b.yMin - 0.5 * yr;
+  const eyMax = b.yMax + 0.5 * yr;
+  let { cx, cy, halfW, halfH } = v;
+  halfW = Math.min(Math.max(halfW, xr * 0.01), xr * 2);
+  halfH = Math.min(Math.max(halfH, yr * 0.01), yr * 2);
+  cx = Math.min(Math.max(cx, exMin + halfW), exMax - halfW);
+  cy = Math.min(Math.max(cy, eyMin + halfH), eyMax - halfH);
+  if (exMin + halfW > exMax - halfW) cx = (exMin + exMax) / 2;
+  if (eyMin + halfH > eyMax - halfH) cy = (eyMin + eyMax) / 2;
+  return { cx, cy, halfW, halfH };
+}
+
+export function zoomView(v: ViewState, b: ViewBounds, factor: number): ViewState {
+  return clampView({ ...v, halfW: v.halfW * factor, halfH: v.halfH * factor }, b);
+}
+
+export function panView(v: ViewState, b: ViewBounds, dx: number, dy: number): ViewState {
+  return clampView({ ...v, cx: v.cx + dx, cy: v.cy + dy }, b);
+}
+
 function zeroPoint(x: number): PlotPoint {
   return { x, y: 0, label: `x₀ = ${trimNum(x)}`, kind: "zero" };
 }

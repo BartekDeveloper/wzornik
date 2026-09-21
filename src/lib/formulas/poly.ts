@@ -12,6 +12,44 @@ export interface PolyFactorResult {
   irreducible?: string;
 }
 
+export interface HornerTable {
+  results: Rational[];
+  prods: Rational[];
+}
+
+export function hornerRow(coeffs: Rational[], x0: Rational): HornerTable {
+  const results: Rational[] = [coeffs[0]];
+  const prods: Rational[] = [{ p: 0n, q: 1n }];
+  for (let i = 1; i < coeffs.length; i++) {
+    const prod = mul(results[i - 1], x0);
+    prods.push(prod);
+    results.push(add(coeffs[i], prod));
+  }
+  return { results, prods };
+}
+
+export function hornerTableLatex(coeffs: Rational[], x0: Rational): string {
+  const { results, prods } = hornerRow(coeffs, x0);
+  const n = coeffs.length;
+  const spec = `c|${"r".repeat(n)}`;
+  const head = [L(x0), ...coeffs.map(L)].join(" & ");
+  const mid = ["", ...prods.slice(1).map(L)].join(" & ");
+  const bot = ["", ...results.map(L)].join(" & ");
+  return `\\begin{array}{${spec}} ${head} \\\\ ${mid} \\\\ \\hline ${bot} \\end{array}`;
+}
+
+export function hornerColumnSteps(coeffs: Rational[], x0: Rational): SolveStep[] {
+  const { results, prods } = hornerRow(coeffs, x0);
+  const n = coeffs.length;
+  return coeffs.slice(1).map((c, k) => {
+    const i = k + 1;
+    return {
+      title: `Kolumna ${i + 1} z ${n}`,
+      body: `${L(results[i - 1])} \\cdot ${L(x0)} = ${L(prods[i])}, \\; ${L(c)} + ${L(prods[i])} = ${L(results[i])}`,
+    };
+  });
+}
+
 function intDivisors(n: bigint): bigint[] {
   const divs: bigint[] = [];
   if (n === 0n) return divs;
@@ -234,6 +272,10 @@ export function factorPolynomial(coeffs: Rational[]): PolyFactorResult {
     );
     let remainder = [...current];
     for (const r of roots) {
+      if (remainder.length > 1 && isZero(evalPoly(remainder, r))) {
+        pushStep(`Horner dla x = ${L(r)}`, hornerTableLatex(remainder, r));
+        for (const s of hornerColumnSteps(remainder, r)) pushStep(s.title, s.body);
+      }
       while (remainder.length > 1 && isZero(evalPoly(remainder, r))) {
         const lin =
           cmp(r, ZERO) === 0

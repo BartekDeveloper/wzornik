@@ -288,6 +288,7 @@ const rownanieKwadratowe: FormulaDef = {
       };
     }
     const dText = formatLatex(q.delta);
+    const deltaRat = sub(mul(b, b), mul(mul(of(4), a), c));
     if (q.kind === "none") {
       return {
         values: [],
@@ -296,8 +297,13 @@ const rownanieKwadratowe: FormulaDef = {
             title: "1. Przekształcenie wzoru",
             body: "x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a}, \\; \\Delta = b^2 - 4ac",
           },
-          { title: "2. Podstawienie danych", body: `${subst} = ${dText}` },
-          { title: "3. Wynik", body: "\\Delta < 0", note: "brak rozwiązań rzeczywistych" },
+          { title: "2. Podstawienie danych", body: subst },
+          { title: "3. Obliczenie delty", body: `${subst} = ${dText} < 0` },
+          {
+            title: "4. Wynik",
+            body: "brak rozwiązań",
+            note: "Δ < 0 — brak rozwiązań rzeczywistych",
+          },
         ],
       };
     }
@@ -307,12 +313,18 @@ const rownanieKwadratowe: FormulaDef = {
         values: [v],
         steps: [
           { title: "1. Przekształcenie wzoru", body: "x = \\frac{-b}{2a} \\; (\\Delta = 0)" },
-          { title: "2. Podstawienie danych", body: `${subst} = ${dText}` },
-          { title: "3. Wynik", body: resultLatex("x", v, places), note: "pierwiastek podwójny" },
+          { title: "2. Podstawienie danych", body: subst },
+          {
+            title: "3. Delta i pierwiastek",
+            body: `${subst} = ${dText} = 0, \\; x = \\frac{-${L(b)}}{2 \\cdot ${L(a)}}`,
+          },
+          { title: "4. Wynik", body: resultLatex("x", v, places), note: "pierwiastek podwójny" },
         ],
       };
     }
     const [x1, x2] = q.roots;
+    const sqText = formatLatex(sqrtRational(deltaRat));
+    const frac = (sgn: string): string => `x = \\frac{-${L(b)} ${sgn} ${sqText}}{2 \\cdot ${L(a)}}`;
     return {
       values: [x1, x2],
       labels: ["x₁", "x₂"],
@@ -321,9 +333,14 @@ const rownanieKwadratowe: FormulaDef = {
           title: "1. Przekształcenie wzoru",
           body: "x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a}, \\; \\Delta = b^2 - 4ac",
         },
-        { title: "2. Podstawienie danych", body: `${subst} = ${dText}` },
+        { title: "2. Podstawienie danych", body: subst },
         {
-          title: "3. Wynik",
+          title: "3. Delta i pierwiastek",
+          body: `${subst} = ${dText}, \\; \\sqrt{\\Delta} = ${sqText}`,
+        },
+        { title: "4. Ułamki", body: `${frac("-")}, \\; ${frac("+")}` },
+        {
+          title: "5. Wynik",
           body: `${resultLatex("x_1", x1, places)}, \\; ${resultLatex("x_2", x2, places)}`,
         },
       ],
@@ -349,41 +366,44 @@ const procent: FormulaDef = {
     if (unknown === "w") {
       const p = asRational(known["p"], "p");
       const x = asRational(known["x"], "x");
-      const value = exactOf(div(mul(p, x), of(100)));
+      const num = mul(p, x);
+      const value = exactOf(div(num, of(100)));
       return {
         values: [value],
-        steps: stdSteps(
-          "w = \\frac{p \\cdot x}{100}",
-          `w = \\frac{${L(p)} \\cdot ${L(x)}}{100}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "w = \\frac{p \\cdot x}{100}" },
+          { title: "2. Podstawienie danych", body: `w = \\frac{${L(p)} \\cdot ${L(x)}}{100}` },
+          { title: "3. Licznik", body: `p \\cdot x = ${L(p)} \\cdot ${L(x)} = ${L(num)}` },
+          { title: "4. Wynik", body: resultLatex("w", value, places) },
+        ],
       };
     }
     const w = asRational(known["w"], "w");
     if (unknown === "p") {
       const x = asRational(known["x"], "x");
-      const value = exactOf(div(mul(w, of(100)), x));
+      const num = mul(w, of(100));
+      const value = exactOf(div(num, x));
       return {
         values: [value],
-        steps: stdSteps(
-          "p = \\frac{100w}{x}",
-          `p = \\frac{100 \\cdot ${L(w)}}{${L(x)}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "p = \\frac{100w}{x}" },
+          { title: "2. Podstawienie danych", body: `p = \\frac{100 \\cdot ${L(w)}}{${L(x)}}` },
+          { title: "3. Licznik", body: `100 \\cdot w = 100 \\cdot ${L(w)} = ${L(num)}` },
+          { title: "4. Wynik", body: resultLatex("p", value, places) },
+        ],
       };
     }
     const p = asRational(known["p"], "p");
-    const value = exactOf(div(mul(w, of(100)), p));
+    const num = mul(w, of(100));
+    const value = exactOf(div(num, p));
     return {
       values: [value],
-      steps: stdSteps(
-        "x = \\frac{100w}{p}",
-        `x = \\frac{100 \\cdot ${L(w)}}{${L(p)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "x = \\frac{100w}{p}" },
+        { title: "2. Podstawienie danych", body: `x = \\frac{100 \\cdot ${L(w)}}{${L(p)}}` },
+        { title: "3. Licznik", body: `100 \\cdot w = 100 \\cdot ${L(w)} = ${L(num)}` },
+        { title: "4. Wynik", body: resultLatex("x", value, places) },
+      ],
     };
   },
 };
@@ -408,30 +428,41 @@ const ciagArytmetyczny: FormulaDef = {
       const a1 = asRational(known["a1"], "a₁");
       const n = requireNatural(known["n"], "n");
       const r = asRational(known["r"], "r");
-      const value = exactOf(add(a1, mul(of(n - 1), r)));
+      const prod = mul(of(n - 1), r);
+      const value = exactOf(add(a1, prod));
       return {
         values: [value],
-        steps: stdSteps(
-          "a_n = a_1 + (n - 1) \\cdot r",
-          `a_{${n}} = ${L(a1)} + ${n - 1} \\cdot ${L(r)}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "a_n = a_1 + (n - 1) \\cdot r" },
+          {
+            title: "2. Podstawienie danych",
+            body: `a_{${n}} = ${L(a1)} + ${n - 1} \\cdot ${L(r)}`,
+          },
+          {
+            title: "3. Iloczyn",
+            body: `(${n} - 1) \\cdot r = ${n - 1} \\cdot ${L(r)} = ${L(prod)}`,
+          },
+          { title: "4. Wynik", body: resultLatex(`a_{${n}}`, value, places) },
+        ],
       };
     }
     if (unknown === "a1") {
       const an = asRational(known["an"], "aₙ");
       const n = requireNatural(known["n"], "n");
       const r = asRational(known["r"], "r");
-      const value = exactOf(sub(an, mul(of(n - 1), r)));
+      const prod = mul(of(n - 1), r);
+      const value = exactOf(sub(an, prod));
       return {
         values: [value],
-        steps: stdSteps(
-          "a_1 = a_n - (n - 1) \\cdot r",
-          `a_1 = ${L(an)} - ${n - 1} \\cdot ${L(r)}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "a_1 = a_n - (n - 1) \\cdot r" },
+          { title: "2. Podstawienie danych", body: `a_1 = ${L(an)} - ${n - 1} \\cdot ${L(r)}` },
+          {
+            title: "3. Iloczyn",
+            body: `(${n} - 1) \\cdot r = ${n - 1} \\cdot ${L(r)} = ${L(prod)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("a_1", value, places) },
+        ],
       };
     }
     if (unknown === "n") {
@@ -444,27 +475,31 @@ const ciagArytmetyczny: FormulaDef = {
       const value = exactOf(add(k, ONE));
       return {
         values: [value],
-        steps: stdSteps(
-          "n = \\frac{a_n - a_1}{r} + 1",
-          `n = \\frac{${L(an)} - ${L(a1)}}{${L(r)}} + 1`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "n = \\frac{a_n - a_1}{r} + 1" },
+          {
+            title: "2. Podstawienie danych",
+            body: `n = \\frac{${L(an)} - ${L(a1)}}{${L(r)}} + 1`,
+          },
+          { title: "3. Iloraz", body: `\\frac{${L(an)} - ${L(a1)}}{${L(r)}} = ${L(k)}` },
+          { title: "4. Wynik", body: resultLatex("n", value, places) },
+        ],
       };
     }
     const an = asRational(known["an"], "aₙ");
     const a1 = asRational(known["a1"], "a₁");
     const n = requireNatural(known["n"], "n");
     if (n === 1) throw new Error("dla n = 1 różnica r jest dowolna — podaj n większe od 1");
-    const value = exactOf(div(sub(an, a1), of(n - 1)));
+    const diff = sub(an, a1);
+    const value = exactOf(div(diff, of(n - 1)));
     return {
       values: [value],
-      steps: stdSteps(
-        "r = \\frac{a_n - a_1}{n - 1}",
-        `r = \\frac{${L(an)} - ${L(a1)}}{${n - 1}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "r = \\frac{a_n - a_1}{n - 1}" },
+        { title: "2. Podstawienie danych", body: `r = \\frac{${L(an)} - ${L(a1)}}{${n - 1}}` },
+        { title: "3. Licznik", body: `a_n - a_1 = ${L(an)} - ${L(a1)} = ${L(diff)}` },
+        { title: "4. Wynik", body: resultLatex("r", value, places) },
+      ],
     };
   },
 };
@@ -492,28 +527,33 @@ const ciagGeometryczny: FormulaDef = {
     if (unknown === "an") {
       const a1 = asRational(known["a1"], "a₁");
       const q = asRational(known["q"], "q");
-      const value = exactOf(mul(a1, pow(q, n - 1)));
+      const pw = pow(q, n - 1);
+      const value = exactOf(mul(a1, pw));
       return {
         values: [value],
-        steps: stdSteps(
-          "a_n = a_1 \\cdot q^{n-1}",
-          `a_{${n}} = ${L(a1)} \\cdot ${L(q)}^{${n - 1}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "a_n = a_1 \\cdot q^{n-1}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `a_{${n}} = ${L(a1)} \\cdot ${L(q)}^{${n - 1}}`,
+          },
+          { title: "3. Potęga", body: `q^{${n - 1}} = ${L(q)}^{${n - 1}} = ${L(pw)}` },
+          { title: "4. Wynik", body: resultLatex(`a_{${n}}`, value, places) },
+        ],
       };
     }
     const an = asRational(known["an"], "aₙ");
     const q = asRational(known["q"], "q");
-    const value = exactOf(div(an, pow(q, n - 1)));
+    const pw = pow(q, n - 1);
+    const value = exactOf(div(an, pw));
     return {
       values: [value],
-      steps: stdSteps(
-        "a_1 = \\frac{a_n}{q^{n-1}}",
-        `a_1 = \\frac{${L(an)}}{${L(q)}^{${n - 1}}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "a_1 = \\frac{a_n}{q^{n-1}}" },
+        { title: "2. Podstawienie danych", body: `a_1 = \\frac{${L(an)}}{${L(q)}^{${n - 1}}}` },
+        { title: "3. Potęga", body: `q^{${n - 1}} = ${L(q)}^{${n - 1}} = ${L(pw)}` },
+        { title: "4. Wynik", body: resultLatex("a_1", value, places) },
+      ],
     };
   },
 };
@@ -707,7 +747,8 @@ const funkcjaLiniowa: FormulaDef = {
       steps: [
         { title: "1. Przekształcenie wzoru", body: "x_0 = -\\frac{b}{a}" },
         { title: "2. Podstawienie danych", body: `x_0 = -\\frac{${L(b)}}{${L(a)}}` },
-        { title: "3. Wynik", body: resultLatex("x_0", v, places) },
+        { title: "3. Licznik", body: `-b = -${L(b)} = ${L(neg(b))}` },
+        { title: "4. Wynik", body: resultLatex("x_0", v, places) },
       ],
     };
   },

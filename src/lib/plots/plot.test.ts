@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { linearPlot, niceStep, quadraticPlot, sampleY } from "./plot";
+import {
+  initialView,
+  linearPlot,
+  niceStep,
+  panView,
+  quadraticPlot,
+  sampleY,
+  zoomView,
+} from "./plot";
 
 describe("quadraticPlot", () => {
   it("finds zeros and vertex for x²-5x+6", () => {
@@ -54,5 +62,44 @@ describe("niceStep", () => {
   it("picks readable grid steps", () => {
     expect(niceStep(10)).toBe(2);
     expect(niceStep(3)).toBe(0.5);
+  });
+});
+
+describe("view", () => {
+  it("initialView centers on sampled bounds", () => {
+    const p = quadraticPlot(1, -5, 6);
+    if (!p) throw new Error("expected plot");
+    const { view, bounds } = initialView(p);
+    expect(view.cx).toBeCloseTo((bounds.xMin + bounds.xMax) / 2, 9);
+    expect(view.halfW).toBeGreaterThan(0);
+    expect(view.halfH).toBeGreaterThan(0);
+  });
+
+  it("zoomView shrinks and grows the window", () => {
+    const p = quadraticPlot(1, -5, 6);
+    if (!p) throw new Error("expected plot");
+    const { view, bounds } = initialView(p);
+    const zin = zoomView(view, bounds, 0.5);
+    expect(zin.halfW).toBeCloseTo(view.halfW * 0.5, 9);
+    const zout = zoomView(view, bounds, 2);
+    expect(zout.halfW).toBeGreaterThan(view.halfW);
+  });
+
+  it("clampView keeps the window within 50% past the edges", () => {
+    const p = quadraticPlot(1, -5, 6);
+    if (!p) throw new Error("expected plot");
+    const { view, bounds } = initialView(p);
+    const xr = bounds.xMax - bounds.xMin;
+    const far = panView(view, bounds, xr * 100, 0);
+    expect(far.cx - far.halfW).toBeGreaterThanOrEqual(bounds.xMin - 0.5 * xr - 1e-9);
+    expect(far.cx + far.halfW).toBeLessThanOrEqual(bounds.xMax + 0.5 * xr + 1e-9);
+  });
+
+  it("panView moves the center", () => {
+    const p = linearPlot(2, -4);
+    if (!p) throw new Error("expected plot");
+    const { view, bounds } = initialView(p);
+    const moved = panView(view, bounds, 1, 0);
+    expect(moved.cx).toBeCloseTo(view.cx + 1, 9);
   });
 });

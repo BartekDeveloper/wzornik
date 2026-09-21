@@ -4,7 +4,7 @@ import { FORMULAS, SUBJECTS } from "../lib/formulas/index";
 import type { FormulaDef } from "../lib/formulas/types";
 import { searchFormulas } from "../lib/search/search";
 import { getFavorites, toggleFavorite } from "../lib/storage/db";
-import { looksLikeEquation, parseEquation } from "../lib/parse-formula";
+import { looksLikeEquation, parseEquation, parseLabel } from "../lib/parse-formula";
 import type { ParsedEquation } from "../lib/parse-formula";
 import Formula from "../components/Formula.vue";
 
@@ -77,10 +77,8 @@ onMounted(() => {
     </div>
     <div v-if="recognized" class="found" role="status">
       <p>
-        Rozpoznano równanie — to
-        <strong>{{
-          recognized.id === "rownanie-kwadratowe" ? "funkcja kwadratowa" : "funkcja liniowa"
-        }}</strong
+        Rozpoznano zadanie — to
+        <strong>{{ recognized ? parseLabel(recognized.id) : "" }}</strong
         >.
       </p>
       <router-link

@@ -29,6 +29,11 @@ const router = createRouter({
       props: true,
     },
     {
+      path: "/zadanie",
+      name: "zadanie",
+      component: () => import("../views/ZadanieView.vue"),
+    },
+    {
       path: "/historia",
       name: "historia",
       component: () => import("../views/HistoriaView.vue"),
@@ -79,6 +84,8 @@ function titleFor(
         : "Kalkulator | Wzornik Maturalny";
     case "historia":
       return "Historia i ulubione | Wzornik Maturalny";
+    case "zadanie":
+      return "Wklej zadanie | Wzornik Maturalny";
     case "konwerter":
       return "Konwerter jednostek | Wzornik Maturalny";
     case "ustawienia":

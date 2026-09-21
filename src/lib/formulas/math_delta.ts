@@ -1,8 +1,8 @@
 import { ZERO, cmp, isZero, mul, of, sub } from "../exact/rational";
-import { exactOf } from "../exact/exact";
+import { exactOf, sqrtRational } from "../exact/exact";
 import { formatLatex, formatRatLatex } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { asRational, stdSteps } from "./types";
+import { asRational, resultLatex } from "./types";
 
 const L = formatRatLatex;
 
@@ -32,16 +32,25 @@ const delta: FormulaDef = {
     if (dCmp > 0) note = "Δ > 0 — dwa pierwiastki rzeczywiste";
     else if (dCmp === 0) note = "Δ = 0 — jeden pierwiastek podwójny";
     else note = "Δ < 0 — brak pierwiastków rzeczywistych";
-    return {
-      values: [value],
-      steps: stdSteps(
-        "\\Delta = b^2 - 4ac",
-        `\\Delta = ${L(b)}^2 - 4 \\cdot ${L(a)} \\cdot ${L(c)} = ${formatLatex(value)}`,
-        value,
-        places,
-        note,
-      ),
-    };
+    const steps: FormulaSolution["steps"] = [
+      { title: "1. Wzór", body: "\\Delta = b^2 - 4ac" },
+      {
+        title: "2. Podstawienie danych",
+        body: `\\Delta = ${L(b)}^2 - 4 \\cdot ${L(a)} \\cdot ${L(c)}`,
+      },
+      {
+        title: "3. Obliczenie",
+        body: `\\Delta = ${L(mul(b, b))} - ${L(mul(mul(of(4), a), c))} = ${formatLatex(value)}`,
+      },
+    ];
+    if (dCmp >= 0) {
+      const sq = sqrtRational(deltaVal);
+      steps.push({ title: "4. Pierwiastek z delty", body: `\\sqrt{\\Delta} = ${formatLatex(sq)}` });
+      steps.push({ title: "5. Wynik", body: resultLatex("\\Delta", value, places), note });
+      return { values: [value, sq], labels: ["Δ", "√Δ"], steps };
+    }
+    steps.push({ title: "4. Wynik", body: resultLatex("\\Delta", value, places), note });
+    return { values: [value], steps };
   },
 };
 

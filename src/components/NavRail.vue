@@ -15,6 +15,11 @@ const quick = [
     label: "Moje",
     icon: "M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.8-5.4 2.8 1-6.1L3.2 9.5l6.1-.9z",
   },
+  {
+    to: "/zadanie",
+    label: "Zadanie",
+    icon: "M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z",
+  },
 ];
 </script>
 

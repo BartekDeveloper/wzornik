@@ -60,10 +60,25 @@ const potega: FormulaDef = {
     const p = asRational(known["p"], "p");
     const n = intVal(asRational(known["n"], "n"), "n");
     const value = exactOf(pow(p, n));
-    return {
-      values: [value],
-      steps: stdSteps("w = p^n", `w = ${L(p)}^{${n}}`, value, places),
-    };
+    const steps: FormulaSolution["steps"] = [
+      { title: "1. Przekształcenie wzoru", body: "w = p^n" },
+      { title: "2. Podstawienie danych", body: `w = ${L(p)}^{${n}}` },
+    ];
+    if (n >= 2 && n <= 6) {
+      steps.push({
+        title: "3. Rozpisanie",
+        body: `w = ${Array(n).fill(L(p)).join(" \\cdot ")}`,
+      });
+    } else if (n <= -2 && n >= -6) {
+      steps.push({
+        title: "3. Rozpisanie",
+        body: `w = \\frac{1}{${Array(-n).fill(L(p)).join(" \\cdot ")}}`,
+      });
+    } else if (n === 0) {
+      steps.push({ title: "3. Reguła", body: "p^0 = 1 \\; (p \\ne 0)" });
+    }
+    steps.push({ title: `${steps.length + 1}. Wynik`, body: resultLatex("w", value, places) });
+    return { values: [value], steps };
   },
 };
 
@@ -104,7 +119,12 @@ const pierwiastek: FormulaDef = {
       const value = sqrtRational(m);
       return {
         values: [value],
-        steps: stdSteps("w = \\sqrt{m}", `w = \\sqrt{${L(m)}}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "w = \\sqrt{m}" },
+          { title: "2. Podstawienie danych", body: `w = \\sqrt{${L(m)}}` },
+          { title: "3. Sprawdzenie", body: `(${formatLatex(value)})^2 = ${L(m)}` },
+          { title: "4. Wynik", body: resultLatex("w", value, places) },
+        ],
       };
     }
     let value: Exact;
@@ -152,10 +172,24 @@ const logarytm: FormulaDef = {
       const b = asRational(known["b"], "b");
       const value = logExact(a, b);
       const note = value.irr?.type === "approx" ? "wynik tylko przybliżony" : undefined;
-      return {
-        values: [value],
-        steps: stdSteps("c = \\log_a b", `c = \\log_{${L(a)}} ${L(b)}`, value, places, note),
-      };
+      const steps: FormulaSolution["steps"] = [
+        { title: "1. Przekształcenie wzoru", body: "c = \\log_a b" },
+        { title: "2. Podstawienie danych", body: `c = \\log_{${L(a)}} ${L(b)}` },
+      ];
+      if (!value.irr) {
+        const k = Number(value.rat.p / value.rat.q);
+        steps.push({
+          title: "3. Sprawdzenie",
+          body: `${L(a)}^{${L(value.rat)}} = ${L(b)}`,
+          note: `bo ${L(a)} do potęgi ${k} daje ${L(b)}`,
+        });
+      }
+      steps.push({
+        title: `${steps.length + 1}. Wynik`,
+        body: resultLatex("c", value, places),
+        note,
+      });
+      return { values: [value], steps };
     }
     if (unknown === "b") {
       const a = asRational(known["a"], "a");
@@ -171,10 +205,22 @@ const logarytm: FormulaDef = {
         value = approxOnly(Math.pow(approx(exactOf(a)), approx(exactOf(c))));
         note = "wynik tylko przybliżony";
       }
-      return {
-        values: [value],
-        steps: stdSteps("b = a^c", `b = ${L(a)}^{${L(c)}}`, value, places, note),
-      };
+      const steps: FormulaSolution["steps"] = [
+        { title: "1. Przekształcenie wzoru", body: "b = a^c" },
+        { title: "2. Podstawienie danych", body: `b = ${L(a)}^{${L(c)}}` },
+      ];
+      if (isIntegerR(c) && Number(c.p) >= 2 && Number(c.p) <= 6) {
+        steps.push({
+          title: "3. Rozpisanie",
+          body: `b = ${Array(Number(c.p)).fill(L(a)).join(" \\cdot ")}`,
+        });
+      }
+      steps.push({
+        title: `${steps.length + 1}. Wynik`,
+        body: resultLatex("b", value, places),
+        note,
+      });
+      return { values: [value], steps };
     }
     throw new Error("podstawę policz pierwiastkiem odpowiedniego stopnia");
   },
@@ -196,7 +242,14 @@ const wartoscBezwzgledna: FormulaDef = {
     const value = exactOf(ax);
     return {
       values: [value],
-      steps: stdSteps("w = |x|", `w = |${L(x)}|`, value, places),
+      steps: [
+        { title: "1. Definicja", body: "w = |x| = x \\; (x \\ge 0), \\; -x \\; (x < 0)" },
+        {
+          title: "2. Znak liczby",
+          body: cmp(x, ZERO) < 0 ? `${L(x)} < 0, \\; w = -x` : `${L(x)} \\ge 0, \\; w = x`,
+        },
+        { title: "3. Wynik", body: resultLatex("w", value, places) },
+      ],
     };
   },
 };
@@ -223,29 +276,44 @@ const procentSkladany: FormulaDef = {
     if (unknown === "K") {
       const K0 = asRational(known["K0"], "K₀");
       const p = asRational(known["p"], "p");
-      const value = exactOf(mul(K0, pow(base_of(p), n)));
+      const base = base_of(p);
+      const pw = pow(base, n);
+      const value = exactOf(mul(K0, pw));
       return {
         values: [value],
-        steps: stdSteps(
-          "K = K_0\\left(1 + \\frac{p}{100}\\right)^n",
-          `K = ${L(K0)}\\left(1 + \\frac{${L(p)}}{100}\\right)^{${n}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "K = K_0\\left(1 + \\frac{p}{100}\\right)^n" },
+          {
+            title: "2. Podstawienie danych",
+            body: `K = ${L(K0)}\\left(1 + \\frac{${L(p)}}{100}\\right)^{${n}}`,
+          },
+          { title: "3. Czynnik procentowy", body: `1 + \\frac{${L(p)}}{100} = ${L(base)}` },
+          { title: "4. Potęga czynnika", body: `${L(base)}^{${n}} = ${L(pw)}` },
+          { title: "5. Wynik", body: resultLatex("K", value, places) },
+        ],
       };
     }
     if (unknown === "K0") {
       const K = asRational(known["K"], "K");
       const p = asRational(known["p"], "p");
-      const value = exactOf(div(K, pow(base_of(p), n)));
+      const base = base_of(p);
+      const pw = pow(base, n);
+      const value = exactOf(div(K, pw));
       return {
         values: [value],
-        steps: stdSteps(
-          "K_0 = \\frac{K}{\\left(1 + p/100\\right)^n}",
-          `K_0 = \\frac{${L(K)}}{\\left(1 + ${L(p)}/100\\right)^{${n}}}`,
-          value,
-          places,
-        ),
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: "K_0 = \\frac{K}{\\left(1 + p/100\\right)^n}",
+          },
+          {
+            title: "2. Podstawienie danych",
+            body: `K_0 = \\frac{${L(K)}}{\\left(1 + ${L(p)}/100\\right)^{${n}}}`,
+          },
+          { title: "3. Czynnik procentowy", body: `1 + \\frac{${L(p)}}{100} = ${L(base)}` },
+          { title: "4. Potęga czynnika", body: `${L(base)}^{${n}} = ${L(pw)}` },
+          { title: "5. Wynik", body: resultLatex("K_0", value, places) },
+        ],
       };
     }
     const K = asRational(known["K"], "K");
@@ -254,13 +322,22 @@ const procentSkladany: FormulaDef = {
     const value = approxOnly(100 * (Math.pow(ratio, 1 / n) - 1));
     return {
       values: [value],
-      steps: stdSteps(
-        "p = 100\\left(\\sqrt[n]{K/K_0} - 1\\right)",
-        `p = 100\\left(\\sqrt[${n}]{${L(K)}/${L(K0)}} - 1\\right)`,
-        value,
-        places,
-        "wynik tylko przybliżony",
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "p = 100\\left(\\sqrt[n]{K/K_0} - 1\\right)" },
+        {
+          title: "2. Podstawienie danych",
+          body: `p = 100\\left(\\sqrt[${n}]{${L(K)}/${L(K0)}} - 1\\right)`,
+        },
+        {
+          title: "3. Iloraz kapitałów",
+          body: `\\frac{K}{K_0} = \\frac{${L(K)}}{${L(K0)}} = ${trimNum(ratio)}`,
+        },
+        {
+          title: "4. Wynik",
+          body: resultLatex("p", value, places),
+          note: "wynik tylko przybliżony",
+        },
+      ],
     };
   },
 };
@@ -287,22 +364,28 @@ const ukladRownan: FormulaDef = {
     const [a1, b1, c1, a2, b2, c2] = [g("a1"), g("b1"), g("c1"), g("a2"), g("b2"), g("c2")];
     const W = sub(mul(a1, b2), mul(a2, b1));
     if (isZero(W)) throw new Error("wyznacznik W = 0 — układ sprzeczny albo nieoznaczony");
-    const x = exactOf(div(sub(mul(c1, b2), mul(c2, b1)), W));
-    const y = exactOf(div(sub(mul(a1, c2), mul(a2, c1)), W));
+    const Wx = sub(mul(c1, b2), mul(c2, b1));
+    const Wy = sub(mul(a1, c2), mul(a2, c1));
+    const x = exactOf(div(Wx, W));
+    const y = exactOf(div(Wy, W));
     return {
       values: [x, y],
       labels: ["x", "y"],
       steps: [
         {
           title: "1. Wyznaczniki (Cramer)",
-          body: "W = a_1b_2 - a_2b_1, \\; x = \\frac{W_x}{W}, \\; y = \\frac{W_y}{W}",
+          body: "W = a_1b_2 - a_2b_1, \\; W_x = c_1b_2 - c_2b_1, \\; W_y = a_1c_2 - a_2c_1",
         },
         {
-          title: "2. Podstawienie danych",
+          title: "2. Wyznacznik główny",
           body: `W = ${L(a1)} \\cdot ${L(b2)} - ${L(a2)} \\cdot ${L(b1)} = ${formatLatex({ rat: W, irr: null })}`,
         },
         {
-          title: "3. Wynik",
+          title: "3. Wyznaczniki pomocnicze",
+          body: `W_x = ${L(c1)} \\cdot ${L(b2)} - ${L(c2)} \\cdot ${L(b1)} = ${formatLatex({ rat: Wx, irr: null })}, \\; W_y = ${L(a1)} \\cdot ${L(c2)} - ${L(a2)} \\cdot ${L(c1)} = ${formatLatex({ rat: Wy, irr: null })}`,
+        },
+        {
+          title: "4. Wynik",
           body: `${resultLatex("x", x, places)}, \\; ${resultLatex("y", y, places)}`,
         },
       ],
@@ -346,7 +429,7 @@ const nierownoscKwadratowa: FormulaDef = {
     ];
     const interval = (body: string, note?: string): FormulaSolution => ({
       values: [],
-      steps: [...head, { title: "3. Wynik", body, note }],
+      steps: [...head, { title: `${head.length + 1}. Wynik`, body, note }],
     });
     const constCase = (holds: boolean): FormulaSolution =>
       holds
@@ -385,12 +468,19 @@ const nierownoscKwadratowa: FormulaDef = {
       const holds = up
         ? op === ">" || op === "≥" || op === "≠"
         : op === "<" || op === "≤" || op === "≠";
+      head.push({ title: "3. Delta", body: `\\Delta = ${formatLatex(q.delta)} < 0` });
       return holds
         ? interval("x \\in \\mathbb{R}", "znak stały (Δ < 0)")
         : interval("\\varnothing", "znak stały, przeciwny do znaku (Δ < 0)");
     }
     if (q.kind === "one" || q.kind === "linear") {
       const x0 = formatLatex(q.roots[0]);
+      if (q.kind === "one") {
+        head.push({
+          title: "3. Delta i pierwiastek",
+          body: `\\Delta = ${formatLatex(q.delta)} = 0, \\; x_0 = ${x0}`,
+        });
+      }
       if (op === "≠") return interval(`x \\in \\mathbb{R} \\setminus \\{${x0}\\}`);
       if (up) {
         if (op === ">") return interval(`x \\in \\mathbb{R} \\setminus \\{${x0}\\}`);
@@ -404,6 +494,10 @@ const nierownoscKwadratowa: FormulaDef = {
       return interval("x \\in \\mathbb{R}", "zero w jednym punkcie się liczy");
     }
     const [x1, x2] = q.roots.map(formatLatex);
+    head.push({
+      title: "3. Delta i pierwiastki",
+      body: `\\Delta = ${formatLatex(q.delta)}, \\; x_1 = ${x1}, \\; x_2 = ${x2}`,
+    });
     const outside = (closed: boolean): string =>
       closed
         ? `x \\in (-\\infty, ${x1}] \\cup [${x2}, +\\infty)`

@@ -124,19 +124,19 @@ describe("solver matematyka", () => {
   it("nierówność ≤: x²-5x+6 ≤ 0 → [2, 3]", () => {
     const r = run("matematyka", "nierownosc-kwadratowa", { a: "1", b: "-5", c: "6", op: "≤" });
     if (!r.ok) throw new Error(r.error);
-    expect(r.steps[2].body).toMatch(/\[2, 3\]/);
+    expect(r.steps[3].body).toMatch(/\[2, 3\]/);
   });
 
   it("nierówność ≠: x²+1 ≠ 0 → ℝ", () => {
     const r = run("matematyka", "nierownosc-kwadratowa", { a: "1", b: "0", c: "1", op: "≠" });
     if (!r.ok) throw new Error(r.error);
-    expect(r.steps[2].body).toMatch(/mathbb\{R\}/);
+    expect(r.steps[3].body).toMatch(/mathbb\{R\}/);
   });
 
   it("nierówność ≥ z pierwiastkiem podwójnym → ℝ", () => {
     const r = run("matematyka", "nierownosc-kwadratowa", { a: "1", b: "-2", c: "1", op: "≥" });
     if (!r.ok) throw new Error(r.error);
-    expect(r.steps[2].body).toMatch(/mathbb\{R\}/);
+    expect(r.steps[3].body).toMatch(/mathbb\{R\}/);
   });
 
   it("znak wielomianu: (x-1)(x-2)(x-3) > 0", () => {
@@ -180,15 +180,15 @@ describe("solver matematyka", () => {
     const r = run("matematyka", "rownanie-kwadratowe", { a: "1", b: "-5", c: "6" });
     if (!r.ok) throw new Error(r.error);
     expect(r.values.map(formatExactText)).toEqual(["2", "3"]);
-    expect(r.steps).toHaveLength(3);
+    expect(r.steps).toHaveLength(5);
   });
 
-  it("nierówność: każdy operator zwraca values[] i 3 kroki", () => {
+  it("nierówność: każdy operator zwraca values[] i 4 kroki", () => {
     for (const op of [">", "≥", "<", "≤", "≠"]) {
       const r = run("matematyka", "nierownosc-kwadratowa", { a: "1", b: "-5", c: "6", op });
       if (!r.ok) throw new Error(`${op}: ${r.error}`);
       expect(Array.isArray(r.values)).toBe(true);
-      expect(r.steps).toHaveLength(3);
+      expect(r.steps).toHaveLength(4);
     }
   });
 });

@@ -3,7 +3,7 @@ import { approx, approxOnly, exactOf, mulRat, stripPi } from "../exact/exact";
 import type { Exact } from "../exact/exact";
 import { formatLatex, formatRatLatex, trimNum } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { APPROX_PI_NOTE, asRational, requireNatural, resultLatex, stdSteps } from "./types";
+import { APPROX_PI_NOTE, asRational, requireNatural, resultLatex } from "./types";
 
 const PI: Exact = { rat: ZERO, irr: { type: "pi", coef: ONE } };
 const L = formatRatLatex;
@@ -50,13 +50,17 @@ const zamianaMiary: FormulaDef = {
     }
     return {
       values: [value],
-      steps: stdSteps(
-        "\\alpha^\\circ = \\alpha \\cdot \\frac{180}{\\pi}",
-        `\\alpha^\\circ = ${formatLatex(rad)} \\cdot \\frac{180}{\\pi}`,
-        value,
-        places,
-        note,
-      ),
+      steps: [
+        {
+          title: "1. Przekształcenie wzoru",
+          body: "\\alpha^\\circ = \\alpha \\cdot \\frac{180}{\\pi}",
+        },
+        {
+          title: "2. Podstawienie danych",
+          body: `\\alpha^\\circ = ${formatLatex(rad)} \\cdot \\frac{180}{\\pi}`,
+        },
+        { title: "3. Wynik", body: resultLatex("\\alpha^\\circ", value, places), note },
+      ],
     };
   },
 };
@@ -121,26 +125,39 @@ const katMiedzyProstymi: FormulaDef = {
       const value = exactOf(ZERO);
       return {
         values: [value],
-        steps: stdSteps(
-          "\\tan\\varphi = \\left|\\frac{a_2 - a_1}{1 + a_1a_2}\\right|",
-          `\\tan\\varphi = \\left|\\frac{${L(a2)} - ${L(a1)}}{1 + ${L(a1)}${L(a2)}}\\right| = 0`,
-          value,
-          places,
-          "proste równoległe",
-        ),
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: "\\tan\\varphi = \\left|\\frac{a_2 - a_1}{1 + a_1a_2}\\right|",
+          },
+          {
+            title: "2. Podstawienie danych",
+            body: `\\tan\\varphi = \\left|\\frac{${L(a2)} - ${L(a1)}}{1 + ${L(a1)}${L(a2)}}\\right| = 0`,
+          },
+          {
+            title: "3. Wynik",
+            body: resultLatex("\\varphi", value, places),
+            note: "proste równoległe",
+          },
+        ],
       };
     }
     if (isZero(den)) {
       const value = exactOf(of(90));
       return {
         values: [value],
-        steps: stdSteps(
-          "\\tan\\varphi = \\left|\\frac{a_2 - a_1}{1 + a_1a_2}\\right|",
-          `1 + ${L(a1)}${L(a2)} = 0`,
-          value,
-          places,
-          "proste prostopadłe",
-        ),
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: "\\tan\\varphi = \\left|\\frac{a_2 - a_1}{1 + a_1a_2}\\right|",
+          },
+          { title: "2. Mianownik", body: `1 + ${L(a1)}${L(a2)} = 0` },
+          {
+            title: "3. Wynik",
+            body: resultLatex("\\varphi", value, places),
+            note: "proste prostopadłe",
+          },
+        ],
       };
     }
     const t = Math.abs(approx(exactOf(div(sub(a2, a1), den))));

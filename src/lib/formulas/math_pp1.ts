@@ -28,7 +28,7 @@ import {
 import type { Exact } from "../exact/exact";
 import { formatDecimal, formatLatex, formatRatLatex, trimNum } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { asRational, requireNatural, resultLatex, stdSteps } from "./types";
+import { asRational, requireNatural, resultLatex } from "./types";
 
 const L = formatRatLatex;
 
@@ -104,14 +104,30 @@ const pierwiastek: FormulaDef = {
       const value = exactOf(pow(w, n));
       return {
         values: [value],
-        steps: stdSteps("m = w^n", `m = ${L(w)}^{${n}}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "m = w^n" },
+          { title: "2. Podstawienie danych", body: `m = ${L(w)}^{${n}}` },
+          { title: "3. Sprawdzenie", body: `\\sqrt[${n}]{${formatLatex(value)}} = ${L(w)}` },
+          { title: "4. Wynik", body: resultLatex("m", value, places) },
+        ],
       };
     }
     const m = asRational(known["m"], "m");
     const n = requireNatural(known["n"], "n");
     if (n === 1) {
       const value = exactOf(m);
-      return { values: [value], steps: stdSteps("w = m", `w = ${L(m)}`, value, places) };
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "w = m" },
+          { title: "2. Podstawienie danych", body: `w = ${L(m)}` },
+          {
+            title: "3. Wynik",
+            body: resultLatex("w", value, places),
+            note: "pierwiastek 1. stopnia to ta sama liczba",
+          },
+        ],
+      };
     }
     if (n === 2) {
       if (cmp(m, ZERO) < 0)
@@ -147,7 +163,11 @@ const pierwiastek: FormulaDef = {
     }
     return {
       values: [value],
-      steps: stdSteps("w = \\sqrt[n]{m}", `w = \\sqrt[${n}]{${L(m)}}`, value, places, note),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "w = \\sqrt[n]{m}" },
+        { title: "2. Podstawienie danych", body: `w = \\sqrt[${n}]{${L(m)}}` },
+        { title: "3. Wynik", body: resultLatex("w", value, places), note },
+      ],
     };
   },
 };
@@ -835,36 +855,53 @@ const tales: FormulaDef = {
     let value: Exact;
     let transform = "";
     let subst = "";
+    let num = "";
     if (unknown === "a") {
       const b = g("b");
       const c = g("c");
       const d = g("d");
-      value = exactOf(div(mul(b, c), d));
+      const prod = mul(b, c);
+      value = exactOf(div(prod, d));
       transform = "a = \\frac{bc}{d}";
       subst = `a = \\frac{${L(b)} \\cdot ${L(c)}}{${L(d)}}`;
+      num = `bc = ${L(b)} \\cdot ${L(c)} = ${L(prod)}`;
     } else if (unknown === "b") {
       const a = g("a");
       const c = g("c");
       const d = g("d");
-      value = exactOf(div(mul(a, d), c));
+      const prod = mul(a, d);
+      value = exactOf(div(prod, c));
       transform = "b = \\frac{ad}{c}";
       subst = `b = \\frac{${L(a)} \\cdot ${L(d)}}{${L(c)}}`;
+      num = `ad = ${L(a)} \\cdot ${L(d)} = ${L(prod)}`;
     } else if (unknown === "c") {
       const a = g("a");
       const b = g("b");
       const d = g("d");
-      value = exactOf(div(mul(a, d), b));
+      const prod = mul(a, d);
+      value = exactOf(div(prod, b));
       transform = "c = \\frac{ad}{b}";
       subst = `c = \\frac{${L(a)} \\cdot ${L(d)}}{${L(b)}}`;
+      num = `ad = ${L(a)} \\cdot ${L(d)} = ${L(prod)}`;
     } else {
       const a = g("a");
       const b = g("b");
       const c = g("c");
-      value = exactOf(div(mul(b, c), a));
+      const prod = mul(b, c);
+      value = exactOf(div(prod, a));
       transform = "d = \\frac{bc}{a}";
       subst = `d = \\frac{${L(b)} \\cdot ${L(c)}}{${L(a)}}`;
+      num = `bc = ${L(b)} \\cdot ${L(c)} = ${L(prod)}`;
     }
-    return { values: [value], steps: stdSteps(transform, subst, value, places) };
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: transform },
+        { title: "2. Podstawienie danych", body: subst },
+        { title: "3. Licznik", body: num },
+        { title: "4. Wynik", body: resultLatex(unknown, value, places) },
+      ],
+    };
   },
 };
 

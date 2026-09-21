@@ -12,7 +12,7 @@ import {
 import type { Exact } from "../exact/exact";
 import { formatLatex, formatRatLatex } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { APPROX_PI_NOTE, asRational, requireNatural, resultLatex, stdSteps } from "./types";
+import { APPROX_PI_NOTE, asRational, requireNatural, resultLatex } from "./types";
 
 const PI: Exact = { rat: ZERO, irr: { type: "pi", coef: ONE } };
 
@@ -170,12 +170,11 @@ const poleProstokata: FormulaDef = {
     const value = exactOf(div(P, o));
     return {
       values: [value],
-      steps: stdSteps(
-        `${unknown} = \\frac{P}{${other}}`,
-        `${unknown} = \\frac{${L(P)}}{${L(o)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${unknown} = \\frac{P}{${other}}` },
+        { title: "2. Podstawienie danych", body: `${unknown} = \\frac{${L(P)}}{${L(o)}}` },
+        { title: "3. Wynik", body: resultLatex(unknown, value, places) },
+      ],
     };
   },
 };

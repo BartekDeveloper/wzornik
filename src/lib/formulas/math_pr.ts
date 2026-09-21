@@ -19,7 +19,7 @@ import { approx, approxOnly, exactOf, logExact, trigExact } from "../exact/exact
 import type { Exact } from "../exact/exact";
 import { formatDecimal, formatLatex, formatRatLatex } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { asRational, requireNatural, resultLatex, stdSteps } from "./types";
+import { asRational, requireNatural, resultLatex } from "./types";
 
 const L = formatRatLatex;
 
@@ -308,12 +308,11 @@ const prawdoWarunkowe: FormulaDef = {
       const value = exactOf(div(PAB, PB));
       return {
         values: [value],
-        steps: stdSteps(
-          "P(A|B) = \\frac{P(A \\cap B)}{P(B)}",
-          `P(A|B) = \\frac{${L(PAB)}}{${L(PB)}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P(A|B) = \\frac{P(A \\cap B)}{P(B)}" },
+          { title: "2. Podstawienie danych", body: `P(A|B) = \\frac{${L(PAB)}}{${L(PB)}}` },
+          { title: "3. Wynik", body: resultLatex("P(A|B)", value, places) },
+        ],
       };
     }
     if (unknown === "PAB") {
@@ -322,12 +321,11 @@ const prawdoWarunkowe: FormulaDef = {
       const value = exactOf(mul(P, PB));
       return {
         values: [value],
-        steps: stdSteps(
-          "P(A \\cap B) = P(A|B) \\cdot P(B)",
-          `P(A \\cap B) = ${L(P)} \\cdot ${L(PB)}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P(A \\cap B) = P(A|B) \\cdot P(B)" },
+          { title: "2. Podstawienie danych", body: `P(A \\cap B) = ${L(P)} \\cdot ${L(PB)}` },
+          { title: "3. Wynik", body: resultLatex("P(A \\cap B)", value, places) },
+        ],
       };
     }
     const P = asRational(known["P"], "P(A|B)");
@@ -335,12 +333,11 @@ const prawdoWarunkowe: FormulaDef = {
     const value = exactOf(div(PAB, P));
     return {
       values: [value],
-      steps: stdSteps(
-        "P(B) = \\frac{P(A \\cap B)}{P(A|B)}",
-        `P(B) = \\frac{${L(PAB)}}{${L(P)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "P(B) = \\frac{P(A \\cap B)}{P(A|B)}" },
+        { title: "2. Podstawienie danych", body: `P(B) = \\frac{${L(PAB)}}{${L(P)}}` },
+        { title: "3. Wynik", body: resultLatex("P(B)", value, places) },
+      ],
     };
   },
 };

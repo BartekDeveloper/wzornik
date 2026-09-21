@@ -3,7 +3,7 @@ import type { Rational } from "../exact/rational";
 import { exactOf } from "../exact/exact";
 import { formatRatLatex } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { asRational, stdSteps } from "./types";
+import { asRational, resultLatex } from "./types";
 
 const L = formatRatLatex;
 
@@ -23,8 +23,34 @@ function nvar3(
   back2: string,
   back2Sub: (x: string, y: string) => string,
   op2: (x: Rational, y: Rational) => Rational,
+  outLabels?: [string, string, string],
+  mid?: (x: Rational, y: Rational, idx: 0 | 1 | 2) => string | undefined,
 ): FormulaDef {
   const [A, B, C] = ids;
+  const [lA, lB, lC] = outLabels ?? [A, B, C];
+  const build = (
+    idx: 0 | 1 | 2,
+    transform: string,
+    subst: string,
+    value: ReturnType<typeof exactOf>,
+    x: Rational,
+    y: Rational,
+    places: number,
+  ): FormulaSolution => {
+    const midBody = mid?.(x, y, idx);
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: transform },
+        { title: "2. Podstawienie danych", body: subst },
+        ...(midBody ? [{ title: "3. Rachunek pośredni", body: midBody }] : []),
+        {
+          title: midBody ? "4. Wynik" : "3. Wynik",
+          body: resultLatex(idx === 0 ? lA : idx === 1 ? lB : lC, value, places),
+        },
+      ],
+    };
+  };
   return {
     id,
     subject: "geografia",
@@ -44,18 +70,18 @@ function nvar3(
         const b = asRational(known[B], B);
         const c = asRational(known[C], C);
         const value = exactOf(op(b, c));
-        return { values: [value], steps: stdSteps(fwd, fwdSub(L(b), L(c)), value, places) };
+        return build(0, fwd, fwdSub(L(b), L(c)), value, b, c, places);
       }
       if (unknown === B) {
         const a = asRational(known[A], A);
         const c = asRational(known[C], C);
         const value = exactOf(op1(a, c));
-        return { values: [value], steps: stdSteps(back1, back1Sub(L(a), L(c)), value, places) };
+        return build(1, back1, back1Sub(L(a), L(c)), value, a, c, places);
       }
       const a = asRational(known[A], A);
       const b = asRational(known[B], B);
       const value = exactOf(op2(a, b));
-      return { values: [value], steps: stdSteps(back2, back2Sub(L(a), L(b)), value, places) };
+      return build(2, back2, back2Sub(L(a), L(b)), value, a, b, places);
     },
   };
 }
@@ -80,6 +106,13 @@ export const GEOGRAFIA_PR_FORMULAS: FormulaDef[] = [
     "L = \\frac{L_m \\cdot 100}{U}",
     (a, b) => `L = \\frac{${a} \\cdot 100}{${b}}`,
     (x, y) => div(mul(x, H), y),
+    undefined,
+    (x, y, i) =>
+      i === 0
+        ? `L_m/L = ${L(div(x, y))}`
+        : i === 1
+          ? `U \\cdot L = ${L(mul(x, y))}`
+          : `L_m \\cdot 100 = ${L(mul(x, H))}`,
   ),
   nvar3(
     "stopa-bezrobocia",
@@ -97,6 +130,13 @@ export const GEOGRAFIA_PR_FORMULAS: FormulaDef[] = [
     "A = \\frac{B \\cdot 100}{u}",
     (a, b) => `A = \\frac{${a} \\cdot 100}{${b}}`,
     (x, y) => div(mul(x, H), y),
+    undefined,
+    (x, y, i) =>
+      i === 0
+        ? `B/A = ${L(div(x, y))}`
+        : i === 1
+          ? `u \\cdot A = ${L(mul(x, y))}`
+          : `B \\cdot 100 = ${L(mul(x, H))}`,
   ),
   nvar3(
     "pkb-per-capita",
@@ -131,6 +171,13 @@ export const GEOGRAFIA_PR_FORMULAS: FormulaDef[] = [
     "M = \\frac{K \\cdot 100}{W_f}",
     (a, b) => `M = \\frac{${a} \\cdot 100}{${b}}`,
     (x, y) => div(mul(x, H), y),
+    undefined,
+    (x, y, i) =>
+      i === 0
+        ? `K/M = ${L(div(x, y))}`
+        : i === 1
+          ? `W_f \\cdot M = ${L(mul(x, y))}`
+          : `K \\cdot 100 = ${L(mul(x, H))}`,
   ),
   nvar3(
     "wspolczynnik-przyrostu",
@@ -148,6 +195,13 @@ export const GEOGRAFIA_PR_FORMULAS: FormulaDef[] = [
     "L = \\frac{PN \\cdot 1000}{r}",
     (a, b) => `L = \\frac{${a} \\cdot 1000}{${b}}`,
     (x, y) => div(mul(x, T), y),
+    undefined,
+    (x, y, i) =>
+      i === 0
+        ? `PN/L = ${L(div(x, y))}`
+        : i === 1
+          ? `r \\cdot L = ${L(mul(x, y))}`
+          : `PN \\cdot 1000 = ${L(mul(x, T))}`,
   ),
   nvar3(
     "czas-sloneczny",

@@ -3,7 +3,7 @@ import type { Rational } from "../exact/rational";
 import { exactOf } from "../exact/exact";
 import { formatRatLatex } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { asRational, stdSteps } from "./types";
+import { asRational, resultLatex } from "./types";
 
 const L = formatRatLatex;
 
@@ -23,8 +23,34 @@ function nvar3(
   back2: string,
   back2Sub: (x: string, y: string) => string,
   op2: (x: Rational, y: Rational) => Rational,
+  outLabels?: [string, string, string],
+  mid?: (x: Rational, y: Rational, idx: 0 | 1 | 2) => string | undefined,
 ): FormulaDef {
   const [A, B, C] = ids;
+  const [lA, lB, lC] = outLabels ?? [A, B, C];
+  const build = (
+    idx: 0 | 1 | 2,
+    transform: string,
+    subst: string,
+    value: ReturnType<typeof exactOf>,
+    x: Rational,
+    y: Rational,
+    places: number,
+  ): FormulaSolution => {
+    const midBody = mid?.(x, y, idx);
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: transform },
+        { title: "2. Podstawienie danych", body: subst },
+        ...(midBody ? [{ title: "3. Rachunek pośredni", body: midBody }] : []),
+        {
+          title: midBody ? "4. Wynik" : "3. Wynik",
+          body: resultLatex(idx === 0 ? lA : idx === 1 ? lB : lC, value, places),
+        },
+      ],
+    };
+  };
   return {
     id,
     subject: "geografia",
@@ -44,18 +70,18 @@ function nvar3(
         const b = asRational(known[B], B);
         const c = asRational(known[C], C);
         const value = exactOf(op(b, c));
-        return { values: [value], steps: stdSteps(fwd, fwdSub(L(b), L(c)), value, places) };
+        return build(0, fwd, fwdSub(L(b), L(c)), value, b, c, places);
       }
       if (unknown === B) {
         const a = asRational(known[A], A);
         const c = asRational(known[C], C);
         const value = exactOf(op1(a, c));
-        return { values: [value], steps: stdSteps(back1, back1Sub(L(a), L(c)), value, places) };
+        return build(1, back1, back1Sub(L(a), L(c)), value, a, c, places);
       }
       const a = asRational(known[A], A);
       const b = asRational(known[B], B);
       const value = exactOf(op2(a, b));
-      return { values: [value], steps: stdSteps(back2, back2Sub(L(a), L(b)), value, places) };
+      return build(2, back2, back2Sub(L(a), L(b)), value, a, b, places);
     },
   };
 }
@@ -196,5 +222,12 @@ export const GEOGRAFIA_FORMULAS: FormulaDef[] = [
     "d = \\frac{D \\cdot 100}{n}",
     (a, b) => `d = \\frac{${a} \\cdot 100}{${b}}`,
     (x, y) => div(mul(x, of(100)), y),
+    undefined,
+    (x, y, i) =>
+      i === 0
+        ? `D/d = ${L(div(x, y))}`
+        : i === 1
+          ? `n \\cdot d = ${L(mul(x, y))}`
+          : `D \\cdot 100 = ${L(mul(x, of(100)))}`,
   ),
 ];

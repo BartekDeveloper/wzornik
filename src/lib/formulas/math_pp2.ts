@@ -12,7 +12,7 @@ import {
 import type { Exact } from "../exact/exact";
 import { formatLatex, formatRatLatex } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { APPROX_PI_NOTE, asRational, resultLatex, stdSteps } from "./types";
+import { APPROX_PI_NOTE, asRational, resultLatex } from "./types";
 
 const PI: Exact = { rat: ZERO, irr: { type: "pi", coef: ONE } };
 const L = formatRatLatex;
@@ -36,19 +36,22 @@ const katyOkrag: FormulaDef = {
       const value = exactOf(mul(of(2), beta));
       return {
         values: [value],
-        steps: stdSteps("\\alpha = 2\\beta", `\\alpha = 2 \\cdot ${L(beta)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "\\alpha = 2\\beta" },
+          { title: "2. Podstawienie danych", body: `\\alpha = 2 \\cdot ${L(beta)}` },
+          { title: "3. Wynik", body: resultLatex("\\alpha", value, places) },
+        ],
       };
     }
     const alfa = asRational(known["alfa"], "α");
     const value = exactOf(div(alfa, of(2)));
     return {
       values: [value],
-      steps: stdSteps(
-        "\\beta = \\frac{\\alpha}{2}",
-        `\\beta = \\frac{${L(alfa)}}{2}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "\\beta = \\frac{\\alpha}{2}" },
+        { title: "2. Podstawienie danych", body: `\\beta = \\frac{${L(alfa)}}{2}` },
+        { title: "3. Wynik", body: resultLatex("\\beta", value, places) },
+      ],
     };
   },
 };
@@ -73,45 +76,60 @@ const poleTrapez: FormulaDef = {
       const a = asRational(known["a"], "a");
       const b = asRational(known["b"], "b");
       const h = asRational(known["h"], "h");
-      const value = exactOf(div(mul(add(a, b), h), of(2)));
+      const sum = add(a, b);
+      const num = mul(sum, h);
+      const value = exactOf(div(num, of(2)));
       return {
         values: [value],
-        steps: stdSteps(
-          "P = \\frac{(a + b)h}{2}",
-          `P = \\frac{(${L(a)} + ${L(b)}) \\cdot ${L(h)}}{2}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P = \\frac{(a + b)h}{2}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `P = \\frac{(${L(a)} + ${L(b)}) \\cdot ${L(h)}}{2}`,
+          },
+          { title: "3. Suma podstaw", body: `a + b = ${L(a)} + ${L(b)} = ${L(sum)}` },
+          { title: "4. Licznik", body: `(${L(sum)}) \\cdot ${L(h)} = ${L(num)}` },
+          { title: "5. Wynik", body: resultLatex("P", value, places) },
+        ],
       };
     }
     if (unknown === "h") {
       const P = asRational(known["P"], "P");
       const a = asRational(known["a"], "a");
       const b = asRational(known["b"], "b");
-      const value = exactOf(div(mul(P, of(2)), add(a, b)));
+      const sum = add(a, b);
+      const num = mul(P, of(2));
+      const value = exactOf(div(num, sum));
       return {
         values: [value],
-        steps: stdSteps(
-          "h = \\frac{2P}{a + b}",
-          `h = \\frac{2 \\cdot ${L(P)}}{${L(a)} + ${L(b)}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "h = \\frac{2P}{a + b}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `h = \\frac{2 \\cdot ${L(P)}}{${L(a)} + ${L(b)}}`,
+          },
+          { title: "3. Licznik i mianownik", body: `2P = ${L(num)}, \\; a + b = ${L(sum)}` },
+          { title: "4. Wynik", body: resultLatex("h", value, places) },
+        ],
       };
     }
     const P = asRational(known["P"], "P");
     const h = asRational(known["h"], "h");
     const other = unknown === "a" ? "b" : "a";
     const o = asRational(known[other], other);
-    const value = exactOf(sub(div(mul(P, of(2)), h), o));
+    const frac = div(mul(P, of(2)), h);
+    const value = exactOf(sub(frac, o));
     return {
       values: [value],
-      steps: stdSteps(
-        `${unknown} = \\frac{2P}{h} - ${other}`,
-        `${unknown} = \\frac{2 \\cdot ${L(P)}}{${L(h)}} - ${L(o)}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${unknown} = \\frac{2P}{h} - ${other}` },
+        {
+          title: "2. Podstawienie danych",
+          body: `${unknown} = \\frac{2 \\cdot ${L(P)}}{${L(h)}} - ${L(o)}`,
+        },
+        { title: "3. Ułamek", body: `\\frac{2 \\cdot ${L(P)}}{${L(h)}} = ${L(frac)}` },
+        { title: "4. Wynik", body: resultLatex(unknown, value, places) },
+      ],
     };
   },
 };
@@ -134,29 +152,31 @@ const poleRombu: FormulaDef = {
     if (unknown === "P") {
       const e = asRational(known["e"], "e");
       const f = asRational(known["f"], "f");
-      const value = exactOf(div(mul(e, f), of(2)));
+      const num = mul(e, f);
+      const value = exactOf(div(num, of(2)));
       return {
         values: [value],
-        steps: stdSteps(
-          "P = \\frac{ef}{2}",
-          `P = \\frac{${L(e)} \\cdot ${L(f)}}{2}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P = \\frac{ef}{2}" },
+          { title: "2. Podstawienie danych", body: `P = \\frac{${L(e)} \\cdot ${L(f)}}{2}` },
+          { title: "3. Licznik", body: `e \\cdot f = ${L(e)} \\cdot ${L(f)} = ${L(num)}` },
+          { title: "4. Wynik", body: resultLatex("P", value, places) },
+        ],
       };
     }
     const P = asRational(known["P"], "P");
     const other = unknown === "e" ? "f" : "e";
     const o = asRational(known[other], other);
-    const value = exactOf(div(mul(P, of(2)), o));
+    const num = mul(P, of(2));
+    const value = exactOf(div(num, o));
     return {
       values: [value],
-      steps: stdSteps(
-        `${unknown} = \\frac{2P}{${other}}`,
-        `${unknown} = \\frac{2 \\cdot ${L(P)}}{${L(o)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${unknown} = \\frac{2P}{${other}}` },
+        { title: "2. Podstawienie danych", body: `${unknown} = \\frac{2 \\cdot ${L(P)}}{${L(o)}}` },
+        { title: "3. Licznik", body: `2 \\cdot P = 2 \\cdot ${L(P)} = ${L(num)}` },
+        { title: "4. Wynik", body: resultLatex(unknown, value, places) },
+      ],
     };
   },
 };
@@ -182,7 +202,11 @@ const poleRownoleglobok: FormulaDef = {
       const value = exactOf(mul(a, h));
       return {
         values: [value],
-        steps: stdSteps("P = a \\cdot h", `P = ${L(a)} \\cdot ${L(h)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P = a \\cdot h" },
+          { title: "2. Podstawienie danych", body: `P = ${L(a)} \\cdot ${L(h)}` },
+          { title: "3. Wynik", body: resultLatex("P", value, places) },
+        ],
       };
     }
     const P = asRational(known["P"], "P");
@@ -191,12 +215,11 @@ const poleRownoleglobok: FormulaDef = {
     const value = exactOf(div(P, o));
     return {
       values: [value],
-      steps: stdSteps(
-        `${unknown} = \\frac{P}{${other}}`,
-        `${unknown} = \\frac{${L(P)}}{${L(o)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${unknown} = \\frac{P}{${other}}` },
+        { title: "2. Podstawienie danych", body: `${unknown} = \\frac{${L(P)}}{${L(o)}}` },
+        { title: "3. Wynik", body: resultLatex(unknown, value, places) },
+      ],
     };
   },
 };
@@ -220,15 +243,22 @@ const lukOkregu: FormulaDef = {
       const r = asRational(known["r"], "r");
       const alfa = asRational(known["alfa"], "α");
       if (cmp(r, ZERO) < 0) throw new Error("promień nie jest ujemny");
-      const value = mulRat(PI, div(mul(mul(alfa, of(2)), r), of(360)));
+      const circ = mul(of(2), r);
+      const value = mulRat(PI, div(mul(alfa, circ), of(360)));
       return {
         values: [value],
-        steps: stdSteps(
-          "l = \\frac{\\alpha}{360^\\circ} \\cdot 2\\pi r",
-          `l = \\frac{${L(alfa)}}{360} \\cdot 2\\pi \\cdot ${L(r)}`,
-          value,
-          places,
-        ),
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: "l = \\frac{\\alpha}{360^\\circ} \\cdot 2\\pi r",
+          },
+          {
+            title: "2. Podstawienie danych",
+            body: `l = \\frac{${L(alfa)}}{360} \\cdot 2\\pi \\cdot ${L(r)}`,
+          },
+          { title: "3. Obwód koła bez π", body: `2r = 2 \\cdot ${L(r)} = ${L(circ)}` },
+          { title: "4. Wynik", body: resultLatex("l", value, places) },
+        ],
       };
     }
     if (unknown === "alfa") {
@@ -237,20 +267,40 @@ const lukOkregu: FormulaDef = {
       let value: Exact;
       let note: string | undefined;
       try {
-        value = exactOf(div(mul(stripPi(l), of(360)), mul(of(2), r)));
+        const inner = div(mul(stripPi(l), of(360)), mul(of(2), r));
+        value = exactOf(inner);
+        return {
+          values: [value],
+          steps: [
+            {
+              title: "1. Przekształcenie wzoru",
+              body: "\\alpha = \\frac{360^\\circ \\cdot l}{2\\pi r}",
+            },
+            {
+              title: "2. Podstawienie danych",
+              body: `\\alpha = \\frac{360 \\cdot ${formatLatex(l)}}{2\\pi \\cdot ${L(r)}}`,
+            },
+            { title: "3. Skrócenie π", body: `\\alpha = ${L(inner)}` },
+            { title: "4. Wynik", body: resultLatex("\\alpha", value, places) },
+          ],
+        };
       } catch {
         value = approxOnly((approx(l) * 360) / (2 * Math.PI * approx(exactOf(r))));
         note = APPROX_PI_NOTE;
       }
       return {
         values: [value],
-        steps: stdSteps(
-          "\\alpha = \\frac{360^\\circ \\cdot l}{2\\pi r}",
-          `\\alpha = \\frac{360 \\cdot ${formatLatex(l)}}{2\\pi \\cdot ${L(r)}}`,
-          value,
-          places,
-          note,
-        ),
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: "\\alpha = \\frac{360^\\circ \\cdot l}{2\\pi r}",
+          },
+          {
+            title: "2. Podstawienie danych",
+            body: `\\alpha = \\frac{360 \\cdot ${formatLatex(l)}}{2\\pi \\cdot ${L(r)}}`,
+          },
+          { title: "3. Wynik", body: resultLatex("\\alpha", value, places), note },
+        ],
       };
     }
     const l = known["l"];
@@ -258,7 +308,23 @@ const lukOkregu: FormulaDef = {
     let value: Exact;
     let note: string | undefined;
     try {
-      value = exactOf(div(mul(stripPi(l), of(360)), mul(alfa, of(2))));
+      const inner = div(mul(stripPi(l), of(360)), mul(alfa, of(2)));
+      value = exactOf(inner);
+      return {
+        values: [value],
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: "r = \\frac{360^\\circ \\cdot l}{2\\pi\\alpha}",
+          },
+          {
+            title: "2. Podstawienie danych",
+            body: `r = \\frac{360 \\cdot ${formatLatex(l)}}{2\\pi \\cdot ${L(alfa)}}`,
+          },
+          { title: "3. Skrócenie π", body: `r = ${L(inner)}` },
+          { title: "4. Wynik", body: resultLatex("r", value, places) },
+        ],
+      };
     } catch {
       const num = approx(l) * 360;
       const den = approx(exactOf(alfa)) * 2 * Math.PI;
@@ -267,13 +333,17 @@ const lukOkregu: FormulaDef = {
     }
     return {
       values: [value],
-      steps: stdSteps(
-        "r = \\frac{360^\\circ \\cdot l}{2\\pi\\alpha}",
-        `r = \\frac{360 \\cdot ${formatLatex(l)}}{2\\pi \\cdot ${L(alfa)}}`,
-        value,
-        places,
-        note,
-      ),
+      steps: [
+        {
+          title: "1. Przekształcenie wzoru",
+          body: "r = \\frac{360^\\circ \\cdot l}{2\\pi\\alpha}",
+        },
+        {
+          title: "2. Podstawienie danych",
+          body: `r = \\frac{360 \\cdot ${formatLatex(l)}}{2\\pi \\cdot ${L(alfa)}}`,
+        },
+        { title: "3. Wynik", body: resultLatex("r", value, places), note },
+      ],
     };
   },
 };
@@ -297,15 +367,22 @@ const wycinekKola: FormulaDef = {
       const r = asRational(known["r"], "r");
       const alfa = asRational(known["alfa"], "α");
       if (cmp(r, ZERO) < 0) throw new Error("promień nie jest ujemny");
-      const value = mulRat(PI, div(mul(alfa, mul(r, r)), of(360)));
+      const r2 = mul(r, r);
+      const value = mulRat(PI, div(mul(alfa, r2), of(360)));
       return {
         values: [value],
-        steps: stdSteps(
-          "P = \\frac{\\alpha}{360^\\circ} \\cdot \\pi r^2",
-          `P = \\frac{${L(alfa)}}{360} \\cdot \\pi \\cdot ${L(r)}^2`,
-          value,
-          places,
-        ),
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: "P = \\frac{\\alpha}{360^\\circ} \\cdot \\pi r^2",
+          },
+          {
+            title: "2. Podstawienie danych",
+            body: `P = \\frac{${L(alfa)}}{360} \\cdot \\pi \\cdot ${L(r)}^2`,
+          },
+          { title: "3. Kwadrat promienia", body: `r^2 = ${L(r)}^2 = ${L(r2)}` },
+          { title: "4. Wynik", body: resultLatex("P", value, places) },
+        ],
       };
     }
     if (unknown === "alfa") {
@@ -314,20 +391,44 @@ const wycinekKola: FormulaDef = {
       let value: Exact;
       let note: string | undefined;
       try {
-        value = exactOf(div(mul(stripPi(P), of(360)), mul(r, r)));
+        const r2 = mul(r, r);
+        const inner = div(mul(stripPi(P), of(360)), r2);
+        value = exactOf(inner);
+        return {
+          values: [value],
+          steps: [
+            {
+              title: "1. Przekształcenie wzoru",
+              body: "\\alpha = \\frac{360^\\circ \\cdot P}{\\pi r^2}",
+            },
+            {
+              title: "2. Podstawienie danych",
+              body: `\\alpha = \\frac{360 \\cdot ${formatLatex(P)}}{\\pi \\cdot ${L(r)}^2}`,
+            },
+            {
+              title: "3. Kwadrat i skrócenie π",
+              body: `r^2 = ${L(r2)}, \\; \\alpha = ${L(inner)}`,
+            },
+            { title: "4. Wynik", body: resultLatex("\\alpha", value, places) },
+          ],
+        };
       } catch {
         value = approxOnly((approx(P) * 360) / (Math.PI * approx(exactOf(r)) ** 2));
         note = APPROX_PI_NOTE;
       }
       return {
         values: [value],
-        steps: stdSteps(
-          "\\alpha = \\frac{360^\\circ \\cdot P}{\\pi r^2}",
-          `\\alpha = \\frac{360 \\cdot ${formatLatex(P)}}{\\pi \\cdot ${L(r)}^2}`,
-          value,
-          places,
-          note,
-        ),
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: "\\alpha = \\frac{360^\\circ \\cdot P}{\\pi r^2}",
+          },
+          {
+            title: "2. Podstawienie danych",
+            body: `\\alpha = \\frac{360 \\cdot ${formatLatex(P)}}{\\pi \\cdot ${L(r)}^2}`,
+          },
+          { title: "3. Wynik", body: resultLatex("\\alpha", value, places), note },
+        ],
       };
     }
     const P = known["P"];
@@ -335,7 +436,23 @@ const wycinekKola: FormulaDef = {
     let value: Exact;
     let note: string | undefined;
     try {
-      value = sqrtRational(div(stripPi(P), div(mul(alfa, ONE), of(360))));
+      const inner = div(stripPi(P), div(mul(alfa, ONE), of(360)));
+      value = sqrtRational(inner);
+      return {
+        values: [value],
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: "r = \\sqrt{\\frac{360^\\circ \\cdot P}{\\pi\\alpha}}",
+          },
+          {
+            title: "2. Podstawienie danych",
+            body: `r = \\sqrt{\\frac{360 \\cdot ${formatLatex(P)}}{\\pi \\cdot ${L(alfa)}}}`,
+          },
+          { title: "3. Skrócenie π", body: `\\frac{360P}{\\pi\\alpha} = ${L(inner)}` },
+          { title: "4. Wynik", body: resultLatex("r", value, places) },
+        ],
+      };
     } catch {
       const num = approx(P);
       const den = (approx(exactOf(alfa)) * Math.PI) / 360;
@@ -344,13 +461,17 @@ const wycinekKola: FormulaDef = {
     }
     return {
       values: [value],
-      steps: stdSteps(
-        "r = \\sqrt{\\frac{360^\\circ \\cdot P}{\\pi\\alpha}}",
-        `r = \\sqrt{\\frac{360 \\cdot ${formatLatex(P)}}{\\pi \\cdot ${L(alfa)}}}`,
-        value,
-        places,
-        note,
-      ),
+      steps: [
+        {
+          title: "1. Przekształcenie wzoru",
+          body: "r = \\sqrt{\\frac{360^\\circ \\cdot P}{\\pi\\alpha}}",
+        },
+        {
+          title: "2. Podstawienie danych",
+          body: `r = \\sqrt{\\frac{360 \\cdot ${formatLatex(P)}}{\\pi \\cdot ${L(alfa)}}}`,
+        },
+        { title: "3. Wynik", body: resultLatex("r", value, places), note },
+      ],
     };
   },
 };
@@ -374,15 +495,27 @@ const odlPunktow: FormulaDef = {
     const g = (id: string) => asRational(known[id], id);
     const dx = sub(g("x2"), g("x1"));
     const dy = sub(g("y2"), g("y1"));
-    const value = sqrtRational(add(mul(dx, dx), mul(dy, dy)));
+    const dx2 = mul(dx, dx);
+    const dy2 = mul(dy, dy);
+    const value = sqrtRational(add(dx2, dy2));
     return {
       values: [value],
-      steps: stdSteps(
-        "|AB| = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}",
-        `|AB| = \\sqrt{(${L(g("x2"))} - ${L(g("x1"))})^2 + (${L(g("y2"))} - ${L(g("y1"))})^2}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Wzór", body: "|AB| = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}" },
+        {
+          title: "2. Podstawienie danych",
+          body: `|AB| = \\sqrt{(${L(g("x2"))} - ${L(g("x1"))})^2 + (${L(g("y2"))} - ${L(g("y1"))})^2}`,
+        },
+        {
+          title: "3. Różnice",
+          body: `\\Delta x = ${L(dx)}, \\; \\Delta y = ${L(dy)}`,
+        },
+        {
+          title: "4. Kwadraty",
+          body: `\\Delta x^2 = ${L(dx2)}, \\; \\Delta y^2 = ${L(dy2)}`,
+        },
+        { title: "5. Wynik", body: resultLatex("|AB|", value, places) },
+      ],
     };
   },
 };
@@ -404,8 +537,10 @@ const srodekOdcinka: FormulaDef = {
   outputLabel: "S",
   solve(_unknown, known, places): FormulaSolution {
     const g = (id: string) => asRational(known[id], id);
-    const xs = exactOf(div(add(g("x1"), g("x2")), of(2)));
-    const ys = exactOf(div(add(g("y1"), g("y2")), of(2)));
+    const sumX = add(g("x1"), g("x2"));
+    const sumY = add(g("y1"), g("y2"));
+    const xs = exactOf(div(sumX, of(2)));
+    const ys = exactOf(div(sumY, of(2)));
     return {
       values: [xs, ys],
       labels: ["x_S", "y_S"],
@@ -416,7 +551,11 @@ const srodekOdcinka: FormulaDef = {
           body: `S = \\left(\\frac{${L(g("x1"))} + ${L(g("x2"))}}{2}, \\frac{${L(g("y1"))} + ${L(g("y2"))}}{2}\\right)`,
         },
         {
-          title: "3. Wynik",
+          title: "3. Sumy",
+          body: `x_1 + x_2 = ${L(sumX)}, \\; y_1 + y_2 = ${L(sumY)}`,
+        },
+        {
+          title: "4. Wynik",
           body: `${resultLatex("x_S", xs, places)}, \\; ${resultLatex("y_S", ys, places)}`,
         },
       ],
@@ -457,7 +596,8 @@ const prosta2Punkty: FormulaDef = {
       };
     }
     const a = exactOf(div(sub(g("y2"), g("y1")), dx));
-    const b = exactOf(sub(g("y1"), mul(a.rat, g("x1"))));
+    const ax1 = mul(a.rat, g("x1"));
+    const b = exactOf(sub(g("y1"), ax1));
     return {
       values: [a, b],
       labels: ["a", "b"],
@@ -468,7 +608,11 @@ const prosta2Punkty: FormulaDef = {
           body: `a = \\frac{${L(g("y2"))} - ${L(g("y1"))}}{${L(g("x2"))} - ${L(g("x1"))}}`,
         },
         {
-          title: "3. Wynik",
+          title: "3. Współczynnik a",
+          body: `a = ${formatLatex(a)}, \\; ax_1 = ${L(ax1)}`,
+        },
+        {
+          title: "4. Wynik",
           body: `${resultLatex("a", a, places)}, \\; ${resultLatex("b", b, places)}`,
         },
       ],
@@ -564,7 +708,11 @@ const okragRownanie: FormulaDef = {
           body: `(x ${fh(h)})^2 + (y ${fh(k)})^2 = ${L(r)}^2`,
         },
         {
-          title: "3. Wynik",
+          title: "3. Kwadrat promienia",
+          body: `r^2 = ${L(r)}^2 = ${formatLatex({ rat: r2, irr: null })}`,
+        },
+        {
+          title: "4. Wynik",
           body: `(x ${fh(h)})^2 + (y ${fh(k)})^2 = ${formatLatex({ rat: r2, irr: null })}`,
         },
       ],
@@ -594,16 +742,24 @@ const odlPunktProsta: FormulaDef = {
     if (isZero(A) && isZero(B)) throw new Error("A i B nie mogą być jednocześnie zerami");
     const num = add(add(mul(A, x0), mul(B, y0)), C);
     const anum = cmp(num, ZERO) < 0 ? neg(num) : num;
-    const den = sqrtRational(add(mul(A, A), mul(B, B)));
+    const denInner = add(mul(A, A), mul(B, B));
+    const den = sqrtRational(denInner);
     const value = divExact(exactOf(anum), den);
     return {
       values: [value],
-      steps: stdSteps(
-        "d = \\frac{|Ax_0 + By_0 + C|}{\\sqrt{A^2 + B^2}}",
-        `d = \\frac{|${L(A)} \\cdot ${L(x0)} + ${L(B)} \\cdot ${L(y0)} + ${L(C)}|}{\\sqrt{${L(A)}^2 + ${L(B)}^2}}`,
-        value,
-        places,
-      ),
+      steps: [
+        {
+          title: "1. Przekształcenie wzoru",
+          body: "d = \\frac{|Ax_0 + By_0 + C|}{\\sqrt{A^2 + B^2}}",
+        },
+        {
+          title: "2. Podstawienie danych",
+          body: `d = \\frac{|${L(A)} \\cdot ${L(x0)} + ${L(B)} \\cdot ${L(y0)} + ${L(C)}|}{\\sqrt{${L(A)}^2 + ${L(B)}^2}}`,
+        },
+        { title: "3. Licznik", body: `Ax_0 + By_0 + C = ${L(num)}, \\; |\\cdot| = ${L(anum)}` },
+        { title: "4. Mianownik", body: `\\sqrt{${L(A)}^2 + ${L(B)}^2} = ${formatLatex(den)}` },
+        { title: "5. Wynik", body: resultLatex("d", value, places) },
+      ],
     };
   },
 };
@@ -629,7 +785,11 @@ const graniastoslup: FormulaDef = {
       const value = exactOf(mul(Pp, H));
       return {
         values: [value],
-        steps: stdSteps("V = P_p \\cdot H", `V = ${L(Pp)} \\cdot ${L(H)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "V = P_p \\cdot H" },
+          { title: "2. Podstawienie danych", body: `V = ${L(Pp)} \\cdot ${L(H)}` },
+          { title: "3. Wynik", body: resultLatex("V", value, places) },
+        ],
       };
     }
     const V = asRational(known["V"], "V");
@@ -638,12 +798,11 @@ const graniastoslup: FormulaDef = {
     const value = exactOf(div(V, o));
     return {
       values: [value],
-      steps: stdSteps(
-        `${unknown} = \\frac{V}{${other}}`,
-        `${unknown} = \\frac{${L(V)}}{${L(o)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${unknown} = \\frac{V}{${other}}` },
+        { title: "2. Podstawienie danych", body: `${unknown} = \\frac{${L(V)}}{${L(o)}}` },
+        { title: "3. Wynik", body: resultLatex(unknown, value, places) },
+      ],
     };
   },
 };
@@ -666,29 +825,31 @@ const ostroslup: FormulaDef = {
     if (unknown === "V") {
       const Pp = asRational(known["Pp"], "Pₚ");
       const H = asRational(known["H"], "H");
-      const value = exactOf(div(mul(Pp, H), of(3)));
+      const num = mul(Pp, H);
+      const value = exactOf(div(num, of(3)));
       return {
         values: [value],
-        steps: stdSteps(
-          "V = \\frac{P_p H}{3}",
-          `V = \\frac{${L(Pp)} \\cdot ${L(H)}}{3}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "V = \\frac{P_p H}{3}" },
+          { title: "2. Podstawienie danych", body: `V = \\frac{${L(Pp)} \\cdot ${L(H)}}{3}` },
+          { title: "3. Licznik", body: `P_p \\cdot H = ${L(Pp)} \\cdot ${L(H)} = ${L(num)}` },
+          { title: "4. Wynik", body: resultLatex("V", value, places) },
+        ],
       };
     }
     const V = asRational(known["V"], "V");
     const other = unknown === "Pp" ? "H" : "Pp";
     const o = asRational(known[other], other);
-    const value = exactOf(div(mul(V, of(3)), o));
+    const num = mul(V, of(3));
+    const value = exactOf(div(num, o));
     return {
       values: [value],
-      steps: stdSteps(
-        `${unknown} = \\frac{3V}{${other}}`,
-        `${unknown} = \\frac{3 \\cdot ${L(V)}}{${L(o)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${unknown} = \\frac{3V}{${other}}` },
+        { title: "2. Podstawienie danych", body: `${unknown} = \\frac{3 \\cdot ${L(V)}}{${L(o)}}` },
+        { title: "3. Licznik", body: `3 \\cdot V = 3 \\cdot ${L(V)} = ${L(num)}` },
+        { title: "4. Wynik", body: resultLatex(unknown, value, places) },
+      ],
     };
   },
 };
@@ -712,15 +873,16 @@ const walec: FormulaDef = {
       const r = asRational(known["r"], "r");
       const H = asRational(known["H"], "H");
       if (cmp(r, ZERO) < 0) throw new Error("promień nie jest ujemny");
-      const value = mulRat(PI, mul(mul(r, r), H));
+      const r2 = mul(r, r);
+      const value = mulRat(PI, mul(r2, H));
       return {
         values: [value],
-        steps: stdSteps(
-          "V = \\pi r^2 H",
-          `V = \\pi \\cdot ${L(r)}^2 \\cdot ${L(H)}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "V = \\pi r^2 H" },
+          { title: "2. Podstawienie danych", body: `V = \\pi \\cdot ${L(r)}^2 \\cdot ${L(H)}` },
+          { title: "3. Kwadrat promienia", body: `r^2 = ${L(r)}^2 = ${L(r2)}` },
+          { title: "4. Wynik", body: resultLatex("V", value, places) },
+        ],
       };
     }
     if (unknown === "H") {
@@ -729,20 +891,35 @@ const walec: FormulaDef = {
       let value: Exact;
       let note: string | undefined;
       try {
-        value = exactOf(div(stripPi(V), mul(r, r)));
+        const r2 = mul(r, r);
+        const inner = div(stripPi(V), r2);
+        value = exactOf(inner);
+        return {
+          values: [value],
+          steps: [
+            { title: "1. Przekształcenie wzoru", body: "H = \\frac{V}{\\pi r^2}" },
+            {
+              title: "2. Podstawienie danych",
+              body: `H = \\frac{${formatLatex(V)}}{\\pi \\cdot ${L(r)}^2}`,
+            },
+            { title: "3. Kwadrat i skrócenie π", body: `r^2 = ${L(r2)}, \\; H = ${L(inner)}` },
+            { title: "4. Wynik", body: resultLatex("H", value, places) },
+          ],
+        };
       } catch {
         value = approxOnly(approx(V) / (Math.PI * approx(exactOf(r)) ** 2));
         note = APPROX_PI_NOTE;
       }
       return {
         values: [value],
-        steps: stdSteps(
-          "H = \\frac{V}{\\pi r^2}",
-          `H = \\frac{${formatLatex(V)}}{\\pi \\cdot ${L(r)}^2}`,
-          value,
-          places,
-          note,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "H = \\frac{V}{\\pi r^2}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `H = \\frac{${formatLatex(V)}}{\\pi \\cdot ${L(r)}^2}`,
+          },
+          { title: "3. Wynik", body: resultLatex("H", value, places), note },
+        ],
       };
     }
     const V = known["V"];
@@ -750,20 +927,34 @@ const walec: FormulaDef = {
     let value: Exact;
     let note: string | undefined;
     try {
-      value = sqrtRational(div(stripPi(V), H));
+      const inner = div(stripPi(V), H);
+      value = sqrtRational(inner);
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "r = \\sqrt{\\frac{V}{\\pi H}}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `r = \\sqrt{\\frac{${formatLatex(V)}}{\\pi \\cdot ${L(H)}}}`,
+          },
+          { title: "3. Skrócenie π", body: `\\frac{V}{\\pi H} = ${L(inner)}` },
+          { title: "4. Wynik", body: resultLatex("r", value, places) },
+        ],
+      };
     } catch {
       value = approxOnly(Math.sqrt(approx(V) / (Math.PI * approx(exactOf(H)))));
       note = APPROX_PI_NOTE;
     }
     return {
       values: [value],
-      steps: stdSteps(
-        "r = \\sqrt{\\frac{V}{\\pi H}}",
-        `r = \\sqrt{\\frac{${formatLatex(V)}}{\\pi \\cdot ${L(H)}}}`,
-        value,
-        places,
-        note,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "r = \\sqrt{\\frac{V}{\\pi H}}" },
+        {
+          title: "2. Podstawienie danych",
+          body: `r = \\sqrt{\\frac{${formatLatex(V)}}{\\pi \\cdot ${L(H)}}}`,
+        },
+        { title: "3. Wynik", body: resultLatex("r", value, places), note },
+      ],
     };
   },
 };
@@ -787,15 +978,21 @@ const stozek: FormulaDef = {
       const r = asRational(known["r"], "r");
       const H = asRational(known["H"], "H");
       if (cmp(r, ZERO) < 0) throw new Error("promień nie jest ujemny");
-      const value = mulRat(PI, div(mul(mul(r, r), H), of(3)));
+      const r2 = mul(r, r);
+      const num = mul(r2, H);
+      const value = mulRat(PI, div(num, of(3)));
       return {
         values: [value],
-        steps: stdSteps(
-          "V = \\frac{\\pi r^2 H}{3}",
-          `V = \\frac{\\pi \\cdot ${L(r)}^2 \\cdot ${L(H)}}{3}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "V = \\frac{\\pi r^2 H}{3}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `V = \\frac{\\pi \\cdot ${L(r)}^2 \\cdot ${L(H)}}{3}`,
+          },
+          { title: "3. Kwadrat promienia", body: `r^2 = ${L(r)}^2 = ${L(r2)}` },
+          { title: "4. Licznik", body: `r^2H = ${L(r2)} \\cdot ${L(H)} = ${L(num)}` },
+          { title: "5. Wynik", body: resultLatex("V", value, places) },
+        ],
       };
     }
     if (unknown === "H") {
@@ -804,20 +1001,35 @@ const stozek: FormulaDef = {
       let value: Exact;
       let note: string | undefined;
       try {
-        value = exactOf(div(mul(stripPi(V), of(3)), mul(r, r)));
+        const r2 = mul(r, r);
+        const inner = div(mul(stripPi(V), of(3)), r2);
+        value = exactOf(inner);
+        return {
+          values: [value],
+          steps: [
+            { title: "1. Przekształcenie wzoru", body: "H = \\frac{3V}{\\pi r^2}" },
+            {
+              title: "2. Podstawienie danych",
+              body: `H = \\frac{3 \\cdot ${formatLatex(V)}}{\\pi \\cdot ${L(r)}^2}`,
+            },
+            { title: "3. Kwadrat i skrócenie π", body: `r^2 = ${L(r2)}, \\; H = ${L(inner)}` },
+            { title: "4. Wynik", body: resultLatex("H", value, places) },
+          ],
+        };
       } catch {
         value = approxOnly((approx(V) * 3) / (Math.PI * approx(exactOf(r)) ** 2));
         note = APPROX_PI_NOTE;
       }
       return {
         values: [value],
-        steps: stdSteps(
-          "H = \\frac{3V}{\\pi r^2}",
-          `H = \\frac{3 \\cdot ${formatLatex(V)}}{\\pi \\cdot ${L(r)}^2}`,
-          value,
-          places,
-          note,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "H = \\frac{3V}{\\pi r^2}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `H = \\frac{3 \\cdot ${formatLatex(V)}}{\\pi \\cdot ${L(r)}^2}`,
+          },
+          { title: "3. Wynik", body: resultLatex("H", value, places), note },
+        ],
       };
     }
     const V = known["V"];
@@ -825,20 +1037,34 @@ const stozek: FormulaDef = {
     let value: Exact;
     let note: string | undefined;
     try {
-      value = sqrtRational(div(mul(stripPi(V), of(3)), H));
+      const inner = div(mul(stripPi(V), of(3)), H);
+      value = sqrtRational(inner);
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "r = \\sqrt{\\frac{3V}{\\pi H}}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `r = \\sqrt{\\frac{3 \\cdot ${formatLatex(V)}}{\\pi \\cdot ${L(H)}}}`,
+          },
+          { title: "3. Skrócenie π", body: `\\frac{3V}{\\pi H} = ${L(inner)}` },
+          { title: "4. Wynik", body: resultLatex("r", value, places) },
+        ],
+      };
     } catch {
       value = approxOnly(Math.sqrt((approx(V) * 3) / (Math.PI * approx(exactOf(H)))));
       note = APPROX_PI_NOTE;
     }
     return {
       values: [value],
-      steps: stdSteps(
-        "r = \\sqrt{\\frac{3V}{\\pi H}}",
-        `r = \\sqrt{\\frac{3 \\cdot ${formatLatex(V)}}{\\pi \\cdot ${L(H)}}}`,
-        value,
-        places,
-        note,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "r = \\sqrt{\\frac{3V}{\\pi H}}" },
+        {
+          title: "2. Podstawienie danych",
+          body: `r = \\sqrt{\\frac{3 \\cdot ${formatLatex(V)}}{\\pi \\cdot ${L(H)}}}`,
+        },
+        { title: "3. Wynik", body: resultLatex("r", value, places), note },
+      ],
     };
   },
 };

@@ -42,15 +42,17 @@ const pitagoras: FormulaDef = {
       const b = asRational(known["b"], "b");
       positive(a, "a");
       positive(b, "b");
-      const value = sqrtRational(add(mul(a, a), mul(b, b)));
+      const a2 = mul(a, a);
+      const b2 = mul(b, b);
+      const value = sqrtRational(add(a2, b2));
       return {
         values: [value],
-        steps: stdSteps(
-          "c = \\sqrt{a^2 + b^2}",
-          `c = \\sqrt{${L(a)}^2 + ${L(b)}^2}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "c = \\sqrt{a^2 + b^2}" },
+          { title: "2. Podstawienie danych", body: `c = \\sqrt{${L(a)}^2 + ${L(b)}^2}` },
+          { title: "3. Kwadraty", body: `a^2 = ${L(a2)}, \\; b^2 = ${L(b2)}` },
+          { title: "4. Wynik", body: resultLatex("c", value, places) },
+        ],
       };
     }
     const other = unknown === "a" ? "b" : "a";
@@ -64,12 +66,12 @@ const pitagoras: FormulaDef = {
     const value = sqrtRational(diff);
     return {
       values: [value],
-      steps: stdSteps(
-        `${unknown} = \\sqrt{c^2 - ${other}^2}`,
-        `${unknown} = \\sqrt{${L(c)}^2 - ${L(o)}^2}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${unknown} = \\sqrt{c^2 - ${other}^2}` },
+        { title: "2. Podstawienie danych", body: `${unknown} = \\sqrt{${L(c)}^2 - ${L(o)}^2}` },
+        { title: "3. Kwadraty", body: `c^2 = ${L(mul(c, c))}, \\; ${other}^2 = ${L(mul(o, o))}` },
+        { title: "4. Wynik", body: resultLatex(unknown, value, places) },
+      ],
     };
   },
 };
@@ -92,36 +94,44 @@ const poleTrojkata: FormulaDef = {
     if (unknown === "P") {
       const a = asRational(known["a"], "a");
       const h = asRational(known["h"], "h");
-      const value = exactOf(div(mul(a, h), of(2)));
+      const num = mul(a, h);
+      const value = exactOf(div(num, of(2)));
       return {
         values: [value],
-        steps: stdSteps(
-          "P = \\frac{a \\cdot h}{2}",
-          `P = \\frac{${L(a)} \\cdot ${L(h)}}{2}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P = \\frac{a \\cdot h}{2}" },
+          { title: "2. Podstawienie danych", body: `P = \\frac{${L(a)} \\cdot ${L(h)}}{2}` },
+          { title: "3. Licznik", body: `a \\cdot h = ${L(a)} \\cdot ${L(h)} = ${L(num)}` },
+          { title: "4. Wynik", body: resultLatex("P", value, places) },
+        ],
       };
     }
     const P = asRational(known["P"], "P");
     if (unknown === "a") {
       const h = asRational(known["h"], "h");
-      const value = exactOf(div(mul(P, of(2)), h));
+      const num = mul(P, of(2));
+      const value = exactOf(div(num, h));
       return {
         values: [value],
-        steps: stdSteps(
-          "a = \\frac{2P}{h}",
-          `a = \\frac{2 \\cdot ${L(P)}}{${L(h)}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "a = \\frac{2P}{h}" },
+          { title: "2. Podstawienie danych", body: `a = \\frac{2 \\cdot ${L(P)}}{${L(h)}}` },
+          { title: "3. Licznik", body: `2 \\cdot P = 2 \\cdot ${L(P)} = ${L(num)}` },
+          { title: "4. Wynik", body: resultLatex("a", value, places) },
+        ],
       };
     }
     const a = asRational(known["a"], "a");
-    const value = exactOf(div(mul(P, of(2)), a));
+    const num = mul(P, of(2));
+    const value = exactOf(div(num, a));
     return {
       values: [value],
-      steps: stdSteps("h = \\frac{2P}{a}", `h = \\frac{2 \\cdot ${L(P)}}{${L(a)}}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "h = \\frac{2P}{a}" },
+        { title: "2. Podstawienie danych", body: `h = \\frac{2 \\cdot ${L(P)}}{${L(a)}}` },
+        { title: "3. Licznik", body: `2 \\cdot P = 2 \\cdot ${L(P)} = ${L(num)}` },
+        { title: "4. Wynik", body: resultLatex("h", value, places) },
+      ],
     };
   },
 };
@@ -147,7 +157,11 @@ const poleProstokata: FormulaDef = {
       const value = exactOf(mul(a, b));
       return {
         values: [value],
-        steps: stdSteps("P = a \\cdot b", `P = ${L(a)} \\cdot ${L(b)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P = a \\cdot b" },
+          { title: "2. Podstawienie danych", body: `P = ${L(a)} \\cdot ${L(b)}` },
+          { title: "3. Wynik", body: resultLatex("P", value, places) },
+        ],
       };
     }
     const P = asRational(known["P"], "P");
@@ -183,30 +197,44 @@ const poleKola: FormulaDef = {
     if (unknown === "P") {
       const r = asRational(known["r"], "r");
       if (cmp(r, ZERO) < 0) throw new Error("promień nie jest ujemny");
-      const value = mulRat(PI, mul(r, r));
+      const r2 = mul(r, r);
+      const value = mulRat(PI, r2);
       return {
         values: [value],
-        steps: stdSteps("P = \\pi r^2", `P = \\pi \\cdot ${L(r)}^2`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P = \\pi r^2" },
+          { title: "2. Podstawienie danych", body: `P = \\pi \\cdot ${L(r)}^2` },
+          { title: "3. Kwadrat promienia", body: `r^2 = ${L(r)}^2 = ${L(r2)}` },
+          { title: "4. Wynik", body: resultLatex("P", value, places) },
+        ],
       };
     }
     const P = known["P"];
     let value: Exact;
     let note: string | undefined;
     try {
-      value = sqrtRational(stripPi(P));
+      const inner = stripPi(P);
+      value = sqrtRational(inner);
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "r = \\sqrt{\\frac{P}{\\pi}}" },
+          { title: "2. Podstawienie danych", body: `r = \\sqrt{\\frac{${formatLatex(P)}}{\\pi}}` },
+          { title: "3. Skrócenie π", body: `\\frac{P}{\\pi} = ${L(inner)}` },
+          { title: "4. Wynik", body: resultLatex("r", value, places) },
+        ],
+      };
     } catch {
       value = approxOnly(Math.sqrt(approx(P) / Math.PI));
       note = APPROX_PI_NOTE;
     }
     return {
       values: [value],
-      steps: stdSteps(
-        "r = \\sqrt{\\frac{P}{\\pi}}",
-        `r = \\sqrt{\\frac{${formatLatex(P)}}{\\pi}}`,
-        value,
-        places,
-        note,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "r = \\sqrt{\\frac{P}{\\pi}}" },
+        { title: "2. Podstawienie danych", body: `r = \\sqrt{\\frac{${formatLatex(P)}}{\\pi}}` },
+        { title: "3. Wynik", body: resultLatex("r", value, places), note },
+      ],
     };
   },
 };
@@ -228,30 +256,44 @@ const obwodKola: FormulaDef = {
     if (unknown === "Ob") {
       const r = asRational(known["r"], "r");
       if (cmp(r, ZERO) < 0) throw new Error("promień nie jest ujemny");
-      const value = mulRat(PI, mul(of(2), r));
+      const twoR = mul(of(2), r);
+      const value = mulRat(PI, twoR);
       return {
         values: [value],
-        steps: stdSteps("Ob = 2\\pi r", `Ob = 2\\pi \\cdot ${L(r)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "Ob = 2\\pi r" },
+          { title: "2. Podstawienie danych", body: `Ob = 2\\pi \\cdot ${L(r)}` },
+          { title: "3. Średnica", body: `2r = 2 \\cdot ${L(r)} = ${L(twoR)}` },
+          { title: "4. Wynik", body: resultLatex("Ob", value, places) },
+        ],
       };
     }
     const Ob = known["Ob"];
     let value: Exact;
     let note: string | undefined;
     try {
-      value = exactOf(div(stripPi(Ob), of(2)));
+      const inner = div(stripPi(Ob), of(2));
+      value = exactOf(inner);
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "r = \\frac{Ob}{2\\pi}" },
+          { title: "2. Podstawienie danych", body: `r = \\frac{${formatLatex(Ob)}}{2\\pi}` },
+          { title: "3. Skrócenie π i dwójki", body: `r = ${L(inner)}` },
+          { title: "4. Wynik", body: resultLatex("r", value, places) },
+        ],
+      };
     } catch {
       value = approxOnly(approx(Ob) / (2 * Math.PI));
       note = APPROX_PI_NOTE;
     }
     return {
       values: [value],
-      steps: stdSteps(
-        "r = \\frac{Ob}{2\\pi}",
-        `r = \\frac{${formatLatex(Ob)}}{2\\pi}`,
-        value,
-        places,
-        note,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "r = \\frac{Ob}{2\\pi}" },
+        { title: "2. Podstawienie danych", body: `r = \\frac{${formatLatex(Ob)}}{2\\pi}` },
+        { title: "3. Wynik", body: resultLatex("r", value, places), note },
+      ],
     };
   },
 };
@@ -578,30 +620,44 @@ const objetoscProstopadloscianu: FormulaDef = {
       const a = asRational(known["a"], "a");
       const b = asRational(known["b"], "b");
       const c = asRational(known["c"], "c");
-      const value = exactOf(mul(mul(a, b), c));
+      const ab = mul(a, b);
+      const value = exactOf(mul(ab, c));
       return {
         values: [value],
-        steps: stdSteps(
-          "V = a \\cdot b \\cdot c",
-          `V = ${L(a)} \\cdot ${L(b)} \\cdot ${L(c)}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "V = a \\cdot b \\cdot c" },
+          {
+            title: "2. Podstawienie danych",
+            body: `V = ${L(a)} \\cdot ${L(b)} \\cdot ${L(c)}`,
+          },
+          { title: "3. Podstawa", body: `a \\cdot b = ${L(a)} \\cdot ${L(b)} = ${L(ab)}` },
+          { title: "4. Wynik", body: resultLatex("V", value, places) },
+        ],
       };
     }
     const V = asRational(known["V"], "V");
     const rest = ["a", "b", "c"].filter((id) => id !== unknown);
     const x = asRational(known[rest[0]], rest[0]);
     const y = asRational(known[rest[1]], rest[1]);
-    const value = exactOf(div(V, mul(x, y)));
+    const prod = mul(x, y);
+    const value = exactOf(div(V, prod));
     return {
       values: [value],
-      steps: stdSteps(
-        `${unknown} = \\frac{V}{${rest[0]} \\cdot ${rest[1]}}`,
-        `${unknown} = \\frac{${L(V)}}{${L(x)} \\cdot ${L(y)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        {
+          title: "1. Przekształcenie wzoru",
+          body: `${unknown} = \\frac{V}{${rest[0]} \\cdot ${rest[1]}}`,
+        },
+        {
+          title: "2. Podstawienie danych",
+          body: `${unknown} = \\frac{${L(V)}}{${L(x)} \\cdot ${L(y)}}`,
+        },
+        {
+          title: "3. Mianownik",
+          body: `${rest[0]} \\cdot ${rest[1]} = ${L(x)} \\cdot ${L(y)} = ${L(prod)}`,
+        },
+        { title: "4. Wynik", body: resultLatex(unknown, value, places) },
+      ],
     };
   },
 };
@@ -623,35 +679,50 @@ const objetoscKuli: FormulaDef = {
     if (unknown === "V") {
       const r = asRational(known["r"], "r");
       if (cmp(r, ZERO) < 0) throw new Error("promień nie jest ujemny");
-      const value = mulRat(PI, div(mul(of(4), pow(r, 3)), of(3)));
+      const r3 = pow(r, 3);
+      const value = mulRat(PI, div(mul(of(4), r3), of(3)));
       return {
         values: [value],
-        steps: stdSteps(
-          "V = \\frac{4}{3}\\pi r^3",
-          `V = \\frac{4}{3}\\pi \\cdot ${L(r)}^3`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "V = \\frac{4}{3}\\pi r^3" },
+          { title: "2. Podstawienie danych", body: `V = \\frac{4}{3}\\pi \\cdot ${L(r)}^3` },
+          { title: "3. Sześcian promienia", body: `r^3 = ${L(r)}^3 = ${L(r3)}` },
+          { title: "4. Wynik", body: resultLatex("V", value, places) },
+        ],
       };
     }
     const V = known["V"];
     let value: Exact;
     let note: string | undefined;
     try {
-      value = cbrtRational(div(mul(stripPi(V), of(3)), of(4)));
+      const inner = div(mul(stripPi(V), of(3)), of(4));
+      value = cbrtRational(inner);
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "r = \\sqrt[3]{\\frac{3V}{4\\pi}}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `r = \\sqrt[3]{\\frac{3 \\cdot ${formatLatex(V)}}{4\\pi}}`,
+          },
+          { title: "3. Skrócenie π", body: `\\frac{3V}{4\\pi} = ${L(inner)}` },
+          { title: "4. Wynik", body: resultLatex("r", value, places) },
+        ],
+      };
     } catch {
       value = approxOnly(Math.cbrt((3 * approx(V)) / (4 * Math.PI)));
       note = "wynik tylko przybliżony — dokładny wychodzi dla objętości z π (np. 36π)";
     }
     return {
       values: [value],
-      steps: stdSteps(
-        "r = \\sqrt[3]{\\frac{3V}{4\\pi}}",
-        `r = \\sqrt[3]{\\frac{3 \\cdot ${formatLatex(V)}}{4\\pi}}`,
-        value,
-        places,
-        note,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "r = \\sqrt[3]{\\frac{3V}{4\\pi}}" },
+        {
+          title: "2. Podstawienie danych",
+          body: `r = \\sqrt[3]{\\frac{3 \\cdot ${formatLatex(V)}}{4\\pi}}`,
+        },
+        { title: "3. Wynik", body: resultLatex("r", value, places), note },
+      ],
     };
   },
 };
@@ -673,30 +744,44 @@ const poleKuli: FormulaDef = {
     if (unknown === "P") {
       const r = asRational(known["r"], "r");
       if (cmp(r, ZERO) < 0) throw new Error("promień nie jest ujemny");
-      const value = mulRat(PI, mul(of(4), mul(r, r)));
+      const r2 = mul(r, r);
+      const value = mulRat(PI, mul(of(4), r2));
       return {
         values: [value],
-        steps: stdSteps("P = 4\\pi r^2", `P = 4\\pi \\cdot ${L(r)}^2`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P = 4\\pi r^2" },
+          { title: "2. Podstawienie danych", body: `P = 4\\pi \\cdot ${L(r)}^2` },
+          { title: "3. Kwadrat promienia", body: `r^2 = ${L(r)}^2 = ${L(r2)}` },
+          { title: "4. Wynik", body: resultLatex("P", value, places) },
+        ],
       };
     }
     const P = known["P"];
     let value: Exact;
     let note: string | undefined;
     try {
-      value = sqrtRational(div(stripPi(P), of(4)));
+      const inner = div(stripPi(P), of(4));
+      value = sqrtRational(inner);
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "r = \\sqrt{\\frac{P}{4\\pi}}" },
+          { title: "2. Podstawienie danych", body: `r = \\sqrt{\\frac{${formatLatex(P)}}{4\\pi}}` },
+          { title: "3. Skrócenie π i czwórki", body: `\\frac{P}{4\\pi} = ${L(inner)}` },
+          { title: "4. Wynik", body: resultLatex("r", value, places) },
+        ],
+      };
     } catch {
       value = approxOnly(Math.sqrt(approx(P) / (4 * Math.PI)));
       note = APPROX_PI_NOTE;
     }
     return {
       values: [value],
-      steps: stdSteps(
-        "r = \\sqrt{\\frac{P}{4\\pi}}",
-        `r = \\sqrt{\\frac{${formatLatex(P)}}{4\\pi}}`,
-        value,
-        places,
-        note,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "r = \\sqrt{\\frac{P}{4\\pi}}" },
+        { title: "2. Podstawienie danych", body: `r = \\sqrt{\\frac{${formatLatex(P)}}{4\\pi}}` },
+        { title: "3. Wynik", body: resultLatex("r", value, places), note },
+      ],
     };
   },
 };

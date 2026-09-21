@@ -1,9 +1,9 @@
 import { ONE, ZERO, add, cmp, div, mul, of, sub } from "../exact/rational";
 import { approx, approxOnly, exactOf, mulRat, sqrtRational, stripPi } from "../exact/exact";
 import type { Exact } from "../exact/exact";
-import { formatLatex, formatRatLatex } from "../exact/format";
+import { formatLatex, formatRatLatex, trimNum } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { asRational, resultLatex, stdSteps } from "./types";
+import { asRational, resultLatex } from "./types";
 
 const G10 = of(10);
 const L = formatRatLatex;
@@ -30,7 +30,11 @@ const moc: FormulaDef = {
       const value = exactOf(div(W, t));
       return {
         values: [value],
-        steps: stdSteps("P = \\frac{W}{t}", `P = \\frac{${L(W)}}{${L(t)}}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P = \\frac{W}{t}" },
+          { title: "2. Podstawienie danych", body: `P = \\frac{${L(W)}}{${L(t)}}` },
+          { title: "3. Wynik", body: resultLatex("P", value, places) },
+        ],
       };
     }
     if (unknown === "W") {
@@ -39,7 +43,11 @@ const moc: FormulaDef = {
       const value = exactOf(mul(P, t));
       return {
         values: [value],
-        steps: stdSteps("W = P \\cdot t", `W = ${L(P)} \\cdot ${L(t)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "W = P \\cdot t" },
+          { title: "2. Podstawienie danych", body: `W = ${L(P)} \\cdot ${L(t)}` },
+          { title: "3. Wynik", body: resultLatex("W", value, places) },
+        ],
       };
     }
     const P = asRational(known["P"], "P");
@@ -47,7 +55,11 @@ const moc: FormulaDef = {
     const value = exactOf(div(W, P));
     return {
       values: [value],
-      steps: stdSteps("t = \\frac{W}{P}", `t = \\frac{${L(W)}}{${L(P)}}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "t = \\frac{W}{P}" },
+        { title: "2. Podstawienie danych", body: `t = \\frac{${L(W)}}{${L(P)}}` },
+        { title: "3. Wynik", body: resultLatex("t", value, places) },
+      ],
     };
   },
 };
@@ -73,13 +85,15 @@ const sprawnosc: FormulaDef = {
       const value = exactOf(div(Wu, Wd));
       return {
         values: [value],
-        steps: stdSteps(
-          "\\eta = \\frac{W_{uż}}{W_{d}}",
-          `\\eta = \\frac{${L(Wu)}}{${L(Wd)}}`,
-          value,
-          places,
-          "ułamek dziesiętny × 100% to procenty",
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "\\eta = \\frac{W_{uż}}{W_{d}}" },
+          { title: "2. Podstawienie danych", body: `\\eta = \\frac{${L(Wu)}}{${L(Wd)}}` },
+          {
+            title: "3. Wynik",
+            body: resultLatex("\\eta", value, places),
+            note: "ułamek dziesiętny × 100% to procenty",
+          },
+        ],
       };
     }
     if (unknown === "Wu") {
@@ -88,12 +102,11 @@ const sprawnosc: FormulaDef = {
       const value = exactOf(mul(eta, Wd));
       return {
         values: [value],
-        steps: stdSteps(
-          "W_{uż} = \\eta \\cdot W_{d}",
-          `W_{uż} = ${L(eta)} \\cdot ${L(Wd)}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "W_{uż} = \\eta \\cdot W_{d}" },
+          { title: "2. Podstawienie danych", body: `W_{uż} = ${L(eta)} \\cdot ${L(Wd)}` },
+          { title: "3. Wynik", body: resultLatex("W_{uż}", value, places) },
+        ],
       };
     }
     const eta = asRational(known["eta"], "η");
@@ -101,12 +114,11 @@ const sprawnosc: FormulaDef = {
     const value = exactOf(div(Wu, eta));
     return {
       values: [value],
-      steps: stdSteps(
-        "W_{d} = \\frac{W_{uż}}{\\eta}",
-        `W_{d} = \\frac{${L(Wu)}}{${L(eta)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "W_{d} = \\frac{W_{uż}}{\\eta}" },
+        { title: "2. Podstawienie danych", body: `W_{d} = \\frac{${L(Wu)}}{${L(eta)}}` },
+        { title: "3. Wynik", body: resultLatex("W_{d}", value, places) },
+      ],
     };
   },
 };
@@ -132,7 +144,11 @@ const ped: FormulaDef = {
       const value = exactOf(mul(m, v));
       return {
         values: [value],
-        steps: stdSteps("p = m \\cdot v", `p = ${L(m)} \\cdot ${L(v)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "p = m \\cdot v" },
+          { title: "2. Podstawienie danych", body: `p = ${L(m)} \\cdot ${L(v)}` },
+          { title: "3. Wynik", body: resultLatex("p", value, places) },
+        ],
       };
     }
     if (unknown === "m") {
@@ -141,7 +157,11 @@ const ped: FormulaDef = {
       const value = exactOf(div(p, v));
       return {
         values: [value],
-        steps: stdSteps("m = \\frac{p}{v}", `m = \\frac{${L(p)}}{${L(v)}}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "m = \\frac{p}{v}" },
+          { title: "2. Podstawienie danych", body: `m = \\frac{${L(p)}}{${L(v)}}` },
+          { title: "3. Wynik", body: resultLatex("m", value, places) },
+        ],
       };
     }
     const p = asRational(known["p"], "p");
@@ -149,7 +169,11 @@ const ped: FormulaDef = {
     const value = exactOf(div(p, m));
     return {
       values: [value],
-      steps: stdSteps("v = \\frac{p}{m}", `v = \\frac{${L(p)}}{${L(m)}}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "v = \\frac{p}{m}" },
+        { title: "2. Podstawienie danych", body: `v = \\frac{${L(p)}}{${L(m)}}` },
+        { title: "3. Wynik", body: resultLatex("v", value, places) },
+      ],
     };
   },
 };
@@ -171,9 +195,10 @@ const zderzenia: FormulaDef = {
   outputLabel: "u",
   solve(_unknown, known, places): FormulaSolution {
     const g = (id: string) => asRational(known[id], id);
-    const value = exactOf(
-      div(add(mul(g("m1"), g("v1")), mul(g("m2"), g("v2"))), add(g("m1"), g("m2"))),
-    );
+    const p1 = mul(g("m1"), g("v1"));
+    const p2 = mul(g("m2"), g("v2"));
+    const M = add(g("m1"), g("m2"));
+    const value = exactOf(div(add(p1, p2), M));
     return {
       values: [value],
       steps: [
@@ -182,7 +207,11 @@ const zderzenia: FormulaDef = {
           title: "2. Podstawienie danych",
           body: `u = \\frac{${L(g("m1"))} \\cdot ${L(g("v1"))} + ${L(g("m2"))} \\cdot ${L(g("v2"))}}{${L(g("m1"))} + ${L(g("m2"))}}`,
         },
-        { title: "3. Wynik", body: resultLatex("u", value, places) },
+        {
+          title: "3. Pędy i masa",
+          body: `m_1v_1 = ${L(p1)}, \\; m_2v_2 = ${L(p2)}, \\; M = ${L(M)}`,
+        },
+        { title: "4. Wynik", body: resultLatex("u", value, places) },
       ],
     };
   },
@@ -207,16 +236,20 @@ const ruchOkrag: FormulaDef = {
     if (unknown === "v") {
       const r = asRational(known["r"], "r");
       const T = asRational(known["T"], "T");
-      const value = mulRat(PI, div(mul(of(2), r), T));
+      const twoR = mul(of(2), r);
+      const value = mulRat(PI, div(twoR, T));
       return {
         values: [value],
-        steps: stdSteps(
-          "v = \\frac{2\\pi r}{T}",
-          `v = \\frac{2\\pi \\cdot ${L(r)}}{${L(T)}}`,
-          value,
-          places,
-          "a także: f = 1/T, ar = v²/r",
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "v = \\frac{2\\pi r}{T}" },
+          { title: "2. Podstawienie danych", body: `v = \\frac{2\\pi \\cdot ${L(r)}}{${L(T)}}` },
+          { title: "3. Licznik bez π", body: `2r = 2 \\cdot ${L(r)} = ${L(twoR)}` },
+          {
+            title: "4. Wynik",
+            body: resultLatex("v", value, places),
+            note: "a także: f = 1/T, ar = v²/r",
+          },
+        ],
       };
     }
     if (unknown === "r") {
@@ -225,20 +258,34 @@ const ruchOkrag: FormulaDef = {
       let value: Exact;
       let note: string | undefined;
       try {
-        value = exactOf(div(mul(stripPi(v), T), of(2)));
+        const inner = div(mul(stripPi(v), T), of(2));
+        value = exactOf(inner);
+        return {
+          values: [value],
+          steps: [
+            { title: "1. Przekształcenie wzoru", body: "r = \\frac{vT}{2\\pi}" },
+            {
+              title: "2. Podstawienie danych",
+              body: `r = \\frac{${formatLatex(v)} \\cdot ${L(T)}}{2\\pi}`,
+            },
+            { title: "3. Skrócenie π", body: `r = ${L(inner)}` },
+            { title: "4. Wynik", body: resultLatex("r", value, places) },
+          ],
+        };
       } catch {
         value = approxOnly((approx(v) * approx(exactOf(T))) / (2 * Math.PI));
         note = APPROX_NOTE;
       }
       return {
         values: [value],
-        steps: stdSteps(
-          "r = \\frac{vT}{2\\pi}",
-          `r = \\frac{${formatLatex(v)} \\cdot ${L(T)}}{2\\pi}`,
-          value,
-          places,
-          note,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "r = \\frac{vT}{2\\pi}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `r = \\frac{${formatLatex(v)} \\cdot ${L(T)}}{2\\pi}`,
+          },
+          { title: "3. Wynik", body: resultLatex("r", value, places), note },
+        ],
       };
     }
     const v = known["v"];
@@ -253,13 +300,14 @@ const ruchOkrag: FormulaDef = {
     }
     return {
       values: [valueT],
-      steps: stdSteps(
-        "T = \\frac{2\\pi r}{v}",
-        `T = \\frac{2\\pi \\cdot ${L(r)}}{${formatLatex(v)}}`,
-        valueT,
-        places,
-        noteT,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "T = \\frac{2\\pi r}{v}" },
+        {
+          title: "2. Podstawienie danych",
+          body: `T = \\frac{2\\pi \\cdot ${L(r)}}{${formatLatex(v)}}`,
+        },
+        { title: "3. Wynik", body: resultLatex("T", valueT, places), note: noteT },
+      ],
     };
   },
 };
@@ -295,24 +343,41 @@ const grawitacja: FormulaDef = {
     let value: Exact;
     let transform = "";
     let subst = "";
+    let mid = "";
     if (unknown === "F") {
-      value = approxOnly((G_CONST * g("m") * g("M")) / g("r") ** 2);
+      const r2 = g("r") ** 2;
+      value = approxOnly((G_CONST * g("m") * g("M")) / r2);
       transform = "F = G\\frac{mM}{r^2}";
       subst = `F = 6{,}67 \\cdot 10^{-11} \\cdot ${g("m")} \\cdot ${g("M")} / ${g("r")}^2`;
+      mid = `r^2 = ${g("r")}^2 = ${r2}`;
     } else if (unknown === "m") {
-      value = approxOnly((g("F") * g("r") ** 2) / (G_CONST * g("M")));
+      const r2 = g("r") ** 2;
+      value = approxOnly((g("F") * r2) / (G_CONST * g("M")));
       transform = "m = \\frac{Fr^2}{GM}";
       subst = `m = ${g("F")} \\cdot ${g("r")}^2 / (G \\cdot ${g("M")})`;
+      mid = `r^2 = ${g("r")}^2 = ${r2}`;
     } else if (unknown === "M") {
-      value = approxOnly((g("F") * g("r") ** 2) / (G_CONST * g("m")));
+      const r2 = g("r") ** 2;
+      value = approxOnly((g("F") * r2) / (G_CONST * g("m")));
       transform = "M = \\frac{Fr^2}{Gm}";
       subst = `M = ${g("F")} \\cdot ${g("r")}^2 / (G \\cdot ${g("m")})`;
+      mid = `r^2 = ${g("r")}^2 = ${r2}`;
     } else {
-      value = approxOnly(Math.sqrt((G_CONST * g("m") * g("M")) / g("F")));
+      const num = G_CONST * g("m") * g("M");
+      value = approxOnly(Math.sqrt(num / g("F")));
       transform = "r = \\sqrt{\\frac{GmM}{F}}";
       subst = `r = \\sqrt{G \\cdot ${g("m")} \\cdot ${g("M")} / ${g("F")}}`;
+      mid = `GmM = 6{,}67 \\cdot 10^{-11} \\cdot ${g("m")} \\cdot ${g("M")} = ${num}`;
     }
-    return { values: [value], steps: stdSteps(transform, subst, value, places, APPROX_NOTE) };
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: transform },
+        { title: "2. Podstawienie danych", body: subst },
+        { title: "3. Pośredni rachunek", body: mid },
+        { title: "4. Wynik", body: resultLatex(unknown, value, places), note: APPROX_NOTE },
+      ],
+    };
   },
 };
 
@@ -340,24 +405,41 @@ const kepler: FormulaDef = {
     let value: Exact;
     let transform = "";
     let subst = "";
+    let mid = "";
     if (unknown === "T1") {
-      value = approxOnly(g("T2") * (g("r1") / g("r2")) ** 1.5);
+      const ratio = g("r1") / g("r2");
+      value = approxOnly(g("T2") * ratio ** 1.5);
       transform = "T_1 = T_2(r_1/r_2)^{3/2}";
       subst = `T_1 = ${g("T2")} \\cdot (${g("r1")}/${g("r2")})^{3/2}`;
+      mid = `r_1/r_2 = ${ratio}`;
     } else if (unknown === "T2") {
-      value = approxOnly(g("T1") * (g("r2") / g("r1")) ** 1.5);
+      const ratio = g("r2") / g("r1");
+      value = approxOnly(g("T1") * ratio ** 1.5);
       transform = "T_2 = T_1(r_2/r_1)^{3/2}";
       subst = `T_2 = ${g("T1")} \\cdot (${g("r2")}/${g("r1")})^{3/2}`;
+      mid = `r_2/r_1 = ${ratio}`;
     } else if (unknown === "r1") {
-      value = approxOnly(g("r2") * (g("T1") / g("T2")) ** (2 / 3));
+      const ratio = g("T1") / g("T2");
+      value = approxOnly(g("r2") * ratio ** (2 / 3));
       transform = "r_1 = r_2(T_1/T_2)^{2/3}";
       subst = `r_1 = ${g("r2")} \\cdot (${g("T1")}/${g("T2")})^{2/3}`;
+      mid = `T_1/T_2 = ${ratio}`;
     } else {
-      value = approxOnly(g("r1") * (g("T2") / g("T1")) ** (2 / 3));
+      const ratio = g("T2") / g("T1");
+      value = approxOnly(g("r1") * ratio ** (2 / 3));
       transform = "r_2 = r_1(T_2/T_1)^{2/3}";
       subst = `r_2 = ${g("r1")} \\cdot (${g("T2")}/${g("T1")})^{2/3}`;
+      mid = `T_2/T_1 = ${ratio}`;
     }
-    return { values: [value], steps: stdSteps(transform, subst, value, places, APPROX_NOTE) };
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: transform },
+        { title: "2. Podstawienie danych", body: subst },
+        { title: "3. Stosunek", body: mid },
+        { title: "4. Wynik", body: resultLatex(unknown, value, places), note: APPROX_NOTE },
+      ],
+    };
   },
 };
 
@@ -379,42 +461,45 @@ const archimedes: FormulaDef = {
     if (unknown === "Fw") {
       const ro = asRational(known["ro"], "ρ");
       const V = asRational(known["V"], "V");
-      const value = exactOf(mul(mul(ro, G10), V));
+      const roV = mul(ro, V);
+      const value = exactOf(mul(roV, G10));
       return {
         values: [value],
-        steps: stdSteps(
-          "F_w = \\rho g V",
-          `F_w = ${L(ro)} \\cdot 10 \\cdot ${L(V)}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "F_w = \\rho g V" },
+          { title: "2. Podstawienie danych", body: `F_w = ${L(ro)} \\cdot 10 \\cdot ${L(V)}` },
+          { title: "3. Iloczyn ρV", body: `\\rho V = ${L(ro)} \\cdot ${L(V)} = ${L(roV)}` },
+          { title: "4. Wynik", body: resultLatex("F_w", value, places) },
+        ],
       };
     }
     if (unknown === "ro") {
       const Fw = asRational(known["Fw"], "Fw");
       const V = asRational(known["V"], "V");
-      const value = exactOf(div(Fw, mul(G10, V)));
+      const gV = mul(G10, V);
+      const value = exactOf(div(Fw, gV));
       return {
         values: [value],
-        steps: stdSteps(
-          "\\rho = \\frac{F_w}{gV}",
-          `\\rho = \\frac{${L(Fw)}}{10 \\cdot ${L(V)}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "\\rho = \\frac{F_w}{gV}" },
+          { title: "2. Podstawienie danych", body: `\\rho = \\frac{${L(Fw)}}{10 \\cdot ${L(V)}}` },
+          { title: "3. Mianownik", body: `gV = 10 \\cdot ${L(V)} = ${L(gV)}` },
+          { title: "4. Wynik", body: resultLatex("\\rho", value, places) },
+        ],
       };
     }
     const Fw = asRational(known["Fw"], "Fw");
     const ro = asRational(known["ro"], "ρ");
-    const value = exactOf(div(Fw, mul(ro, G10)));
+    const roG = mul(ro, G10);
+    const value = exactOf(div(Fw, roG));
     return {
       values: [value],
-      steps: stdSteps(
-        "V = \\frac{F_w}{\\rho g}",
-        `V = \\frac{${L(Fw)}}{${L(ro)} \\cdot 10}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "V = \\frac{F_w}{\\rho g}" },
+        { title: "2. Podstawienie danych", body: `V = \\frac{${L(Fw)}}{${L(ro)} \\cdot 10}` },
+        { title: "3. Mianownik", body: `\\rho g = ${L(ro)} \\cdot 10 = ${L(roG)}` },
+        { title: "4. Wynik", body: resultLatex("V", value, places) },
+      ],
     };
   },
 };
@@ -437,37 +522,45 @@ const hydrostatyczne: FormulaDef = {
     if (unknown === "p") {
       const ro = asRational(known["ro"], "ρ");
       const h = asRational(known["h"], "h");
-      const value = exactOf(mul(mul(ro, G10), h));
+      const roH = mul(ro, h);
+      const value = exactOf(mul(roH, G10));
       return {
         values: [value],
-        steps: stdSteps("p = \\rho g h", `p = ${L(ro)} \\cdot 10 \\cdot ${L(h)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "p = \\rho g h" },
+          { title: "2. Podstawienie danych", body: `p = ${L(ro)} \\cdot 10 \\cdot ${L(h)}` },
+          { title: "3. Iloczyn ρh", body: `\\rho h = ${L(ro)} \\cdot ${L(h)} = ${L(roH)}` },
+          { title: "4. Wynik", body: resultLatex("p", value, places) },
+        ],
       };
     }
     if (unknown === "ro") {
       const p = asRational(known["p"], "p");
       const h = asRational(known["h"], "h");
-      const value = exactOf(div(p, mul(G10, h)));
+      const gh = mul(G10, h);
+      const value = exactOf(div(p, gh));
       return {
         values: [value],
-        steps: stdSteps(
-          "\\rho = \\frac{p}{gh}",
-          `\\rho = \\frac{${L(p)}}{10 \\cdot ${L(h)}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "\\rho = \\frac{p}{gh}" },
+          { title: "2. Podstawienie danych", body: `\\rho = \\frac{${L(p)}}{10 \\cdot ${L(h)}}` },
+          { title: "3. Mianownik", body: `gh = 10 \\cdot ${L(h)} = ${L(gh)}` },
+          { title: "4. Wynik", body: resultLatex("\\rho", value, places) },
+        ],
       };
     }
     const p = asRational(known["p"], "p");
     const ro = asRational(known["ro"], "ρ");
-    const value = exactOf(div(p, mul(ro, G10)));
+    const roG = mul(ro, G10);
+    const value = exactOf(div(p, roG));
     return {
       values: [value],
-      steps: stdSteps(
-        "h = \\frac{p}{\\rho g}",
-        `h = \\frac{${L(p)}}{${L(ro)} \\cdot 10}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "h = \\frac{p}{\\rho g}" },
+        { title: "2. Podstawienie danych", body: `h = \\frac{${L(p)}}{${L(ro)} \\cdot 10}` },
+        { title: "3. Mianownik", body: `\\rho g = ${L(ro)} \\cdot 10 = ${L(roG)}` },
+        { title: "4. Wynik", body: resultLatex("h", value, places) },
+      ],
     };
   },
 };
@@ -490,50 +583,72 @@ const cieplo: FormulaDef = {
   solve(unknown, known, places): FormulaSolution {
     const g = (id: string) => asRational(known[id], id);
     if (unknown === "Q") {
-      const value = exactOf(mul(mul(g("m"), g("c")), g("dT")));
+      const mc = mul(g("m"), g("c"));
+      const value = exactOf(mul(mc, g("dT")));
       return {
         values: [value],
-        steps: stdSteps(
-          "Q = mc\\Delta T",
-          `Q = ${L(g("m"))} \\cdot ${L(g("c"))} \\cdot ${L(g("dT"))}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "Q = mc\\Delta T" },
+          {
+            title: "2. Podstawienie danych",
+            body: `Q = ${L(g("m"))} \\cdot ${L(g("c"))} \\cdot ${L(g("dT"))}`,
+          },
+          { title: "3. Iloczyn mc", body: `mc = ${L(g("m"))} \\cdot ${L(g("c"))} = ${L(mc)}` },
+          { title: "4. Wynik", body: resultLatex("Q", value, places) },
+        ],
       };
     }
     if (unknown === "m") {
-      const value = exactOf(div(g("Q"), mul(g("c"), g("dT"))));
+      const den = mul(g("c"), g("dT"));
+      const value = exactOf(div(g("Q"), den));
       return {
         values: [value],
-        steps: stdSteps(
-          "m = \\frac{Q}{c\\Delta T}",
-          `m = \\frac{${L(g("Q"))}}{${L(g("c"))} \\cdot ${L(g("dT"))}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "m = \\frac{Q}{c\\Delta T}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `m = \\frac{${L(g("Q"))}}{${L(g("c"))} \\cdot ${L(g("dT"))}}`,
+          },
+          {
+            title: "3. Mianownik",
+            body: `c\\Delta T = ${L(g("c"))} \\cdot ${L(g("dT"))} = ${L(den)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("m", value, places) },
+        ],
       };
     }
     if (unknown === "c") {
-      const value = exactOf(div(g("Q"), mul(g("m"), g("dT"))));
+      const den = mul(g("m"), g("dT"));
+      const value = exactOf(div(g("Q"), den));
       return {
         values: [value],
-        steps: stdSteps(
-          "c = \\frac{Q}{m\\Delta T}",
-          `c = \\frac{${L(g("Q"))}}{${L(g("m"))} \\cdot ${L(g("dT"))}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "c = \\frac{Q}{m\\Delta T}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `c = \\frac{${L(g("Q"))}}{${L(g("m"))} \\cdot ${L(g("dT"))}}`,
+          },
+          {
+            title: "3. Mianownik",
+            body: `m\\Delta T = ${L(g("m"))} \\cdot ${L(g("dT"))} = ${L(den)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("c", value, places) },
+        ],
       };
     }
-    const value = exactOf(div(g("Q"), mul(g("m"), g("c"))));
+    const den = mul(g("m"), g("c"));
+    const value = exactOf(div(g("Q"), den));
     return {
       values: [value],
-      steps: stdSteps(
-        "\\Delta T = \\frac{Q}{mc}",
-        `\\Delta T = \\frac{${L(g("Q"))}}{${L(g("m"))} \\cdot ${L(g("c"))}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "\\Delta T = \\frac{Q}{mc}" },
+        {
+          title: "2. Podstawienie danych",
+          body: `\\Delta T = \\frac{${L(g("Q"))}}{${L(g("m"))} \\cdot ${L(g("c"))}}`,
+        },
+        { title: "3. Mianownik", body: `mc = ${L(g("m"))} \\cdot ${L(g("c"))} = ${L(den)}` },
+        { title: "4. Wynik", body: resultLatex("\\Delta T", value, places) },
+      ],
     };
   },
 };
@@ -559,7 +674,11 @@ const cieploPrzemiany: FormulaDef = {
       const value = exactOf(mul(m, R));
       return {
         values: [value],
-        steps: stdSteps("Q = m \\cdot R", `Q = ${L(m)} \\cdot ${L(R)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "Q = m \\cdot R" },
+          { title: "2. Podstawienie danych", body: `Q = ${L(m)} \\cdot ${L(R)}` },
+          { title: "3. Wynik", body: resultLatex("Q", value, places) },
+        ],
       };
     }
     if (unknown === "m") {
@@ -568,7 +687,11 @@ const cieploPrzemiany: FormulaDef = {
       const value = exactOf(div(Q, R));
       return {
         values: [value],
-        steps: stdSteps("m = \\frac{Q}{R}", `m = \\frac{${L(Q)}}{${L(R)}}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "m = \\frac{Q}{R}" },
+          { title: "2. Podstawienie danych", body: `m = \\frac{${L(Q)}}{${L(R)}}` },
+          { title: "3. Wynik", body: resultLatex("m", value, places) },
+        ],
       };
     }
     const Q = asRational(known["Q"], "Q");
@@ -576,7 +699,11 @@ const cieploPrzemiany: FormulaDef = {
     const value = exactOf(div(Q, m));
     return {
       values: [value],
-      steps: stdSteps("R = \\frac{Q}{m}", `R = \\frac{${L(Q)}}{${L(m)}}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "R = \\frac{Q}{m}" },
+        { title: "2. Podstawienie danych", body: `R = \\frac{${L(Q)}}{${L(m)}}` },
+        { title: "3. Wynik", body: resultLatex("R", value, places) },
+      ],
     };
   },
 };
@@ -602,7 +729,11 @@ const ohm: FormulaDef = {
       const value = exactOf(div(U, R));
       return {
         values: [value],
-        steps: stdSteps("I = \\frac{U}{R}", `I = \\frac{${L(U)}}{${L(R)}}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "I = \\frac{U}{R}" },
+          { title: "2. Podstawienie danych", body: `I = \\frac{${L(U)}}{${L(R)}}` },
+          { title: "3. Wynik", body: resultLatex("I", value, places) },
+        ],
       };
     }
     if (unknown === "U") {
@@ -611,7 +742,11 @@ const ohm: FormulaDef = {
       const value = exactOf(mul(I, R));
       return {
         values: [value],
-        steps: stdSteps("U = I \\cdot R", `U = ${L(I)} \\cdot ${L(R)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "U = I \\cdot R" },
+          { title: "2. Podstawienie danych", body: `U = ${L(I)} \\cdot ${L(R)}` },
+          { title: "3. Wynik", body: resultLatex("U", value, places) },
+        ],
       };
     }
     const I = asRational(known["I"], "I");
@@ -619,7 +754,11 @@ const ohm: FormulaDef = {
     const value = exactOf(div(U, I));
     return {
       values: [value],
-      steps: stdSteps("R = \\frac{U}{I}", `R = \\frac{${L(U)}}{${L(I)}}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "R = \\frac{U}{I}" },
+        { title: "2. Podstawienie danych", body: `R = \\frac{${L(U)}}{${L(I)}}` },
+        { title: "3. Wynik", body: resultLatex("R", value, places) },
+      ],
     };
   },
 };
@@ -642,50 +781,66 @@ const opor: FormulaDef = {
   solve(unknown, known, places): FormulaSolution {
     const g = (id: string) => asRational(known[id], id);
     if (unknown === "R") {
-      const value = exactOf(div(mul(g("ro"), g("l")), g("S")));
+      const num = mul(g("ro"), g("l"));
+      const value = exactOf(div(num, g("S")));
       return {
         values: [value],
-        steps: stdSteps(
-          "R = \\rho\\frac{l}{S}",
-          `R = ${L(g("ro"))} \\cdot \\frac{${L(g("l"))}}{${L(g("S"))}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "R = \\rho\\frac{l}{S}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `R = ${L(g("ro"))} \\cdot \\frac{${L(g("l"))}}{${L(g("S"))}}`,
+          },
+          { title: "3. Licznik", body: `\\rho l = ${L(g("ro"))} \\cdot ${L(g("l"))} = ${L(num)}` },
+          { title: "4. Wynik", body: resultLatex("R", value, places) },
+        ],
       };
     }
     if (unknown === "ro") {
-      const value = exactOf(div(mul(g("R"), g("S")), g("l")));
+      const num = mul(g("R"), g("S"));
+      const value = exactOf(div(num, g("l")));
       return {
         values: [value],
-        steps: stdSteps(
-          "\\rho = \\frac{RS}{l}",
-          `\\rho = \\frac{${L(g("R"))} \\cdot ${L(g("S"))}}{${L(g("l"))}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "\\rho = \\frac{RS}{l}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `\\rho = \\frac{${L(g("R"))} \\cdot ${L(g("S"))}}{${L(g("l"))}}`,
+          },
+          { title: "3. Licznik", body: `RS = ${L(g("R"))} \\cdot ${L(g("S"))} = ${L(num)}` },
+          { title: "4. Wynik", body: resultLatex("\\rho", value, places) },
+        ],
       };
     }
     if (unknown === "l") {
-      const value = exactOf(div(mul(g("R"), g("S")), g("ro")));
+      const num = mul(g("R"), g("S"));
+      const value = exactOf(div(num, g("ro")));
       return {
         values: [value],
-        steps: stdSteps(
-          "l = \\frac{RS}{\\rho}",
-          `l = \\frac{${L(g("R"))} \\cdot ${L(g("S"))}}{${L(g("ro"))}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "l = \\frac{RS}{\\rho}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `l = \\frac{${L(g("R"))} \\cdot ${L(g("S"))}}{${L(g("ro"))}}`,
+          },
+          { title: "3. Licznik", body: `RS = ${L(g("R"))} \\cdot ${L(g("S"))} = ${L(num)}` },
+          { title: "4. Wynik", body: resultLatex("l", value, places) },
+        ],
       };
     }
-    const value = exactOf(div(mul(g("ro"), g("l")), g("R")));
+    const num = mul(g("ro"), g("l"));
+    const value = exactOf(div(num, g("R")));
     return {
       values: [value],
-      steps: stdSteps(
-        "S = \\frac{\\rho l}{R}",
-        `S = \\frac{${L(g("ro"))} \\cdot ${L(g("l"))}}{${L(g("R"))}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "S = \\frac{\\rho l}{R}" },
+        {
+          title: "2. Podstawienie danych",
+          body: `S = \\frac{${L(g("ro"))} \\cdot ${L(g("l"))}}{${L(g("R"))}}`,
+        },
+        { title: "3. Licznik", body: `\\rho l = ${L(g("ro"))} \\cdot ${L(g("l"))} = ${L(num)}` },
+        { title: "4. Wynik", body: resultLatex("S", value, places) },
+      ],
     };
   },
 };
@@ -711,7 +866,11 @@ const mocPradu: FormulaDef = {
       const value = exactOf(mul(U, I));
       return {
         values: [value],
-        steps: stdSteps("P = U \\cdot I", `P = ${L(U)} \\cdot ${L(I)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P = U \\cdot I" },
+          { title: "2. Podstawienie danych", body: `P = ${L(U)} \\cdot ${L(I)}` },
+          { title: "3. Wynik", body: resultLatex("P", value, places) },
+        ],
       };
     }
     if (unknown === "U") {
@@ -720,7 +879,11 @@ const mocPradu: FormulaDef = {
       const value = exactOf(div(P, I));
       return {
         values: [value],
-        steps: stdSteps("U = \\frac{P}{I}", `U = \\frac{${L(P)}}{${L(I)}}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "U = \\frac{P}{I}" },
+          { title: "2. Podstawienie danych", body: `U = \\frac{${L(P)}}{${L(I)}}` },
+          { title: "3. Wynik", body: resultLatex("U", value, places) },
+        ],
       };
     }
     const P = asRational(known["P"], "P");
@@ -728,7 +891,11 @@ const mocPradu: FormulaDef = {
     const value = exactOf(div(P, U));
     return {
       values: [value],
-      steps: stdSteps("I = \\frac{P}{U}", `I = \\frac{${L(P)}}{${L(U)}}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "I = \\frac{P}{U}" },
+        { title: "2. Podstawienie danych", body: `I = \\frac{${L(P)}}{${L(U)}}` },
+        { title: "3. Wynik", body: resultLatex("I", value, places) },
+      ],
     };
   },
 };
@@ -754,7 +921,11 @@ const energiaPradu: FormulaDef = {
       const value = exactOf(mul(P, t));
       return {
         values: [value],
-        steps: stdSteps("W = P \\cdot t", `W = ${L(P)} \\cdot ${L(t)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "W = P \\cdot t" },
+          { title: "2. Podstawienie danych", body: `W = ${L(P)} \\cdot ${L(t)}` },
+          { title: "3. Wynik", body: resultLatex("W", value, places) },
+        ],
       };
     }
     if (unknown === "P") {
@@ -763,7 +934,11 @@ const energiaPradu: FormulaDef = {
       const value = exactOf(div(W, t));
       return {
         values: [value],
-        steps: stdSteps("P = \\frac{W}{t}", `P = \\frac{${L(W)}}{${L(t)}}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P = \\frac{W}{t}" },
+          { title: "2. Podstawienie danych", body: `P = \\frac{${L(W)}}{${L(t)}}` },
+          { title: "3. Wynik", body: resultLatex("P", value, places) },
+        ],
       };
     }
     const W = asRational(known["W"], "W");
@@ -771,7 +946,11 @@ const energiaPradu: FormulaDef = {
     const value = exactOf(div(W, P));
     return {
       values: [value],
-      steps: stdSteps("t = \\frac{W}{P}", `t = \\frac{${L(W)}}{${L(P)}}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "t = \\frac{W}{P}" },
+        { title: "2. Podstawienie danych", body: `t = \\frac{${L(W)}}{${L(P)}}` },
+        { title: "3. Wynik", body: resultLatex("t", value, places) },
+      ],
     };
   },
 };
@@ -794,29 +973,37 @@ const lorentz: FormulaDef = {
   solve(unknown, known, places): FormulaSolution {
     const g = (id: string) => asRational(known[id], id);
     if (unknown === "F") {
-      const value = exactOf(mul(mul(g("q"), g("v")), g("B")));
+      const qv = mul(g("q"), g("v"));
+      const value = exactOf(mul(qv, g("B")));
       return {
         values: [value],
-        steps: stdSteps(
-          "F = qvB",
-          `F = ${L(g("q"))} \\cdot ${L(g("v"))} \\cdot ${L(g("B"))}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "F = qvB" },
+          {
+            title: "2. Podstawienie danych",
+            body: `F = ${L(g("q"))} \\cdot ${L(g("v"))} \\cdot ${L(g("B"))}`,
+          },
+          { title: "3. Iloczyn qv", body: `qv = ${L(g("q"))} \\cdot ${L(g("v"))} = ${L(qv)}` },
+          { title: "4. Wynik", body: resultLatex("F", value, places) },
+        ],
       };
     }
     const others = ["q", "v", "B"].filter((id) => id !== unknown);
     const o = others.map(g);
     const F = g("F");
-    const value = exactOf(div(F, mul(o[0], o[1])));
+    const den = mul(o[0], o[1]);
+    const value = exactOf(div(F, den));
     return {
       values: [value],
-      steps: stdSteps(
-        `${unknown} = F/(${others[0]}${others[1]})`,
-        `${unknown} = \\frac{${L(F)}}{${L(o[0])} \\cdot ${L(o[1])}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${unknown} = F/(${others[0]}${others[1]})` },
+        {
+          title: "2. Podstawienie danych",
+          body: `${unknown} = \\frac{${L(F)}}{${L(o[0])} \\cdot ${L(o[1])}}`,
+        },
+        { title: "3. Mianownik", body: `${L(o[0])} \\cdot ${L(o[1])} = ${L(den)}` },
+        { title: "4. Wynik", body: resultLatex(unknown, value, places) },
+      ],
     };
   },
 };
@@ -844,45 +1031,61 @@ const snell: FormulaDef = {
       return v;
     };
     if (unknown === "n") {
-      const value = approxOnly(Math.sin(rad(g("alfa"))) / Math.sin(rad(g("beta"))));
+      const sa = Math.sin(rad(g("alfa")));
+      const sb = Math.sin(rad(g("beta")));
+      const value = approxOnly(sa / sb);
       return {
         values: [value],
-        steps: stdSteps(
-          "n = \\sin\\alpha/\\sin\\beta",
-          `n = \\sin ${g("alfa")}^\\circ / \\sin ${g("beta")}^\\circ`,
-          value,
-          places,
-          APPROX_NOTE,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "n = \\sin\\alpha/\\sin\\beta" },
+          {
+            title: "2. Podstawienie danych",
+            body: `n = \\sin ${g("alfa")}^\\circ / \\sin ${g("beta")}^\\circ`,
+          },
+          {
+            title: "3. Sinusy",
+            body: `\\sin ${g("alfa")}^\\circ = ${trimNum(sa)}, \\; \\sin ${g("beta")}^\\circ = ${trimNum(sb)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("n", value, places), note: APPROX_NOTE },
+        ],
       };
     }
     if (unknown === "alfa") {
-      const s = g("n") * Math.sin(rad(g("beta")));
+      const sb = Math.sin(rad(g("beta")));
+      const s = g("n") * sb;
       if (Math.abs(s) > 1) throw new Error("sin α > 1 — sprawdź dane (całkowite odbicie?)");
       const value = approxOnly(deg(Math.asin(s)));
       return {
         values: [value],
-        steps: stdSteps(
-          "\\alpha = \\arcsin(n \\sin\\beta)",
-          `\\alpha = \\arcsin(${g("n")} \\cdot \\sin ${g("beta")}^\\circ)`,
-          value,
-          places,
-          APPROX_NOTE,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "\\alpha = \\arcsin(n \\sin\\beta)" },
+          {
+            title: "2. Podstawienie danych",
+            body: `\\alpha = \\arcsin(${g("n")} \\cdot \\sin ${g("beta")}^\\circ)`,
+          },
+          {
+            title: "3. Iloczyn",
+            body: `n \\sin\\beta = ${g("n")} \\cdot ${trimNum(sb)} = ${trimNum(s)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("\\alpha", value, places), note: APPROX_NOTE },
+        ],
       };
     }
-    const s = Math.sin(rad(g("alfa"))) / g("n");
+    const sa = Math.sin(rad(g("alfa")));
+    const s = sa / g("n");
     if (Math.abs(s) > 1) throw new Error("sin β > 1 — sprawdź dane");
     const value = approxOnly(deg(Math.asin(s)));
     return {
       values: [value],
-      steps: stdSteps(
-        "\\beta = \\arcsin(\\sin\\alpha/n)",
-        `\\beta = \\arcsin(\\sin ${g("alfa")}^\\circ / ${g("n")})`,
-        value,
-        places,
-        APPROX_NOTE,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "\\beta = \\arcsin(\\sin\\alpha/n)" },
+        {
+          title: "2. Podstawienie danych",
+          body: `\\beta = \\arcsin(\\sin ${g("alfa")}^\\circ / ${g("n")})`,
+        },
+        { title: "3. Iloraz", body: `\\sin\\alpha/n = ${trimNum(sa)} / ${g("n")} = ${trimNum(s)}` },
+        { title: "4. Wynik", body: resultLatex("\\beta", value, places), note: APPROX_NOTE },
+      ],
     };
   },
 };
@@ -906,42 +1109,57 @@ const soczewki: FormulaDef = {
     if (unknown === "f") {
       const x = g("x");
       const y = g("y");
-      const value = exactOf(div(mul(x, y), add(x, y)));
+      const num = mul(x, y);
+      const den = add(x, y);
+      const value = exactOf(div(num, den));
       return {
         values: [value],
-        steps: stdSteps(
-          "f = \\frac{xy}{x + y}",
-          `f = \\frac{${L(x)} \\cdot ${L(y)}}{${L(x)} + ${L(y)}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "f = \\frac{xy}{x + y}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `f = \\frac{${L(x)} \\cdot ${L(y)}}{${L(x)} + ${L(y)}}`,
+          },
+          { title: "3. Licznik i mianownik", body: `xy = ${L(num)}, \\; x + y = ${L(den)}` },
+          { title: "4. Wynik", body: resultLatex("f", value, places) },
+        ],
       };
     }
     if (unknown === "x") {
       const f = g("f");
       const y = g("y");
-      const value = exactOf(div(mul(f, y), sub(y, f)));
+      const num = mul(f, y);
+      const den = sub(y, f);
+      const value = exactOf(div(num, den));
       return {
         values: [value],
-        steps: stdSteps(
-          "x = \\frac{fy}{y - f}",
-          `x = \\frac{${L(f)} \\cdot ${L(y)}}{${L(y)} - ${L(f)}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "x = \\frac{fy}{y - f}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `x = \\frac{${L(f)} \\cdot ${L(y)}}{${L(y)} - ${L(f)}}`,
+          },
+          { title: "3. Licznik i mianownik", body: `fy = ${L(num)}, \\; y - f = ${L(den)}` },
+          { title: "4. Wynik", body: resultLatex("x", value, places) },
+        ],
       };
     }
     const f = g("f");
     const x = g("x");
-    const value = exactOf(div(mul(f, x), sub(x, f)));
+    const num = mul(f, x);
+    const den = sub(x, f);
+    const value = exactOf(div(num, den));
     return {
       values: [value],
-      steps: stdSteps(
-        "y = \\frac{fx}{x - f}",
-        `y = \\frac{${L(f)} \\cdot ${L(x)}}{${L(x)} - ${L(f)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "y = \\frac{fx}{x - f}" },
+        {
+          title: "2. Podstawienie danych",
+          body: `y = \\frac{${L(f)} \\cdot ${L(x)}}{${L(x)} - ${L(f)}}`,
+        },
+        { title: "3. Licznik i mianownik", body: `fx = ${L(num)}, \\; x - f = ${L(den)}` },
+        { title: "4. Wynik", body: resultLatex("y", value, places) },
+      ],
     };
   },
 };
@@ -965,7 +1183,11 @@ const powiekszenie: FormulaDef = {
     const value = exactOf(div(y, x));
     return {
       values: [value],
-      steps: stdSteps("p = \\frac{y}{x}", `p = \\frac{${L(y)}}{${L(x)}}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "p = \\frac{y}{x}" },
+        { title: "2. Podstawienie danych", body: `p = \\frac{${L(y)}}{${L(x)}}` },
+        { title: "3. Wynik", body: resultLatex("p", value, places) },
+      ],
     };
   },
 };
@@ -992,7 +1214,8 @@ const siatka: FormulaDef = {
       const d = num(known["d"]);
       const alfa = num(known["alfa"]);
       const lambda = num(known["lambda"]);
-      const nFloat = (d * Math.sin(rad(alfa))) / lambda;
+      const s = Math.sin(rad(alfa));
+      const nFloat = (d * s) / lambda;
       const n = Math.round(nFloat);
       if (!Number.isFinite(nFloat) || Math.abs(nFloat - n) > 1e-6 || n < 0) {
         throw new Error("rząd nie wychodzi całkowity — sprawdź dane");
@@ -1000,12 +1223,18 @@ const siatka: FormulaDef = {
       const value = exactOf({ p: BigInt(n), q: 1n });
       return {
         values: [value],
-        steps: stdSteps(
-          "n = d\\sin\\alpha/\\lambda",
-          `n = ${d} \\cdot \\sin ${alfa}^\\circ / ${lambda}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "n = d\\sin\\alpha/\\lambda" },
+          {
+            title: "2. Podstawienie danych",
+            body: `n = ${d} \\cdot \\sin ${alfa}^\\circ / ${lambda}`,
+          },
+          {
+            title: "3. Sinus i iloczyn",
+            body: `\\sin ${alfa}^\\circ = ${trimNum(s)}, \\; d\\sin\\alpha = ${trimNum(d * s)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("n", value, places) },
+        ],
       };
     }
     const gn = (id: string): number => {
@@ -1014,43 +1243,56 @@ const siatka: FormulaDef = {
       return v;
     };
     if (unknown === "d") {
-      const value = approxOnly((gn("n") * gn("lambda")) / Math.sin(rad(gn("alfa"))));
+      const numV = gn("n") * gn("lambda");
+      const den = Math.sin(rad(gn("alfa")));
+      const value = approxOnly(numV / den);
       return {
         values: [value],
-        steps: stdSteps(
-          "d = n\\lambda/\\sin\\alpha",
-          `d = ${gn("n")} \\cdot ${gn("lambda")} / \\sin ${gn("alfa")}^\\circ`,
-          value,
-          places,
-          APPROX_NOTE,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "d = n\\lambda/\\sin\\alpha" },
+          {
+            title: "2. Podstawienie danych",
+            body: `d = ${gn("n")} \\cdot ${gn("lambda")} / \\sin ${gn("alfa")}^\\circ`,
+          },
+          {
+            title: "3. Licznik i sinus",
+            body: `n\\lambda = ${trimNum(numV)}, \\; \\sin\\alpha = ${trimNum(den)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("d", value, places), note: APPROX_NOTE },
+        ],
       };
     }
     if (unknown === "lambda") {
-      const value = approxOnly((gn("d") * Math.sin(rad(gn("alfa")))) / gn("n"));
+      const numV = gn("d") * Math.sin(rad(gn("alfa")));
+      const value = approxOnly(numV / gn("n"));
       return {
         values: [value],
-        steps: stdSteps(
-          "\\lambda = d\\sin\\alpha/n",
-          `\\lambda = ${gn("d")} \\cdot \\sin ${gn("alfa")}^\\circ / ${gn("n")}`,
-          value,
-          places,
-          APPROX_NOTE,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "\\lambda = d\\sin\\alpha/n" },
+          {
+            title: "2. Podstawienie danych",
+            body: `\\lambda = ${gn("d")} \\cdot \\sin ${gn("alfa")}^\\circ / ${gn("n")}`,
+          },
+          { title: "3. Licznik", body: `d\\sin\\alpha = ${trimNum(numV)}` },
+          { title: "4. Wynik", body: resultLatex("\\lambda", value, places), note: APPROX_NOTE },
+        ],
       };
     }
-    const s = (gn("n") * gn("lambda")) / gn("d");
+    const numV = gn("n") * gn("lambda");
+    const s = numV / gn("d");
     if (Math.abs(s) > 1) throw new Error("sin α > 1 — sprawdź dane");
     const value = approxOnly(deg(Math.asin(s)));
     return {
       values: [value],
-      steps: stdSteps(
-        "\\alpha = \\arcsin(n\\lambda/d)",
-        `\\alpha = \\arcsin(${gn("n")} \\cdot ${gn("lambda")} / ${gn("d")})`,
-        value,
-        places,
-        APPROX_NOTE,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "\\alpha = \\arcsin(n\\lambda/d)" },
+        {
+          title: "2. Podstawienie danych",
+          body: `\\alpha = \\arcsin(${gn("n")} \\cdot ${gn("lambda")} / ${gn("d")})`,
+        },
+        { title: "3. Argument", body: `n\\lambda/d = ${trimNum(s)}` },
+        { title: "4. Wynik", body: resultLatex("\\alpha", value, places), note: APPROX_NOTE },
+      ],
     };
   },
 };
@@ -1076,7 +1318,11 @@ const fale: FormulaDef = {
       const value = exactOf(mul(lambda, f));
       return {
         values: [value],
-        steps: stdSteps("v = \\lambda f", `v = ${L(lambda)} \\cdot ${L(f)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "v = \\lambda f" },
+          { title: "2. Podstawienie danych", body: `v = ${L(lambda)} \\cdot ${L(f)}` },
+          { title: "3. Wynik", body: resultLatex("v", value, places) },
+        ],
       };
     }
     if (unknown === "lambda") {
@@ -1085,7 +1331,11 @@ const fale: FormulaDef = {
       const value = exactOf(div(v, f));
       return {
         values: [value],
-        steps: stdSteps("\\lambda = v/f", `\\lambda = \\frac{${L(v)}}{${L(f)}}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "\\lambda = v/f" },
+          { title: "2. Podstawienie danych", body: `\\lambda = \\frac{${L(v)}}{${L(f)}}` },
+          { title: "3. Wynik", body: resultLatex("\\lambda", value, places) },
+        ],
       };
     }
     const v = asRational(known["v"], "v");
@@ -1093,7 +1343,11 @@ const fale: FormulaDef = {
     const value = exactOf(div(v, lambda));
     return {
       values: [value],
-      steps: stdSteps("f = v/\\lambda", `f = \\frac{${L(v)}}{${L(lambda)}}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "f = v/\\lambda" },
+        { title: "2. Podstawienie danych", body: `f = \\frac{${L(v)}}{${L(lambda)}}` },
+        { title: "3. Wynik", body: resultLatex("f", value, places) },
+      ],
     };
   },
 };
@@ -1115,30 +1369,30 @@ const wahadloMat: FormulaDef = {
     if (unknown === "T") {
       const l = asRational(known["l"], "l");
       if (cmp(l, ZERO) <= 0) throw new Error("długość dodatnia");
-      const out = approxOnly(2 * Math.PI * Math.sqrt(num(exactOf(l)) / 10));
+      const ratio = num(exactOf(l)) / 10;
+      const out = approxOnly(2 * Math.PI * Math.sqrt(ratio));
       return {
         values: [out],
-        steps: stdSteps(
-          "T = 2\\pi\\sqrt{l/g}",
-          `T = 2\\pi\\sqrt{${L(l)}/10}`,
-          out,
-          places,
-          APPROX_NOTE,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "T = 2\\pi\\sqrt{l/g}" },
+          { title: "2. Podstawienie danych", body: `T = 2\\pi\\sqrt{${L(l)}/10}` },
+          { title: "3. Ułamek pod pierwiastkiem", body: `l/g = ${trimNum(ratio)}` },
+          { title: "4. Wynik", body: resultLatex("T", out, places), note: APPROX_NOTE },
+        ],
       };
     }
     const T = known["T"];
     const tNum = num(T);
-    const value = approxOnly((10 * tNum * tNum) / (4 * Math.PI * Math.PI));
+    const t2 = tNum * tNum;
+    const value = approxOnly((10 * t2) / (4 * Math.PI * Math.PI));
     return {
       values: [value],
-      steps: stdSteps(
-        "l = gT^2/(4\\pi^2)",
-        `l = 10 \\cdot ${formatLatex(T)}^2 / (4\\pi^2)`,
-        value,
-        places,
-        APPROX_NOTE,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "l = gT^2/(4\\pi^2)" },
+        { title: "2. Podstawienie danych", body: `l = 10 \\cdot ${formatLatex(T)}^2 / (4\\pi^2)` },
+        { title: "3. Kwadrat okresu", body: `T^2 = ${trimNum(t2)}` },
+        { title: "4. Wynik", body: resultLatex("l", value, places), note: APPROX_NOTE },
+      ],
     };
   },
 };
@@ -1171,39 +1425,51 @@ const wahadloSprezyna: FormulaDef = {
       const m = asRational(known["m"], "m");
       const k = asRational(known["k"], "k");
       if (cmp(m, ZERO) <= 0 || cmp(k, ZERO) <= 0) throw new Error("m i k dodatnie");
+      const ratio = num(exactOf(m)) / num(exactOf(k));
       const out = mulPiNum(mulExactNum(sqrtRational(div(m, k)), 2));
       return {
         values: [out],
-        steps: stdSteps("T = 2\\pi\\sqrt{m/k}", `T = 2\\pi\\sqrt{${L(m)}/${L(k)}}`, out, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "T = 2\\pi\\sqrt{m/k}" },
+          { title: "2. Podstawienie danych", body: `T = 2\\pi\\sqrt{${L(m)}/${L(k)}}` },
+          { title: "3. Ułamek pod pierwiastkiem", body: `m/k = ${trimNum(ratio)}` },
+          { title: "4. Wynik", body: resultLatex("T", out, places) },
+        ],
       };
     }
     const T = known["T"];
     const tNum = num(T);
     if (unknown === "m") {
       const k = asRational(known["k"], "k");
-      const value = approxOnly((num(exactOf(k)) * tNum * tNum) / (4 * Math.PI * Math.PI));
+      const t2 = tNum * tNum;
+      const value = approxOnly((num(exactOf(k)) * t2) / (4 * Math.PI * Math.PI));
       return {
         values: [value],
-        steps: stdSteps(
-          "m = kT^2/(4\\pi^2)",
-          `m = ${L(k)} \\cdot ${formatLatex(T)}^2 / (4\\pi^2)`,
-          value,
-          places,
-          APPROX_NOTE,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "m = kT^2/(4\\pi^2)" },
+          {
+            title: "2. Podstawienie danych",
+            body: `m = ${L(k)} \\cdot ${formatLatex(T)}^2 / (4\\pi^2)`,
+          },
+          { title: "3. Kwadrat okresu", body: `T^2 = ${trimNum(t2)}` },
+          { title: "4. Wynik", body: resultLatex("m", value, places), note: APPROX_NOTE },
+        ],
       };
     }
     const m = asRational(known["m"], "m");
-    const value = approxOnly((4 * Math.PI * Math.PI * num(exactOf(m))) / (tNum * tNum));
+    const t2 = tNum * tNum;
+    const value = approxOnly((4 * Math.PI * Math.PI * num(exactOf(m))) / t2);
     return {
       values: [value],
-      steps: stdSteps(
-        "k = 4\\pi^2m/T^2",
-        `k = 4\\pi^2 \\cdot ${L(m)} / ${formatLatex(T)}^2`,
-        value,
-        places,
-        APPROX_NOTE,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "k = 4\\pi^2m/T^2" },
+        {
+          title: "2. Podstawienie danych",
+          body: `k = 4\\pi^2 \\cdot ${L(m)} / ${formatLatex(T)}^2`,
+        },
+        { title: "3. Kwadrat okresu", body: `T^2 = ${trimNum(t2)}` },
+        { title: "4. Wynik", body: resultLatex("k", value, places), note: APPROX_NOTE },
+      ],
     };
   },
 };
@@ -1229,7 +1495,11 @@ const foto: FormulaDef = {
       const value = exactOf(add(W, Ek));
       return {
         values: [value],
-        steps: stdSteps("E_f = W + E_k", `E_f = ${L(W)} + ${L(Ek)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "E_f = W + E_k" },
+          { title: "2. Podstawienie danych", body: `E_f = ${L(W)} + ${L(Ek)}` },
+          { title: "3. Wynik", body: resultLatex("E_f", value, places) },
+        ],
       };
     }
     if (unknown === "W") {
@@ -1238,7 +1508,11 @@ const foto: FormulaDef = {
       const value = exactOf(sub(Ef, Ek));
       return {
         values: [value],
-        steps: stdSteps("W = E_f - E_k", `W = ${L(Ef)} - ${L(Ek)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "W = E_f - E_k" },
+          { title: "2. Podstawienie danych", body: `W = ${L(Ef)} - ${L(Ek)}` },
+          { title: "3. Wynik", body: resultLatex("W", value, places) },
+        ],
       };
     }
     const Ef = asRational(known["Ef"], "Ef");
@@ -1246,7 +1520,11 @@ const foto: FormulaDef = {
     const value = exactOf(sub(Ef, W));
     return {
       values: [value],
-      steps: stdSteps("E_k = E_f - W", `E_k = ${L(Ef)} - ${L(W)}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "E_k = E_f - W" },
+        { title: "2. Podstawienie danych", body: `E_k = ${L(Ef)} - ${L(W)}` },
+        { title: "3. Wynik", body: resultLatex("E_k", value, places) },
+      ],
     };
   },
 };
@@ -1267,17 +1545,29 @@ const emc2: FormulaDef = {
   solve(unknown, known, places): FormulaSolution {
     if (unknown === "E") {
       const m = num(known["m"]);
-      const value = approxOnly(m * C_LIGHT * C_LIGHT);
+      const c2 = C_LIGHT * C_LIGHT;
+      const value = approxOnly(m * c2);
       return {
         values: [value],
-        steps: stdSteps("E = mc^2", `E = ${m}c^2`, value, places, APPROX_NOTE),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "E = mc^2" },
+          { title: "2. Podstawienie danych", body: `E = ${m}c^2` },
+          { title: "3. Kwadrat prędkości światła", body: `c^2 = (3 \\cdot 10^8)^2 = ${c2}` },
+          { title: "4. Wynik", body: resultLatex("E", value, places), note: APPROX_NOTE },
+        ],
       };
     }
     const E = num(known["E"]);
-    const value = approxOnly(E / (C_LIGHT * C_LIGHT));
+    const c2 = C_LIGHT * C_LIGHT;
+    const value = approxOnly(E / c2);
     return {
       values: [value],
-      steps: stdSteps("m = E/c^2", `m = ${E}/c^2`, value, places, APPROX_NOTE),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "m = E/c^2" },
+        { title: "2. Podstawienie danych", body: `m = ${E}/c^2` },
+        { title: "3. Kwadrat prędkości światła", body: `c^2 = (3 \\cdot 10^8)^2 = ${c2}` },
+        { title: "4. Wynik", body: resultLatex("m", value, places), note: APPROX_NOTE },
+      ],
     };
   },
 };
@@ -1304,29 +1594,37 @@ const rozpad: FormulaDef = {
       return v;
     };
     if (unknown === "N") {
-      const value = approxOnly(g("N0") * 0.5 ** (g("t") / g("T")));
+      const ratio = g("t") / g("T");
+      const pw = 0.5 ** ratio;
+      const value = approxOnly(g("N0") * pw);
       return {
         values: [value],
-        steps: stdSteps(
-          "N = N_0(1/2)^{t/T}",
-          `N = ${g("N0")}(1/2)^{${g("t")}/${g("T")}}`,
-          value,
-          places,
-          APPROX_NOTE,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "N = N_0(1/2)^{t/T}" },
+          { title: "2. Podstawienie danych", body: `N = ${g("N0")}(1/2)^{${g("t")}/${g("T")}}` },
+          {
+            title: "3. Wykładnik i potęga",
+            body: `t/T = ${trimNum(ratio)}, \\; (1/2)^{${trimNum(ratio)}} = ${trimNum(pw)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("N", value, places), note: APPROX_NOTE },
+        ],
       };
     }
     if (unknown === "N0") {
-      const value = approxOnly(g("N") * 2 ** (g("t") / g("T")));
+      const ratio = g("t") / g("T");
+      const pw = 2 ** ratio;
+      const value = approxOnly(g("N") * pw);
       return {
         values: [value],
-        steps: stdSteps(
-          "N_0 = N 2^{t/T}",
-          `N_0 = ${g("N")} 2^{${g("t")}/${g("T")}}`,
-          value,
-          places,
-          APPROX_NOTE,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "N_0 = N 2^{t/T}" },
+          { title: "2. Podstawienie danych", body: `N_0 = ${g("N")} 2^{${g("t")}/${g("T")}}` },
+          {
+            title: "3. Wykładnik i potęga",
+            body: `t/T = ${trimNum(ratio)}, \\; 2^{${trimNum(ratio)}} = ${trimNum(pw)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("N_0", value, places), note: APPROX_NOTE },
+        ],
       };
     }
     if (g("N0") <= 0 || g("N") <= 0 || g("N") > g("N0")) {
@@ -1337,26 +1635,24 @@ const rozpad: FormulaDef = {
       const value = approxOnly(g("T") * log2);
       return {
         values: [value],
-        steps: stdSteps(
-          "t = T log_2(N_0/N)",
-          `t = ${g("T")} log_2(${g("N0")}/${g("N")})`,
-          value,
-          places,
-          APPROX_NOTE,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "t = T log_2(N_0/N)" },
+          { title: "2. Podstawienie danych", body: `t = ${g("T")} log_2(${g("N0")}/${g("N")})` },
+          { title: "3. Logarytm", body: `\\log_2(${g("N0")}/${g("N")}) = ${trimNum(log2)}` },
+          { title: "4. Wynik", body: resultLatex("t", value, places), note: APPROX_NOTE },
+        ],
       };
     }
     if (log2 === 0) throw new Error("N = N₀ — czas nieokreślony");
     const value = approxOnly(g("t") / log2);
     return {
       values: [value],
-      steps: stdSteps(
-        "T = t/log_2(N_0/N)",
-        `T = ${g("t")}/log_2(${g("N0")}/${g("N")})`,
-        value,
-        places,
-        APPROX_NOTE,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "T = t/log_2(N_0/N)" },
+        { title: "2. Podstawienie danych", body: `T = ${g("t")}/log_2(${g("N0")}/${g("N")})` },
+        { title: "3. Logarytm", body: `\\log_2(${g("N0")}/${g("N")}) = ${trimNum(log2)}` },
+        { title: "4. Wynik", body: resultLatex("T", value, places), note: APPROX_NOTE },
+      ],
     };
   },
 };

@@ -1,8 +1,8 @@
 import { ZERO, add, cmp, div, isIntegerR, mul, of, pow, sub, toNumber } from "../exact/rational";
 import { addExact, approx, approxOnly, exactOf, logExact, subExact } from "../exact/exact";
-import { formatRatLatex } from "../exact/format";
+import { formatLatex, formatRatLatex } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { asRational, requireNatural, resultLatex, stdSteps } from "./types";
+import { asRational, requireNatural, resultLatex } from "./types";
 
 const L = formatRatLatex;
 
@@ -30,7 +30,9 @@ const kc: FormulaDef = {
     const g = (id: string) => asRational(known[id], id);
     const [a, b, c, d] = [e("a"), e("b"), e("c"), e("d")];
     const [CA, CB, CC, CD] = [g("CA"), g("CB"), g("CC"), g("CD")];
-    const value = exactOf(div(mul(pow(CC, c), pow(CD, d)), mul(pow(CA, a), pow(CB, b))));
+    const num = mul(pow(CC, c), pow(CD, d));
+    const den = mul(pow(CA, a), pow(CB, b));
+    const value = exactOf(div(num, den));
     return {
       values: [value],
       steps: [
@@ -39,7 +41,11 @@ const kc: FormulaDef = {
           title: "2. Podstawienie danych",
           body: `K_c = \\frac{${L(CC)}^{${c}}${L(CD)}^{${d}}}{${L(CA)}^{${a}}${L(CB)}^{${b}}}`,
         },
-        { title: "3. Wynik", body: resultLatex("K_c", value, places) },
+        {
+          title: "3. Licznik i mianownik",
+          body: `[C]^c[D]^d = ${L(num)}, \\; [A]^a[B]^b = ${L(den)}`,
+        },
+        { title: "4. Wynik", body: resultLatex("K_c", value, places) },
       ],
     };
   },
@@ -66,12 +72,11 @@ const dysocjacja: FormulaDef = {
       const value = exactOf(div(cz, c0));
       return {
         values: [value],
-        steps: stdSteps(
-          "\\alpha = \\frac{C_{zdys}}{C_0}",
-          `\\alpha = \\frac{${L(cz)}}{${L(c0)}}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "\\alpha = \\frac{C_{zdys}}{C_0}" },
+          { title: "2. Podstawienie danych", body: `\\alpha = \\frac{${L(cz)}}{${L(c0)}}` },
+          { title: "3. Wynik", body: resultLatex("\\alpha", value, places) },
+        ],
       };
     }
     if (unknown === "cz") {
@@ -80,12 +85,11 @@ const dysocjacja: FormulaDef = {
       const value = exactOf(mul(alfa, c0));
       return {
         values: [value],
-        steps: stdSteps(
-          "C_{zdys} = \\alpha \\cdot C_0",
-          `C_{zdys} = ${L(alfa)} \\cdot ${L(c0)}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "C_{zdys} = \\alpha \\cdot C_0" },
+          { title: "2. Podstawienie danych", body: `C_{zdys} = ${L(alfa)} \\cdot ${L(c0)}` },
+          { title: "3. Wynik", body: resultLatex("C_{zdys}", value, places) },
+        ],
       };
     }
     const alfa = asRational(known["alfa"], "α");
@@ -93,12 +97,11 @@ const dysocjacja: FormulaDef = {
     const value = exactOf(div(cz, alfa));
     return {
       values: [value],
-      steps: stdSteps(
-        "C_0 = \\frac{C_{zdys}}{\\alpha}",
-        `C_0 = \\frac{${L(cz)}}{${L(alfa)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "C_0 = \\frac{C_{zdys}}{\\alpha}" },
+        { title: "2. Podstawienie danych", body: `C_0 = \\frac{${L(cz)}}{${L(alfa)}}` },
+        { title: "3. Wynik", body: resultLatex("C_0", value, places) },
+      ],
     };
   },
 };
@@ -124,7 +127,11 @@ const iloczyn: FormulaDef = {
       const value = exactOf(mul(A, B));
       return {
         values: [value],
-        steps: stdSteps("K_s = [A][B]", `K_s = ${L(A)}${L(B)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "K_s = [A][B]" },
+          { title: "2. Podstawienie danych", body: `K_s = ${L(A)}${L(B)}` },
+          { title: "3. Wynik", body: resultLatex("K_s", value, places) },
+        ],
       };
     }
     const Ks = asRational(known["Ks"], "Ks");
@@ -135,12 +142,11 @@ const iloczyn: FormulaDef = {
     const so = unknown === "A" ? "[B]" : "[A]";
     return {
       values: [value],
-      steps: stdSteps(
-        `${sym} = \\frac{K_s}{${so}}`,
-        `${sym} = \\frac{${L(Ks)}}{${L(o)}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${sym} = \\frac{K_s}{${so}}` },
+        { title: "2. Podstawienie danych", body: `${sym} = \\frac{${L(Ks)}}{${L(o)}}` },
+        { title: "3. Wynik", body: resultLatex(sym, value, places) },
+      ],
     };
   },
 };
@@ -166,7 +172,11 @@ const ogniwo: FormulaDef = {
       const value = exactOf(sub(Ekat, Ean));
       return {
         values: [value],
-        steps: stdSteps("E = E_{kat} - E_{an}", `E = ${L(Ekat)} - ${L(Ean)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "E = E_{kat} - E_{an}" },
+          { title: "2. Podstawienie danych", body: `E = ${L(Ekat)} - ${L(Ean)}` },
+          { title: "3. Wynik", body: resultLatex("E", value, places) },
+        ],
       };
     }
     if (unknown === "Ekat") {
@@ -175,7 +185,11 @@ const ogniwo: FormulaDef = {
       const value = exactOf(add(E, Ean));
       return {
         values: [value],
-        steps: stdSteps("E_{kat} = E + E_{an}", `E_{kat} = ${L(E)} + ${L(Ean)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "E_{kat} = E + E_{an}" },
+          { title: "2. Podstawienie danych", body: `E_{kat} = ${L(E)} + ${L(Ean)}` },
+          { title: "3. Wynik", body: resultLatex("E_{kat}", value, places) },
+        ],
       };
     }
     const E = asRational(known["E"], "E");
@@ -183,7 +197,11 @@ const ogniwo: FormulaDef = {
     const value = exactOf(sub(Ekat, E));
     return {
       values: [value],
-      steps: stdSteps("E_{an} = E_{kat} - E", `E_{an} = ${L(Ekat)} - ${L(E)}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "E_{an} = E_{kat} - E" },
+        { title: "2. Podstawienie danych", body: `E_{an} = ${L(Ekat)} - ${L(E)}` },
+        { title: "3. Wynik", body: resultLatex("E_{an}", value, places) },
+      ],
     };
   },
 };
@@ -206,32 +224,40 @@ const elektroliza: FormulaDef = {
   solve(unknown, known, places): FormulaSolution {
     const g = (id: string) => asRational(known[id], id);
     if (unknown === "m") {
-      const value = exactOf(mul(mul(g("k"), g("I")), g("t")));
+      const kI = mul(g("k"), g("I"));
+      const value = exactOf(mul(kI, g("t")));
       return {
         values: [value],
-        steps: stdSteps(
-          "m = k I t",
-          `m = ${L(g("k"))} \\cdot ${L(g("I"))} \\cdot ${L(g("t"))}`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "m = k I t" },
+          {
+            title: "2. Podstawienie danych",
+            body: `m = ${L(g("k"))} \\cdot ${L(g("I"))} \\cdot ${L(g("t"))}`,
+          },
+          { title: "3. Iloczyn kI", body: `kI = ${L(g("k"))} \\cdot ${L(g("I"))} = ${L(kI)}` },
+          { title: "4. Wynik", body: resultLatex("m", value, places) },
+        ],
       };
     }
     const others = ["k", "I", "t"].filter((id) => id !== unknown);
     const o = others.map(g);
     const m = g("m");
-    const value = exactOf(div(m, mul(o[0], o[1])));
+    const den = mul(o[0], o[1]);
+    const value = exactOf(div(m, den));
     const sym = { k: "k", I: "I", t: "t" } as const;
     const s = sym[unknown as keyof typeof sym];
     const so = others.map((id) => sym[id as keyof typeof sym]);
     return {
       values: [value],
-      steps: stdSteps(
-        `${s} = \\frac{m}{${so[0]}${so[1]}}`,
-        `${s} = \\frac{${L(m)}}{${L(o[0])} \\cdot ${L(o[1])}}`,
-        value,
-        places,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${s} = \\frac{m}{${so[0]}${so[1]}}` },
+        {
+          title: "2. Podstawienie danych",
+          body: `${s} = \\frac{${L(m)}}{${L(o[0])} \\cdot ${L(o[1])}}`,
+        },
+        { title: "3. Mianownik", body: `${L(o[0])} \\cdot ${L(o[1])} = ${L(den)}` },
+        { title: "4. Wynik", body: resultLatex(s, value, places) },
+      ],
     };
   },
 };
@@ -257,17 +283,24 @@ const bufor: FormulaDef = {
       const Cs = asRational(known["Cs"], "Cs");
       const Ck = asRational(known["Ck"], "Ck");
       if (cmp(Cs, ZERO) <= 0 || cmp(Ck, ZERO) <= 0) throw new Error("stężenia muszą być dodatnie");
-      const value = addExact(exactOf(pKa), logExact(of(10), div(Cs, Ck)));
+      const ratio = div(Cs, Ck);
+      const lg = logExact(of(10), ratio);
+      const value = addExact(exactOf(pKa), lg);
       const note = value.irr?.type === "approx" ? "wynik tylko przybliżony" : undefined;
       return {
         values: [value],
-        steps: stdSteps(
-          "pH = pK_a + \\log\\frac{C_s}{C_k}",
-          `pH = ${L(pKa)} + \\log\\frac{${L(Cs)}}{${L(Ck)}}`,
-          value,
-          places,
-          note,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "pH = pK_a + \\log\\frac{C_s}{C_k}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `pH = ${L(pKa)} + \\log\\frac{${L(Cs)}}{${L(Ck)}}`,
+          },
+          {
+            title: "3. Stosunek i logarytm",
+            body: `\\frac{C_s}{C_k} = ${L(ratio)}, \\; \\log = ${formatLatex(lg)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("pH", value, places), note },
+        ],
       };
     }
     if (unknown === "pKa") {
@@ -275,17 +308,24 @@ const bufor: FormulaDef = {
       const Cs = asRational(known["Cs"], "Cs");
       const Ck = asRational(known["Ck"], "Ck");
       if (cmp(Cs, ZERO) <= 0 || cmp(Ck, ZERO) <= 0) throw new Error("stężenia muszą być dodatnie");
-      const value = subExact(exactOf(pH), logExact(of(10), div(Cs, Ck)));
+      const ratio = div(Cs, Ck);
+      const lg = logExact(of(10), ratio);
+      const value = subExact(exactOf(pH), lg);
       const note = value.irr?.type === "approx" ? "wynik tylko przybliżony" : undefined;
       return {
         values: [value],
-        steps: stdSteps(
-          "pK_a = pH - \\log\\frac{C_s}{C_k}",
-          `pK_a = ${L(pH)} - \\log\\frac{${L(Cs)}}{${L(Ck)}}`,
-          value,
-          places,
-          note,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "pK_a = pH - \\log\\frac{C_s}{C_k}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `pK_a = ${L(pH)} - \\log\\frac{${L(Cs)}}{${L(Ck)}}`,
+          },
+          {
+            title: "3. Stosunek i logarytm",
+            body: `\\frac{C_s}{C_k} = ${L(ratio)}, \\; \\log = ${formatLatex(lg)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("pK_a", value, places), note },
+        ],
       };
     }
     const other = unknown === "Cs" ? "Ck" : "Cs";
@@ -305,15 +345,18 @@ const bufor: FormulaDef = {
     }
     const sym = unknown === "Cs" ? "C_s" : "C_k";
     const so = unknown === "Cs" ? "C_k" : "C_s";
+    const sgn = unknown === "Cs" ? "+" : "-";
     return {
       values: [value],
-      steps: stdSteps(
-        `${sym} = ${so} \\cdot 10^{${unknown === "Cs" ? "+" : "-"}(pH-pK_a)}`,
-        `${sym} = ${L(Co)} \\cdot 10^{${unknown === "Cs" ? "+" : "-"}(${L(pH)}-${L(pKa)})}`,
-        value,
-        places,
-        note,
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${sym} = ${so} \\cdot 10^{${sgn}(pH-pK_a)}` },
+        {
+          title: "2. Podstawienie danych",
+          body: `${sym} = ${L(Co)} \\cdot 10^{${sgn}(${L(pH)}-${L(pKa)})}`,
+        },
+        { title: "3. Różnica pH", body: `pH - pK_a = ${L(d)}` },
+        { title: "4. Wynik", body: resultLatex(sym, value, places), note },
+      ],
     };
   },
 };

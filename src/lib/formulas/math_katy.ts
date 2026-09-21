@@ -1,9 +1,9 @@
 import { ONE, ZERO, add, cmp, div, isZero, mul, of, sub } from "../exact/rational";
 import { approx, approxOnly, exactOf, mulRat, stripPi } from "../exact/exact";
 import type { Exact } from "../exact/exact";
-import { formatLatex, formatRatLatex } from "../exact/format";
+import { formatLatex, formatRatLatex, trimNum } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { APPROX_PI_NOTE, asRational, requireNatural, stdSteps } from "./types";
+import { APPROX_PI_NOTE, asRational, requireNatural, resultLatex, stdSteps } from "./types";
 
 const PI: Exact = { rat: ZERO, irr: { type: "pi", coef: ONE } };
 const L = formatRatLatex;
@@ -24,15 +24,19 @@ const zamianaMiary: FormulaDef = {
   solve(unknown, known, places): FormulaSolution {
     if (unknown === "rad") {
       const deg = asRational(known["deg"], "α");
-      const value = mulRat(PI, div(deg, of(180)));
+      const frac = div(deg, of(180));
+      const value = mulRat(PI, frac);
       return {
         values: [value],
-        steps: stdSteps(
-          "\\alpha = \\alpha^\\circ \\cdot \\frac{\\pi}{180}",
-          `\\alpha = ${L(deg)} \\cdot \\frac{\\pi}{180}`,
-          value,
-          places,
-        ),
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: "\\alpha = \\alpha^\\circ \\cdot \\frac{\\pi}{180}",
+          },
+          { title: "2. Podstawienie danych", body: `\\alpha = ${L(deg)} \\cdot \\frac{\\pi}{180}` },
+          { title: "3. Ułamek", body: `\\frac{${L(deg)}}{180} = ${L(frac)}` },
+          { title: "4. Wynik", body: resultLatex("\\alpha", value, places) },
+        ],
       };
     }
     const rad = known["rad"];
@@ -74,7 +78,8 @@ const katTrojkat: FormulaDef = {
   solve(unknown, known, places): FormulaSolution {
     const others = ["alfa", "beta", "gamma"].filter((id) => id !== unknown);
     const o = others.map((id) => asRational(known[id], id));
-    const value = exactOf(sub(sub(of(180), o[0]), o[1]));
+    const rest = sub(of(180), o[0]);
+    const value = exactOf(sub(rest, o[1]));
     if (cmp(value.rat, ZERO) <= 0)
       throw new Error("kąty trójkąta muszą być dodatnie i sumować się do 180°");
     const sym = { alfa: "\\alpha", beta: "\\beta", gamma: "\\gamma" } as const;
@@ -82,12 +87,15 @@ const katTrojkat: FormulaDef = {
     const so = others.map((id) => sym[id as keyof typeof sym]);
     return {
       values: [value],
-      steps: stdSteps(
-        `${s} = 180^\\circ - ${so[0]} - ${so[1]}`,
-        `${s} = 180 - ${L(o[0])} - ${L(o[1])}`,
-        value,
-        places,
-      ),
+      steps: [
+        {
+          title: "1. Przekształcenie wzoru",
+          body: `${s} = 180^\\circ - ${so[0]} - ${so[1]}`,
+        },
+        { title: "2. Podstawienie danych", body: `${s} = 180 - ${L(o[0])} - ${L(o[1])}` },
+        { title: "3. Pierwsze odejmowanie", body: `180 - ${L(o[0])} = ${L(rest)}` },
+        { title: "4. Wynik", body: resultLatex(s, value, places) },
+      ],
     };
   },
 };
@@ -136,16 +144,29 @@ const katMiedzyProstymi: FormulaDef = {
       };
     }
     const t = Math.abs(approx(exactOf(div(sub(a2, a1), den))));
+    const num = sub(a2, a1);
     const value = approxOnly((Math.atan(t) * 180) / Math.PI);
     return {
       values: [value],
-      steps: stdSteps(
-        "\\tan\\varphi = \\left|\\frac{a_2 - a_1}{1 + a_1a_2}\\right|",
-        `\\tan\\varphi = \\left|\\frac{${L(a2)} - ${L(a1)}}{1 + ${L(a1)}${L(a2)}}\\right|`,
-        value,
-        places,
-        "wynik w stopniach",
-      ),
+      steps: [
+        {
+          title: "1. Przekształcenie wzoru",
+          body: "\\tan\\varphi = \\left|\\frac{a_2 - a_1}{1 + a_1a_2}\\right|",
+        },
+        {
+          title: "2. Podstawienie danych",
+          body: `\\tan\\varphi = \\left|\\frac{${L(a2)} - ${L(a1)}}{1 + ${L(a1)}${L(a2)}}\\right|`,
+        },
+        {
+          title: "3. Licznik i mianownik",
+          body: `a_2 - a_1 = ${L(num)}, \\; 1 + a_1a_2 = ${L(den)}`,
+        },
+        {
+          title: "4. Wynik",
+          body: resultLatex("\\varphi", value, places),
+          note: "wynik w stopniach",
+        },
+      ],
     };
   },
 };
@@ -171,7 +192,11 @@ const trojkatyPodobne: FormulaDef = {
       const value = exactOf(mul(k, x));
       return {
         values: [value],
-        steps: stdSteps("y = k \\cdot x", `y = ${L(k)} \\cdot ${L(x)}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "y = k \\cdot x" },
+          { title: "2. Podstawienie danych", body: `y = ${L(k)} \\cdot ${L(x)}` },
+          { title: "3. Wynik", body: resultLatex("y", value, places) },
+        ],
       };
     }
     if (unknown === "x") {
@@ -180,7 +205,11 @@ const trojkatyPodobne: FormulaDef = {
       const value = exactOf(div(y, k));
       return {
         values: [value],
-        steps: stdSteps("x = \\frac{y}{k}", `x = \\frac{${L(y)}}{${L(k)}}`, value, places),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "x = \\frac{y}{k}" },
+          { title: "2. Podstawienie danych", body: `x = \\frac{${L(y)}}{${L(k)}}` },
+          { title: "3. Wynik", body: resultLatex("x", value, places) },
+        ],
       };
     }
     const x = asRational(known["x"], "x");
@@ -188,7 +217,11 @@ const trojkatyPodobne: FormulaDef = {
     const value = exactOf(div(y, x));
     return {
       values: [value],
-      steps: stdSteps("k = \\frac{y}{x}", `k = \\frac{${L(y)}}{${L(x)}}`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "k = \\frac{y}{x}" },
+        { title: "2. Podstawienie danych", body: `k = \\frac{${L(y)}}{${L(x)}}` },
+        { title: "3. Wynik", body: resultLatex("k", value, places) },
+      ],
     };
   },
 };
@@ -231,13 +264,16 @@ const katZBokow: FormulaDef = {
     const value = approxOnly(deg);
     return {
       values: [value],
-      steps: stdSteps(
-        `\\alpha = ${fn}\\frac{x}{y}`,
-        `\\alpha = ${fn}\\frac{${L(x)}}{${L(y)}}`,
-        value,
-        places,
-        "wynik w stopniach",
-      ),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `\\alpha = ${fn}\\frac{x}{y}` },
+        { title: "2. Podstawienie danych", body: `\\alpha = ${fn}\\frac{${L(x)}}{${L(y)}}` },
+        { title: "3. Iloraz", body: `\\frac{x}{y} = \\frac{${L(x)}}{${L(y)}} = ${trimNum(r)}` },
+        {
+          title: "4. Wynik",
+          body: resultLatex("\\alpha", value, places),
+          note: "wynik w stopniach",
+        },
+      ],
     };
   },
 };
@@ -262,12 +298,12 @@ const sumaKatow: FormulaDef = {
       const value = exactOf(mul(of(n - 2), of(180)));
       return {
         values: [value],
-        steps: stdSteps(
-          "S = (n - 2) \\cdot 180^\\circ",
-          `S = (${n} - 2) \\cdot 180`,
-          value,
-          places,
-        ),
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "S = (n - 2) \\cdot 180^\\circ" },
+          { title: "2. Podstawienie danych", body: `S = (${n} - 2) \\cdot 180` },
+          { title: "3. Nawias", body: `n - 2 = ${n} - 2 = ${n - 2}` },
+          { title: "4. Wynik", body: resultLatex("S", value, places) },
+        ],
       };
     }
     const S = asRational(known["S"], "S");
@@ -276,7 +312,12 @@ const sumaKatow: FormulaDef = {
     const value = exactOf(add(n, of(2)));
     return {
       values: [value],
-      steps: stdSteps("n = \\frac{S}{180} + 2", `n = \\frac{${L(S)}}{180} + 2`, value, places),
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "n = \\frac{S}{180} + 2" },
+        { title: "2. Podstawienie danych", body: `n = \\frac{${L(S)}}{180} + 2` },
+        { title: "3. Iloraz", body: `\\frac{S}{180} = ${L(n)}` },
+        { title: "4. Wynik", body: resultLatex("n", value, places) },
+      ],
     };
   },
 };

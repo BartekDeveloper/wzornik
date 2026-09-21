@@ -98,7 +98,7 @@ onMounted(() => {
       <li v-for="f in results" :key="`${f.subject}/${f.id}`">
         <div class="cards__top">
           <p class="cards__topic">
-            {{ f.subject === "matematyka" ? "Matematyka" : "Fizyka" }} · {{ f.topic }}
+            {{ SUBJECTS.find((s) => s.id === f.subject)?.label ?? f.subject }} · {{ f.topic }}
           </p>
           <button
             class="heart"

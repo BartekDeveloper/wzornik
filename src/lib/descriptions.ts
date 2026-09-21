@@ -40,7 +40,6 @@ export const DESCRIPTIONS: Record<string, string> = {
   tales: "Proporcja odcinków na ramionach kąta przeciętych równoległymi.",
   "postacie-kwadratowej": "Ogólna, kanoniczna i iloczynowa z tych samych współczynników naraz.",
   "rozklad-liczby": "Rozkład liczby naturalnej na czynniki pierwsze.",
-  "rozklad-wielomianu": "Rozkład wielomianu 3. stopnia na czynniki liniowe (Horner + deflacja).",
   "katy-okrag": "Kąt środkowy jest dwa razy większy od wpisanego opartego na tym samym łuku.",
   "pole-trapez": "Połowa sumy podstaw razy wysokość.",
   "pole-rombu": "Połowa iloczynu przekątnych.",
@@ -124,6 +123,57 @@ export const DESCRIPTIONS: Record<string, string> = {
   "kat-z-bokow": "Kąt z dwóch boków trójkąta prostokątnego (arcus w stopniach).",
   "suma-katow": "Suma kątów wewnętrznych wielokąta i liczba boków wstecz.",
   "znak-wielomianu": "Przedziały znaku wielomianu 3. stopnia z wyborem operatora.",
+  mol: "Liczba moli z masy i masy molowej; każda wielkość wstecz.",
+  "stezenie-molowe": "Mole na decymetr sześcienny; objętość i liczba moli też wstecz.",
+  "stezenie-procentowe":
+    "Procent masowy substancji w roztworze; masa substancji lub roztworu wstecz.",
+  rozcienczanie: "C₁V₁ = C₂V₂ — rozcieńczanie i mieszanie roztworów; każda wielkość wstecz.",
+  ph: "pH = −log[H⁺]; stężenie jonów wodorowych i odwrotnie.",
+  wydajnosc: "Wydajność reakcji w procentach; masa praktyczna i teoretyczna wstecz.",
+  mieszanie: "Stężenie po wymieszaniu dwóch roztworów o znanych stężeniach i masach.",
+  kc: "Stała równowagi Kc ze stężeniów równowagi i współczynników stechiometrycznych.",
+  dysocjacja: "Stopień dysocjacji z masy zdysocjowanej i początkowej; każda wielkość wstecz.",
+  iloczyn: "Iloczyn rozpuszczalności Ks = [A][B] dla soli 1:1; stężenie i Ks wstecz.",
+  ogniwo: "SEM ogniwa: E = E_katody − E_anody; każda elektroda i SEM wstecz.",
+  elektroliza: "Masa osadzona na elektrodzie (I × t × ekwiwalent); prąd, czas, ekwiwalent wstecz.",
+  bufor: "pH buforu Henderson–Hasselbalch: pKa + log(Cs/Ck); każdy składnik wstecz.",
+  delta: "Wyróżnik równania kwadratowego; klasyfikuje liczbę pierwiastków rzeczywistych.",
+  "kwadratowa-iloczynowa": "Przekształca ax²+bx+c na a(x−x₁)(x−x₂) z obliczeniem Δ i pierwiastków.",
+  "kwadratowa-ogolna":
+    "Z postaci iloczynowej (a, x₁, x₂) oblicza postać ogólną ax²+bx+c (wzory Viete'a).",
+  "kwadrat-sumy-roznicy": "Oblicza (a+b)² i (a−b)² dla podanych a, b; wzory skróconego mnożenia.",
+  "roznica-kwadratow": "Oblicza a²−b² i (a−b)(a+b); sprawdza tożsamość różnicy kwadratów.",
+  "wzor-herona":
+    "Pole trójkąta z trzech boków przez półobwód p=(a+b+c)/2 i pierwiastek √(p(p−a)(p−b)(p−c)).",
+  "wyodrebnianie-czynnika":
+    "Wyodrębnia wspólny czynnik liczbowy (NWD) i zmienny (x^min) z trzech jednomianów.",
+  grupowanie: "Próbuje rozłożyć wielomian 4-wyrazowy metodą grupowania par (1,2) i (3,4).",
+  "rozklad-wielomianu":
+    "Pełny rozkład wielomianu stopnia 2–6: wspólny czynnik, grupowanie, różnica kwadratów, Horner, Δ.",
+  "dzielenie-wielomianow":
+    "Dzielenie wielomianu przez liniowy pisemnie (długie dzielenie), iloraz i reszta.",
+  "schemat-hornera":
+    "Schemat Hornera: wartość W(x₀) i współczynniki ilorazu przy dzieleniu przez (x−x₀).",
+  "dodawanie-pisemne":
+    "Dodawanie w kolumnie z przeniesieniami; obsługa liczb całkowitych i dziesiętnych.",
+  "odejmowanie-pisemne": "Odejmowanie w kolumnie z pożyczkami; porównuje moduły, obsługa ujemnych.",
+  "mnozenie-pisemne": "Mnożenie w kolumnie z częściowymi iloczynami i sumowaniem pod kreską.",
+  "dzielenie-pisemne": "Dzielenie długie w kolumnie krok po kroku; iloraz i reszta.",
+  "skala-mapy": "Mianownik skali z odległości na mapie i w terenie; każda wielkość wstecz.",
+  "gestosc-zaludnienia": "Osoby na km²; ludność i powierzchnia też wstecz.",
+  "przyrost-naturalny": "Urodzenia minus zgony; każdy składnik wstecz.",
+  "saldo-migracji": "Imigracja minus emigracja; każdy składnik wstecz.",
+  "przyrost-rzeczywisty": "Przyrost naturalny plus saldo migracji.",
+  deniwelacja: "Różnica wysokości maksymalnej i minimalnej.",
+  "amplituda-temperatur": "Różnica temperatury maksymalnej i minimalnej.",
+  "nachylenie-stoku": "Spadek w procentach z deniwelacji i odległości poziomej.",
+  "wskaznik-urbanizacji": "Procent ludności miejskiej; ludność miast i ogółem wstecz.",
+  "stopa-bezrobocia": "Procent bezrobotnych wśród aktywnych zawodowo.",
+  "pkb-per-capita": "PKB na mieszkańca; PKB i ludność wstecz.",
+  "wspolczynnik-feminizacji": "Liczba kobiet na 100 mężczyzn.",
+  "wspolczynnik-przyrostu": "Przyrost w promilach; przyrost i ludność wstecz.",
+  "czas-sloneczny": "Różnica czasu z różnicy długości geograficznej (1° = 4 min).",
+  "bilans-wodny": "Opad minus parowanie; każdy składnik wstecz.",
 };
 
 export function getDescription(id: string): string | undefined {

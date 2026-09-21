@@ -5,7 +5,7 @@ describe("searchFormulas", () => {
   it('finds quadratic by "delta"', () => {
     const r = searchFormulas("delta");
     expect(r.length).toBeGreaterThan(0);
-    expect(r[0].id).toBe("rownanie-kwadratowe");
+    expect(r[0].id).toBe("delta");
   });
 
   it("matches without diacritics", () => {

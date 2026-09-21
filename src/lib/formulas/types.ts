@@ -25,7 +25,7 @@ export interface FormulaSolution {
 
 export interface FormulaDef {
   id: string;
-  subject: "matematyka" | "fizyka";
+  subject: "matematyka" | "fizyka" | "chemia" | "geografia";
   topic: string;
   name: string;
   latex: string;

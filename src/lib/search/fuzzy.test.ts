@@ -50,6 +50,6 @@ describe("searchFormulas fuzzy", () => {
   });
 
   it("keeps exact matches first", () => {
-    expect(searchFormulas("delta")[0].id).toBe("rownanie-kwadratowe");
+    expect(searchFormulas("delta")[0].id).toBe("delta");
   });
 });

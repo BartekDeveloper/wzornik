@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getFormula } from "../lib/formulas/index";
+import { getFormula, SUBJECTS } from "../lib/formulas/index";
 import { solveFormula } from "../lib/solver/solver";
 import { parseEquation } from "../lib/parse-formula";
 import { formatDecimal, formatLatex, trimNum } from "../lib/exact/format";
@@ -21,6 +21,10 @@ const def = computed(() =>
 );
 
 const description = computed(() => (props.formula ? getDescription(props.formula) : undefined));
+
+const subjectLabel = computed(() =>
+  def.value ? (SUBJECTS.find((s) => s.id === def.value!.subject)?.label ?? def.value!.subject) : "",
+);
 
 const inputs = reactive<Record<string, string>>({});
 const places = ref(loadSettings().places);
@@ -200,9 +204,7 @@ onUnmounted(() => window.clearTimeout(saveTimer));
 
 <template>
   <section v-if="def">
-    <p class="topic">
-      {{ def.subject === "matematyka" ? "Matematyka" : "Fizyka" }} · {{ def.topic }}
-    </p>
+    <p class="topic">{{ subjectLabel }} · {{ def.topic }}</p>
     <h2>{{ def.name }}</h2>
     <button
       class="fav"

@@ -127,6 +127,20 @@ function draw(): void {
     ctx.stroke();
   }
 
+  if (props.data.shade) {
+    ctx.fillStyle = ACC;
+    ctx.globalAlpha = 0.15;
+    for (const band of props.data.shade) {
+      const bx0 = Math.max(band.from, x0);
+      const bx1 = Math.min(band.to, x1);
+      if (!(bx1 > bx0)) continue;
+      const [px0] = toPx(bx0, 0);
+      const [px1] = toPx(bx1, 0);
+      ctx.fillRect(px0, 8, px1 - px0, HEIGHT - pad - 8);
+    }
+    ctx.globalAlpha = 1;
+  }
+
   ctx.lineWidth = 2.5;
   ctx.strokeStyle = ACC;
   ctx.beginPath();

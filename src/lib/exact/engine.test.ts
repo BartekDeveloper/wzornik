@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { binom, factorial, fromString } from "./rational";
-import { approx, logExact, rootRational, trigExact } from "./exact";
+import { approx, logExact, parseExact, rootRational, trigExact } from "./exact";
 import { formatExactText } from "./format";
 
 describe("factorial/binom", () => {
@@ -59,5 +59,21 @@ describe("rootRational", () => {
     expect(() => rootRational(fromString("2"), 2)).toThrow();
     expect(() => rootRational(fromString("-4"), 2)).toThrow();
     expect(() => rootRational(fromString("8"), 1)).toThrow();
+  });
+});
+
+describe("parseExact periods", () => {
+  it("parses repeating decimals", () => {
+    expect(formatExactText(parseExact("0.(3)"))).toBe("1/3");
+    expect(formatExactText(parseExact("0.(6)"))).toBe("2/3");
+    expect(formatExactText(parseExact("1.2(34)"))).toBe("611/495");
+    expect(formatExactText(parseExact("-0.(6)"))).toBe("-2/3");
+    expect(formatExactText(parseExact("2.(0)"))).toBe("2");
+  });
+
+  it("rejects malformed periods", () => {
+    expect(() => parseExact("0.()")).toThrow();
+    expect(() => parseExact("0.(a)")).toThrow();
+    expect(formatExactText(parseExact("(3)"))).toBe("1/3");
   });
 });

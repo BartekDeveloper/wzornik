@@ -1,5 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { addWritten, divWritten, mulWritten, subWritten } from "./pisemne";
+import { addWritten, divWritten, expandPeriod, mulWritten, subWritten } from "./pisemne";
+
+describe("expandPeriod", () => {
+  it("wykrywa okres 1/3", () => {
+    const ex = expandPeriod(1n, 3n, 10);
+    expect(ex.int).toBe("0");
+    expect(ex.pre).toBe("");
+    expect(ex.per).toBe("3");
+  });
+
+  it("liczy część przedokresową 1/6", () => {
+    const ex = expandPeriod(1n, 6n, 10);
+    expect(ex.int).toBe("0");
+    expect(ex.pre).toBe("1");
+    expect(ex.per).toBe("6");
+  });
+
+  it("kończy dzielenie dokładne", () => {
+    const ex = expandPeriod(7n, 2n, 5);
+    expect(ex.int).toBe("3");
+    expect(ex.pre).toBe("5");
+    expect(ex.per).toBe("");
+    expect(ex.capped).toBe(false);
+  });
+});
 
 describe("addWritten", () => {
   it("dodaje 123 + 456", () => {

@@ -359,6 +359,85 @@ export function divWritten(aStr: string, bStr: string, maxFrac = 2): WrittenStep
   );
 }
 
+export interface PeriodExpansion {
+  int: string;
+  pre: string;
+  per: string;
+  capped: boolean;
+  remainder: bigint;
+  trail: string[];
+}
+
+function longDivideCore(
+  digits: number[],
+  splitAt: number,
+  q: bigint,
+  maxFrac: number,
+): PeriodExpansion {
+  const out: bigint[] = [];
+  let work = 0n;
+  const trail: string[] = [];
+  const seen = new Map<bigint, number>();
+  let periodFrom = -1;
+  let pos = 0;
+  for (;;) {
+    if (pos >= digits.length) {
+      if (work === 0n) break;
+      const prev = seen.get(work);
+      if (prev !== undefined) {
+        periodFrom = prev;
+        break;
+      }
+      if (out.length - splitAt >= maxFrac) break;
+      seen.set(work, out.length);
+      work = work * 10n;
+    } else {
+      work = work * 10n + BigInt(digits[pos]!);
+      pos++;
+    }
+    if (work < q) {
+      out.push(0n);
+      continue;
+    }
+    const d = work / q;
+    const prod = d * q;
+    const rem = work - prod;
+    out.push(d);
+    trail.push(`${work} - ${prod} = ${rem}`);
+    work = rem;
+  }
+  const intDigits = out.slice(0, splitAt).map(String);
+  while (intDigits.length > 1 && intDigits[0] === "0") intDigits.shift();
+  const int = intDigits.join("") || "0";
+  if (periodFrom >= 0) {
+    const pre = out.slice(splitAt, periodFrom).map(String).join("");
+    let per = out.slice(periodFrom).map(String).join("");
+    while (
+      per.length % 2 === 0 &&
+      per.length > 0 &&
+      per.slice(0, per.length / 2) === per.slice(per.length / 2)
+    ) {
+      per = per.slice(0, per.length / 2);
+    }
+    return { int, pre, per, capped: false, remainder: 0n, trail };
+  }
+  const frac = out.slice(splitAt).map(String);
+  while (frac.length > 0 && frac[frac.length - 1] === "0") frac.pop();
+  return { int, pre: frac.join(""), per: "", capped: work !== 0n, remainder: work, trail };
+}
+
+export function expandPeriod(p: bigint, q: bigint, maxFrac: number): PeriodExpansion {
+  if (q <= 0n) throw new Error("dzielenie przez zero");
+  if (p < 0n) throw new Error("expandPeriod: tylko liczby nieujemne");
+  const pStr = p.toString();
+  return longDivideCore(
+    pStr.split("").map((d) => parseInt(d, 10)),
+    pStr.length,
+    q,
+    maxFrac,
+  );
+}
+
 function divAbs(aStr: string, bStr: string, maxFrac = 2): WrittenStep[] {
   const a = parseNumber(aStr);
   const b = parseNumber(bStr);
@@ -380,74 +459,30 @@ function divAbs(aStr: string, bStr: string, maxFrac = 2): WrittenStep[] {
       )} = ${digitsWithPoint(dd, pointPos)} : ${b.digits.join("")} \\; (\\times 10^{${k}})`,
     });
   }
-  const quotient: bigint[] = [];
-  let work = 0n;
-  const trail: string[] = [];
-  let i = 0;
-  const seen = new Map<bigint, number>();
-  let periodFrom = -1;
-  for (;;) {
-    if (i >= dd.length) {
-      if (work === 0n) break;
-      const prev = seen.get(work);
-      if (prev !== undefined) {
-        periodFrom = prev;
-        break;
-      }
-      if (quotient.length - pointPos >= maxFrac) break;
-      seen.set(work, quotient.length);
-      work = work * 10n;
-    } else {
-      work = work * 10n + BigInt(dd[i]);
-      i++;
-    }
-    if (work < divNum) {
-      quotient.push(0n);
-      continue;
-    }
-    const q = work / divNum;
-    const prod = q * divNum;
-    const remainder = work - prod;
-    quotient.push(q);
-    trail.push(`${work} - ${prod} = ${remainder}`);
-    work = remainder;
-  }
-  const intDigits = quotient.slice(0, pointPos).map(String);
-  while (intDigits.length > 1 && intDigits[0] === "0") intDigits.shift();
-  const fracDigits = quotient.slice(pointPos).map(String);
-  const intStr = intDigits.join("") || "0";
-  let qStr: string;
-  let periodNote: string | undefined;
-  let remainder = work;
-  if (periodFrom >= 0) {
-    const pre = fracDigits.slice(0, periodFrom - pointPos).join("");
-    let per = fracDigits.slice(periodFrom - pointPos).join("");
-    while (
-      per.length % 2 === 0 &&
-      per.length > 0 &&
-      per.slice(0, per.length / 2) === per.slice(per.length / 2)
-    ) {
-      per = per.slice(0, per.length / 2);
-    }
-    qStr = `${intStr}.${pre}(${per})`;
-    periodNote = "ułamek okresowy — cyfry w nawiasie powtarzają się w nieskończoność";
-    remainder = 0n;
-  } else {
-    while (fracDigits.length > 0 && fracDigits[fracDigits.length - 1] === "0") fracDigits.pop();
-    qStr = fracDigits.length > 0 ? `${intStr}.${fracDigits.join("")}` : intStr;
-  }
+  const ex = longDivideCore(dd, pointPos, divNum, maxFrac);
+  const qStr =
+    ex.per !== ""
+      ? `${ex.int}.${ex.pre}(${ex.per})`
+      : ex.pre !== ""
+        ? `${ex.int}.${ex.pre}`
+        : ex.int;
   const lines = ["\\begin{aligned}"];
   lines.push(
     `& ${digitsWithPoint(dd, pointPos)} : ${b.digits.join("")} = ${qStr.split("").join(" ")} \\\\`,
   );
-  for (const t of trail) lines.push(`& ${t} \\\\`);
-  if (remainder !== 0n) lines.push(`& \\text{reszta } ${remainder} \\\\`);
+  for (const t of ex.trail) lines.push(`& ${t} \\\\`);
+  if (ex.remainder !== 0n) lines.push(`& \\text{reszta } ${ex.remainder} \\\\`);
   lines.push("\\end{aligned}");
   steps.push({ title: `${steps.length + 1}. Dzielenie pod kreską`, body: lines.join("\n") });
   steps.push({
     title: `${steps.length + 1}. Wynik`,
-    body: `= ${qStr}${remainder !== 0n ? ` \\text{ r } ${remainder}` : ""}`,
-    note: remainder !== 0n ? `reszta ${remainder} (ograniczono do ${maxFrac} miejsc)` : periodNote,
+    body: `= ${qStr}${ex.remainder !== 0n ? ` \\text{ r } ${ex.remainder}` : ""}`,
+    note:
+      ex.remainder !== 0n
+        ? `reszta ${ex.remainder} (ograniczono do ${maxFrac} miejsc)`
+        : ex.per !== ""
+          ? "ułamek okresowy — cyfry w nawiasie powtarzają się w nieskończoność"
+          : undefined,
   });
   return steps;
 }

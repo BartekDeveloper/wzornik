@@ -1,6 +1,10 @@
+import { add, div, isZero, mul, sub } from "../exact/rational";
 import type { Rational } from "../exact/rational";
+import { formatRatLatex } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
-import { addWritten, divWritten, mulWritten, subWritten } from "./pisemne";
+import { addWritten, divWritten, expandPeriod, mulWritten, subWritten } from "./pisemne";
+
+const L = formatRatLatex;
 
 function ratToDecimal(r: Rational): string {
   const neg = r.p < 0n;
@@ -24,10 +28,41 @@ function ratToDecimal(r: Rational): string {
   return (neg ? "-" : "") + int.toString() + "." + frac;
 }
 
-function decInput(known: Record<string, { rat: Rational }>, id: string): string {
+function ratOf(known: Record<string, { rat: Rational }>, id: string): Rational {
   const v = known[id];
   if (!v) throw new Error(`uzupełnij pole ${id}`);
-  return ratToDecimal(v.rat);
+  return v.rat;
+}
+
+function decInput(known: Record<string, { rat: Rational }>, id: string): string {
+  return ratToDecimal(ratOf(known, id));
+}
+
+function isTerminating(r: Rational): boolean {
+  let q = r.q < 0n ? -r.q : r.q;
+  while (q % 2n === 0n) q /= 2n;
+  while (q % 5n === 0n) q /= 5n;
+  return q === 1n;
+}
+
+function expandRat(r: Rational): string {
+  const neg = r.p < 0n;
+  const ex = expandPeriod(neg ? -r.p : r.p, r.q, 64);
+  const sign = neg ? "-" : "";
+  if (ex.per !== "") return `${sign}${ex.int}.${ex.pre}(${ex.per})`;
+  return `${sign}${ex.int}${ex.pre !== "" ? `.${ex.pre}` : ""}`;
+}
+
+function exactSteps(opTex: string, a: Rational, b: Rational, res: Rational): FormulaSolution {
+  return {
+    values: [],
+    steps: [
+      { title: "1. Zamiana na ułamki", body: `${L(a)} ${opTex} ${L(b)}` },
+      { title: "2. Wynik dokładny", body: `= ${L(res)}` },
+      { title: "3. Rozwinięcie dziesiętne", body: `= ${expandRat(res)}` },
+    ],
+    labels: [],
+  };
 }
 
 const dodawanie: FormulaDef = {
@@ -44,6 +79,11 @@ const dodawanie: FormulaDef = {
   outputId: "sum",
   outputLabel: "suma",
   solve(_unknown, known, _places): FormulaSolution {
+    const a = ratOf(known, "a");
+    const b = ratOf(known, "b");
+    if (!isTerminating(a) || !isTerminating(b)) {
+      return exactSteps("+", a, b, add(a, b));
+    }
     const steps = addWritten(decInput(known, "a"), decInput(known, "b"));
     return { values: [], steps };
   },
@@ -63,6 +103,11 @@ const odejmowanie: FormulaDef = {
   outputId: "diff",
   outputLabel: "różnica",
   solve(_unknown, known, _places): FormulaSolution {
+    const a = ratOf(known, "a");
+    const b = ratOf(known, "b");
+    if (!isTerminating(a) || !isTerminating(b)) {
+      return exactSteps("-", a, b, sub(a, b));
+    }
     const steps = subWritten(decInput(known, "a"), decInput(known, "b"));
     return { values: [], steps };
   },
@@ -82,6 +127,11 @@ const mnozenie: FormulaDef = {
   outputId: "prod",
   outputLabel: "iloczyn",
   solve(_unknown, known, _places): FormulaSolution {
+    const a = ratOf(known, "a");
+    const b = ratOf(known, "b");
+    if (!isTerminating(a) || !isTerminating(b)) {
+      return exactSteps("\\times", a, b, mul(a, b));
+    }
     const steps = mulWritten(decInput(known, "a"), decInput(known, "b"));
     return { values: [], steps };
   },
@@ -101,6 +151,12 @@ const dzielenie: FormulaDef = {
   outputId: "quot",
   outputLabel: "iloraz",
   solve(_unknown, known, places): FormulaSolution {
+    const a = ratOf(known, "a");
+    const b = ratOf(known, "b");
+    if (isZero(b)) throw new Error("dzielenie przez zero");
+    if (!isTerminating(a) || !isTerminating(b)) {
+      return exactSteps(":", a, b, div(a, b));
+    }
     const steps = divWritten(decInput(known, "a"), decInput(known, "b"), Math.max(0, places));
     return { values: [], steps };
   },

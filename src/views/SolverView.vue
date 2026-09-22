@@ -7,7 +7,10 @@ import { parseEquation } from "../lib/parse-formula";
 import { formatDecimal, formatLatex, trimNum } from "../lib/exact/format";
 import { approx, isApproxOnly, parseExact } from "../lib/exact/exact";
 import type { Exact } from "../lib/exact/exact";
-import { linearPlot, polyPlot, quadraticPlot } from "../lib/plots/plot";
+import { solveQuadratic } from "../lib/exact/exact";
+import { linearPlot, polyPlot, quadraticPlot, trajectoryPlot } from "../lib/plots/plot";
+import type { InequalityOp } from "../lib/plots/plot";
+import { inequalityBands } from "../lib/plots/plot";
 import { addHistory, isFavorite, toggleFavorite } from "../lib/storage/db";
 import { loadSettings } from "../lib/settings";
 import { getDescription } from "../lib/descriptions";
@@ -211,6 +214,33 @@ const plotData = computed(() => {
     if (st.state !== "done") return null;
     const roots = st.raw.map((v) => approx(v));
     return polyPlot(coeffs, roots);
+  }
+  if (d.id === "rzut-poziomy") {
+    const v0 = numInput("v0");
+    const h = numInput("h");
+    if (v0 === null || h === null) return null;
+    return trajectoryPlot(v0, h);
+  }
+  if (d.id === "nierownosc-kwadratowa") {
+    const a = numInput("a");
+    const b = numInput("b");
+    const c = numInput("c");
+    if (a === null || b === null || c === null) return null;
+    const base = quadraticPlot(a, b, c);
+    if (!base) return null;
+    try {
+      const qa = parseExact((inputs.a ?? "").trim());
+      const qb = parseExact((inputs.b ?? "").trim());
+      const qc = parseExact((inputs.c ?? "").trim());
+      if (qa.irr || qb.irr || qc.irr) return base;
+      const q = solveQuadratic(qa.rat, qb.rat, qc.rat);
+      const qroots = q.roots.map((r) => approx(r));
+      const op = (inputs.op ?? ">") as InequalityOp;
+      const bands = inequalityBands(a, op, qroots);
+      return bands && bands.length > 0 ? { ...base, shade: bands } : base;
+    } catch {
+      return base;
+    }
   }
   return null;
 });

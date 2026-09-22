@@ -280,6 +280,8 @@ const CASES: [string, string, Record<string, string>][] = [
     { deg: "3", a6: "0", a5: "0", a4: "0", a3: "1", a2: "-6", a1: "11", a0: "-6", x0: "1" },
   ],
   ["matematyka", "dodawanie-pisemne", { a: "123", b: "456" }],
+  ["matematyka", "dodawanie-pisemne", { a: "1/3", b: "1/6" }],
+  ["matematyka", "mnozenie-pisemne", { a: "0.(3)", b: "3" }],
   ["matematyka", "odejmowanie-pisemne", { a: "456", b: "123" }],
   ["matematyka", "mnozenie-pisemne", { a: "123", b: "45" }],
   ["matematyka", "dzielenie-pisemne", { a: "1234", b: "12" }],

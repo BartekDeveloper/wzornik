@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  inequalityBands,
   initialView,
   linearPlot,
   niceStep,
@@ -7,6 +8,7 @@ import {
   polyPlot,
   quadraticPlot,
   sampleY,
+  trajectoryPlot,
   zoomView,
 } from "./plot";
 
@@ -80,6 +82,57 @@ describe("polyPlot", () => {
   it("returns null without roots or with zero leading coefficient", () => {
     expect(polyPlot([1, -6, 11, -6], [])).toBeNull();
     expect(polyPlot([0, 1, 2], [1])).toBeNull();
+  });
+});
+
+describe("trajectoryPlot", () => {
+  it("starts at (0,h) and lands at (Z,0)", () => {
+    const p = trajectoryPlot(10, 20);
+    if (!p) throw new Error("expected plot");
+    expect(p.fn(0)).toBeCloseTo(20, 9);
+    const Z = 10 * Math.sqrt(4);
+    expect(p.xMax).toBeCloseTo(Z, 9);
+    expect(p.fn(Z)).toBeCloseTo(0, 9);
+    expect(p.points).toHaveLength(2);
+  });
+
+  it("rejects non-positive v0 and negative h", () => {
+    expect(trajectoryPlot(0, 5)).toBeNull();
+    expect(trajectoryPlot(10, -1)).toBeNull();
+  });
+});
+
+describe("inequalityBands", () => {
+  it("shades outside for a>0 with >", () => {
+    const b = inequalityBands(1, ">", [2, 3]);
+    expect(b).toHaveLength(2);
+    expect(b![1]!.from).toBe(3);
+  });
+
+  it("shades inside for a>0 with <", () => {
+    expect(inequalityBands(1, "<", [2, 3])).toEqual([{ from: 2, to: 3 }]);
+  });
+
+  it("flips sides for a<0", () => {
+    expect(inequalityBands(-1, ">", [2, 3])).toEqual([{ from: 2, to: 3 }]);
+    expect(inequalityBands(-1, "<", [2, 3])).toHaveLength(2);
+  });
+
+  it("handles double root and empty roots", () => {
+    expect(inequalityBands(1, ">", [2])).toHaveLength(2);
+    expect(inequalityBands(1, "<", [2])).toEqual([]);
+    expect(inequalityBands(1, "≥", [2])).toHaveLength(1);
+    expect(inequalityBands(1, ">", [])).toHaveLength(1);
+    expect(inequalityBands(1, "<", [])).toEqual([]);
+    expect(inequalityBands(-1, "<", [])).toHaveLength(1);
+  });
+
+  it("shades everything for ≠", () => {
+    expect(inequalityBands(1, "≠", [2, 3])).toHaveLength(1);
+  });
+
+  it("rejects a=0", () => {
+    expect(inequalityBands(0, ">", [2])).toBeNull();
   });
 });
 

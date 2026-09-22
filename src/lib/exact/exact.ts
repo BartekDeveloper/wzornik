@@ -42,6 +42,26 @@ export function isApproxOnly(e: Exact): boolean {
 export function parseExact(s: string): Exact {
   const t = s.trim().replace(",", ".").replace(/\s+/g, "").toLowerCase().replace("π", "pi");
   if (t === "") throw new Error("dokładne: puste wejście");
+  const per = /^(-?)(\d*)\.?(\d*)\((\d+)\)$/.exec(t);
+  if (per) {
+    const neg = per[1] === "-";
+    const intPart = per[2] === "" ? 0n : BigInt(per[2]);
+    const frac = per[3] ?? "";
+    const cyc = per[4] ?? "";
+    if (/^0+$/.test(cyc)) {
+      const plain = `${neg ? "-" : ""}${intPart}${frac === "" ? "" : `.${frac}`}`;
+      return { rat: fromString(plain === "-0" || plain === "-" ? "0" : plain), irr: null };
+    }
+    const f = frac.length;
+    const p = cyc.length;
+    const pow10f = 10n ** BigInt(f);
+    const pow10p = 10n ** BigInt(p);
+    const fracVal = frac === "" ? 0n : BigInt(frac);
+    const cycVal = BigInt(cyc);
+    const num = intPart * pow10f * (pow10p - 1n) + fracVal * (pow10p - 1n) + cycVal;
+    const den = pow10f * (pow10p - 1n);
+    return { rat: norm(neg ? -num : num, den), irr: null };
+  }
   const m = /^(.*?)pi$/.exec(t);
   if (m) {
     const raw = m[1].replace(/\*$/, "");

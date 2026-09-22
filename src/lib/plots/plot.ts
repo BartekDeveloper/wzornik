@@ -7,11 +7,17 @@ export interface PlotPoint {
   kind: "zero" | "vertex" | "intercept";
 }
 
+export interface PlotBand {
+  from: number;
+  to: number;
+}
+
 export interface PlotData {
   fn: (x: number) => number;
   points: PlotPoint[];
   xMin: number;
   xMax: number;
+  shade?: PlotBand[];
 }
 
 export interface SampledPlot extends PlotData {
@@ -131,6 +137,54 @@ export function polyPlot(coeffs: number[], roots: number[]): PlotData | null {
   };
   const points: PlotPoint[] = saneRoots.map((r) => zeroPoint(r));
   return frame(points, fn);
+}
+
+export function trajectoryPlot(v0: number, h: number): PlotData | null {
+  if (![v0, h].every(Number.isFinite) || v0 <= 0 || h < 0) return null;
+  const g = 10;
+  const Z = v0 * Math.sqrt((2 * h) / g);
+  if (!Number.isFinite(Z)) return null;
+  const fn = (x: number): number => h - (g * x * x) / (2 * v0 * v0);
+  const points: PlotPoint[] = [
+    { x: 0, y: h, label: `(0, ${trimNum(h)})`, kind: "intercept" },
+    { x: Z, y: 0, label: `(Z, 0) = ${trimNum(Z)}`, kind: "zero" },
+  ];
+  return { fn, points, xMin: 0, xMax: Math.max(Z, 1) };
+}
+
+export type InequalityOp = ">" | "≥" | "<" | "≤" | "≠";
+
+export function inequalityBands(a: number, op: InequalityOp, roots: number[]): PlotBand[] | null {
+  if (!Number.isFinite(a) || a === 0) return null;
+  const xs = [...roots].filter(Number.isFinite).sort((p, q) => p - q);
+  const up = a > 0;
+  const outside = (up && (op === ">" || op === "≥")) || (!up && (op === "<" || op === "≤"));
+  if (op === "≠") return [{ from: Number.NEGATIVE_INFINITY, to: Number.POSITIVE_INFINITY }];
+  if (xs.length === 0) {
+    const holds = (up && (op === ">" || op === "≥")) || (!up && (op === "<" || op === "≤"));
+    return holds ? [{ from: Number.NEGATIVE_INFINITY, to: Number.POSITIVE_INFINITY }] : [];
+  }
+  if (xs.length === 1) {
+    const x0 = xs[0]!;
+    if (op === ">" || op === "<") {
+      const holdsOutside = (up && op === ">") || (!up && op === "<");
+      return holdsOutside
+        ? [
+            { from: Number.NEGATIVE_INFINITY, to: x0 },
+            { from: x0, to: Number.POSITIVE_INFINITY },
+          ]
+        : [];
+    }
+    return [{ from: Number.NEGATIVE_INFINITY, to: Number.POSITIVE_INFINITY }];
+  }
+  const [x1, x2] = [xs[0]!, xs[1]!];
+  if (outside) {
+    return [
+      { from: Number.NEGATIVE_INFINITY, to: x1 },
+      { from: x2, to: Number.POSITIVE_INFINITY },
+    ];
+  }
+  return [{ from: x1, to: x2 }];
 }
 
 export function sampleY(data: PlotData, n = 200): SampledPlot {

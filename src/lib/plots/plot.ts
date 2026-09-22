@@ -119,6 +119,20 @@ export function linearPlot(a: number, b: number): PlotData | null {
   return frame(points, fn);
 }
 
+export function polyPlot(coeffs: number[], roots: number[]): PlotData | null {
+  if (coeffs.length < 2 || !coeffs.every(Number.isFinite)) return null;
+  if (coeffs[0] === 0) return null;
+  const saneRoots = roots.filter(Number.isFinite);
+  if (saneRoots.length === 0) return null;
+  const fn = (x: number): number => {
+    let v = 0;
+    for (const c of coeffs) v = v * x + c;
+    return v;
+  };
+  const points: PlotPoint[] = saneRoots.map((r) => zeroPoint(r));
+  return frame(points, fn);
+}
+
 export function sampleY(data: PlotData, n = 200): SampledPlot {
   let yMin = Infinity;
   let yMax = -Infinity;

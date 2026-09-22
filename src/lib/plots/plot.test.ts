@@ -4,6 +4,7 @@ import {
   linearPlot,
   niceStep,
   panView,
+  polyPlot,
   quadraticPlot,
   sampleY,
   zoomView,
@@ -62,6 +63,23 @@ describe("niceStep", () => {
   it("picks readable grid steps", () => {
     expect(niceStep(10)).toBe(2);
     expect(niceStep(3)).toBe(0.5);
+  });
+});
+
+describe("polyPlot", () => {
+  it("frames cubic zeros and evaluates by Horner", () => {
+    const p = polyPlot([1, -6, 11, -6], [1, 2, 3]);
+    if (!p) throw new Error("expected plot");
+    expect(p.fn(2)).toBeCloseTo(0, 9);
+    expect(p.fn(0)).toBeCloseTo(-6, 9);
+    expect(p.xMin).toBeLessThan(1);
+    expect(p.xMax).toBeGreaterThan(3);
+    expect(p.points).toHaveLength(3);
+  });
+
+  it("returns null without roots or with zero leading coefficient", () => {
+    expect(polyPlot([1, -6, 11, -6], [])).toBeNull();
+    expect(polyPlot([0, 1, 2], [1])).toBeNull();
   });
 });
 

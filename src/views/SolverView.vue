@@ -6,7 +6,8 @@ import { solveFormula } from "../lib/solver/solver";
 import { parseEquation } from "../lib/parse-formula";
 import { formatDecimal, formatLatex, trimNum } from "../lib/exact/format";
 import { approx, isApproxOnly, parseExact } from "../lib/exact/exact";
-import { linearPlot, quadraticPlot } from "../lib/plots/plot";
+import type { Exact } from "../lib/exact/exact";
+import { linearPlot, polyPlot, quadraticPlot } from "../lib/plots/plot";
 import { addHistory, isFavorite, toggleFavorite } from "../lib/storage/db";
 import { loadSettings } from "../lib/settings";
 import { getDescription } from "../lib/descriptions";
@@ -126,6 +127,7 @@ const view = computed(() => {
       dec: formatDecimal(v, places.value),
       approx: isApproxOnly(v),
     })),
+    raw: r.values as Exact[],
     steps: r.steps,
     first: r.values[0],
   };
@@ -195,6 +197,20 @@ const plotData = computed(() => {
     const b = numInput("b");
     if (a === null || b === null) return null;
     return linearPlot(a, b);
+  }
+  if (d.id === "rozklad-wielomianu" || d.id === "horner-pierwiastki") {
+    const ids =
+      d.id === "rozklad-wielomianu"
+        ? ["a6", "a5", "a4", "a3", "a2", "a1", "a0"]
+        : ["a", "b", "c", "d"];
+    const raw = ids.map(numInput);
+    if (raw.some((v) => v === null)) return null;
+    let coeffs = raw as number[];
+    while (coeffs.length > 2 && coeffs[0] === 0) coeffs = coeffs.slice(1);
+    const st = view.value;
+    if (st.state !== "done") return null;
+    const roots = st.raw.map((v) => approx(v));
+    return polyPlot(coeffs, roots);
   }
   return null;
 });

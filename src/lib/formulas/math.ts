@@ -4,7 +4,9 @@ import {
   approxOnly,
   cbrtRational,
   exactOf,
+  logExact,
   mulRat,
+  rootRational,
   solveQuadratic,
   sqrtRational,
   stripPi,
@@ -561,8 +563,62 @@ const ciagGeometryczny: FormulaDef = {
   outputId: "",
   outputLabel: "",
   solve(unknown, known, places): FormulaSolution {
-    if (unknown === "q" || unknown === "n") {
-      throw new Error("ten kalkulator liczy aₙ i a₁ — q i n wymagają pierwiastków i logarytmów");
+    if (unknown === "q") {
+      const an = asRational(known["an"], "aₙ");
+      const a1 = asRational(known["a1"], "a₁");
+      const n = requireNatural(known["n"], "n");
+      if (n === 1) throw new Error("dla n = 1 iloraz q jest dowolny — podaj n większe od 1");
+      const ratio = div(an, a1);
+      const k = n - 1;
+      let value: Exact;
+      let note: string | undefined;
+      try {
+        value = rootRational(ratio, k);
+      } catch {
+        const rf = approx(exactOf(ratio));
+        if (!(rf > 0)) throw new Error("iloraz rzeczywisty wymaga aₙ/a₁ > 0");
+        value = approxOnly(rf ** (1 / k));
+        note = "wynik tylko przybliżony";
+      }
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: `q = \\sqrt[${k}]{a_n/a_1}` },
+          {
+            title: "2. Podstawienie danych",
+            body: `q = \\sqrt[${k}]{${L(an)}/${L(a1)}}`,
+          },
+          { title: "3. Ułamek", body: `a_n/a_1 = ${L(ratio)}` },
+          { title: "4. Wynik", body: resultLatex("q", value, places), note },
+        ],
+      };
+    }
+    if (unknown === "n") {
+      const an = asRational(known["an"], "aₙ");
+      const a1 = asRational(known["a1"], "a₁");
+      const q = asRational(known["q"], "q");
+      const ratio = div(an, a1);
+      if (cmp(ratio, ZERO) <= 0 || cmp(q, ZERO) <= 0 || cmp(sub(q, ONE), ZERO) === 0) {
+        throw new Error("iloraz wyznaczam dla aₙ/a₁ > 0 i q > 0, q ≠ 1");
+      }
+      const lq = logExact(q, ratio);
+      const nf = Math.round(approx(lq) + 1);
+      if (!Number.isInteger(nf) || nf < 1 || cmp(mul(a1, pow(q, nf - 1)), an) !== 0) {
+        throw new Error("te dane nie dają naturalnego n — sprawdź liczby");
+      }
+      const value = exactOf(of(nf));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "n = \\log_q(a_n/a_1) + 1" },
+          {
+            title: "2. Podstawienie danych",
+            body: `n = \\log_{${L(q)}}(${L(an)}/${L(a1)}) + 1`,
+          },
+          { title: "3. Logarytm", body: `\\log_q(a_n/a_1) = ${formatLatex(lq)}` },
+          { title: "4. Wynik", body: resultLatex("n", value, places) },
+        ],
+      };
     }
     const n = requireNatural(known["n"], "n");
     if (unknown === "an") {

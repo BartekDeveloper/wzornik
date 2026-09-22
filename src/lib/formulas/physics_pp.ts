@@ -1657,6 +1657,306 @@ const rozpad: FormulaDef = {
   },
 };
 
+const energiaWewnetrzna: FormulaDef = {
+  id: "energia-wewnetrzna",
+  subject: "fizyka",
+  topic: "Termodynamika · ROZSZ",
+  name: "Energia wewnętrzna gazu doskonałego",
+  latex: "U = \\frac{3}{2}nRT",
+  vars: [
+    { id: "U", label: "U [J]" },
+    { id: "n", label: "n [mol]" },
+    { id: "T", label: "T [K]" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places): FormulaSolution {
+    const R = 8.31;
+    const g = (id: string): number => {
+      const v = num(known[id]);
+      if (!Number.isFinite(v) || v < 0) throw new Error(`${id}: wpisz nieujemną liczbę`);
+      return v;
+    };
+    if (unknown === "U") {
+      const nRT = g("n") * R * g("T");
+      const value = approxOnly((3 * nRT) / 2);
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "U = \\frac{3}{2}nRT" },
+          {
+            title: "2. Podstawienie danych",
+            body: `U = \\frac{3}{2} \\cdot ${g("n")} \\cdot 8{,}31 \\cdot ${g("T")}`,
+          },
+          { title: "3. Iloczyn nRT", body: `nRT = ${trimNum(nRT)}` },
+          { title: "4. Wynik", body: resultLatex("U", value, places), note: APPROX_NOTE },
+        ],
+      };
+    }
+    if (unknown === "n") {
+      const den = R * g("T");
+      const value = approxOnly((2 * g("U")) / (3 * den));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "n = \\frac{2U}{3RT}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `n = \\frac{2 \\cdot ${g("U")}}{3 \\cdot 8{,}31 \\cdot ${g("T")}}`,
+          },
+          { title: "3. Mianownik", body: `3RT = ${trimNum(3 * den)}` },
+          { title: "4. Wynik", body: resultLatex("n", value, places), note: APPROX_NOTE },
+        ],
+      };
+    }
+    const den = R * g("n");
+    const value = approxOnly((2 * g("U")) / (3 * den));
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "T = \\frac{2U}{3nR}" },
+        {
+          title: "2. Podstawienie danych",
+          body: `T = \\frac{2 \\cdot ${g("U")}}{3 \\cdot ${g("n")} \\cdot 8{,}31}`,
+        },
+        { title: "3. Mianownik", body: `3nR = ${trimNum(3 * den)}` },
+        { title: "4. Wynik", body: resultLatex("T", value, places), note: APPROX_NOTE },
+      ],
+    };
+  },
+};
+
+const opornikiSzeregowo: FormulaDef = {
+  id: "oporniki-szeregowo",
+  subject: "fizyka",
+  topic: "Prąd stały",
+  name: "Oporniki szeregowo",
+  latex: "R_z = R_1 + R_2",
+  vars: [
+    { id: "Rz", label: "Rz [Ω]" },
+    { id: "R1", label: "R₁ [Ω]" },
+    { id: "R2", label: "R₂ [Ω]" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places): FormulaSolution {
+    if (unknown === "Rz") {
+      const R1 = asRational(known["R1"], "R₁");
+      const R2 = asRational(known["R2"], "R₂");
+      const value = exactOf(add(R1, R2));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "R_z = R_1 + R_2" },
+          { title: "2. Podstawienie danych", body: `R_z = ${L(R1)} + ${L(R2)}` },
+          { title: "3. Wynik", body: resultLatex("R_z", value, places) },
+        ],
+      };
+    }
+    const Rz = asRational(known["Rz"], "Rz");
+    const other = unknown === "R1" ? "R2" : "R1";
+    const o = asRational(known[other], other);
+    const value = exactOf(sub(Rz, o));
+    return {
+      values: [value],
+      steps: [
+        {
+          title: "1. Przekształcenie wzoru",
+          body: `${other} = R_z - ${other === "R2" ? "R_2" : "R_1"}`,
+        },
+        { title: "2. Podstawienie danych", body: `${unknown} = ${L(Rz)} - ${L(o)}` },
+        { title: "3. Wynik", body: resultLatex(unknown, value, places) },
+      ],
+    };
+  },
+};
+
+const opornikiRownolegle: FormulaDef = {
+  id: "oporniki-rownolegle",
+  subject: "fizyka",
+  topic: "Prąd stały",
+  name: "Oporniki równolegle",
+  latex: "\\frac{1}{R_z} = \\frac{1}{R_1} + \\frac{1}{R_2}",
+  vars: [
+    { id: "Rz", label: "Rz [Ω]" },
+    { id: "R1", label: "R₁ [Ω]" },
+    { id: "R2", label: "R₂ [Ω]" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places): FormulaSolution {
+    const g = (id: string) => asRational(known[id], id);
+    if (unknown === "Rz") {
+      const sum = add(div(ONE, g("R1")), div(ONE, g("R2")));
+      const value = exactOf(div(ONE, sum));
+      return {
+        values: [value],
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: "\\frac{1}{R_z} = \\frac{1}{R_1} + \\frac{1}{R_2}",
+          },
+          {
+            title: "2. Podstawienie danych",
+            body: `\\frac{1}{R_z} = \\frac{1}{${L(g("R1"))}} + \\frac{1}{${L(g("R2"))}}`,
+          },
+          { title: "3. Suma odwrotności", body: `\\frac{1}{R_z} = ${L(sum)}` },
+          { title: "4. Wynik", body: resultLatex("R_z", value, places) },
+        ],
+      };
+    }
+    const other = unknown === "R1" ? "R2" : "R1";
+    const inv = sub(div(ONE, g("Rz")), div(ONE, g(other)));
+    const value = exactOf(div(ONE, inv));
+    const sym = unknown === "R1" ? "R_1" : "R_2";
+    const so = unknown === "R1" ? "R_2" : "R_1";
+    return {
+      values: [value],
+      steps: [
+        {
+          title: "1. Przekształcenie wzoru",
+          body: `\\frac{1}{${sym}} = \\frac{1}{R_z} - \\frac{1}{${so}}`,
+        },
+        {
+          title: "2. Podstawienie danych",
+          body: `\\frac{1}{${sym}} = \\frac{1}{${L(g("Rz"))}} - \\frac{1}{${L(g(other))}}`,
+        },
+        { title: "3. Różnica odwrotności", body: `\\frac{1}{${sym}} = ${L(inv)}` },
+        { title: "4. Wynik", body: resultLatex(sym, value, places) },
+      ],
+    };
+  },
+};
+
+const doppler: FormulaDef = {
+  id: "doppler",
+  subject: "fizyka",
+  topic: "Fale · ROZSZ",
+  name: "Efekt Dopplera (źródło zbliża się)",
+  latex: "f' = f\\frac{V}{V - v_s}",
+  vars: [
+    { id: "fp", label: "f' [Hz]" },
+    { id: "f", label: "f [Hz]" },
+    { id: "vs", label: "v_s [m/s]" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places): FormulaSolution {
+    const V = 340;
+    const g = (id: string): number => {
+      const v = num(known[id]);
+      if (!Number.isFinite(v) || v < 0) throw new Error(`${id}: wpisz nieujemną liczbę`);
+      return v;
+    };
+    if (unknown === "fp") {
+      const den = V - g("vs");
+      if (den <= 0) throw new Error("v_s < V — źródło wolniejsze od dźwięku");
+      const ratio = V / den;
+      const value = approxOnly(g("f") * ratio);
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "f' = f\\frac{V}{V - v_s}, \\; V = 340 m/s" },
+          {
+            title: "2. Podstawienie danych",
+            body: `f' = ${g("f")} \\cdot \\frac{340}{340 - ${g("vs")}}`,
+          },
+          {
+            title: "3. Mianownik i stosunek",
+            body: `V - v_s = ${trimNum(den)}, \\; V/(V-v_s) = ${trimNum(ratio)}`,
+          },
+          { title: "4. Wynik", body: resultLatex("f'", value, places), note: APPROX_NOTE },
+        ],
+      };
+    }
+    if (unknown === "f") {
+      const den = V - g("vs");
+      if (den <= 0) throw new Error("v_s < V — źródło wolniejsze od dźwięku");
+      const value = approxOnly((g("fp") * den) / V);
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "f = f'\\frac{V - v_s}{V}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `f = ${g("fp")} \\cdot \\frac{340 - ${g("vs")}}{340}`,
+          },
+          { title: "3. Licznik", body: `V - v_s = ${trimNum(den)}` },
+          { title: "4. Wynik", body: resultLatex("f", value, places), note: APPROX_NOTE },
+        ],
+      };
+    }
+    const ratio = g("fp") / g("f");
+    const value = approxOnly(V * (1 - 1 / ratio));
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "v_s = V(1 - f/f')" },
+        {
+          title: "2. Podstawienie danych",
+          body: `v_s = 340(1 - ${g("f")}/${g("fp")})`,
+        },
+        { title: "3. Stosunek", body: `f/f' = ${trimNum(1 / ratio)}` },
+        { title: "4. Wynik", body: resultLatex("v_s", value, places), note: APPROX_NOTE },
+      ],
+    };
+  },
+};
+
+const katGraniczny: FormulaDef = {
+  id: "kat-graniczny",
+  subject: "fizyka",
+  topic: "Optyka",
+  name: "Kąt graniczny",
+  latex: "\\sin\\alpha_{gr} = \\frac{1}{n}",
+  vars: [
+    { id: "alfa", label: "α_gr [°]" },
+    { id: "n", label: "n" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places): FormulaSolution {
+    const deg = (r: number): number => (r * 180) / Math.PI;
+    if (unknown === "alfa") {
+      const n = asRational(known["n"], "n");
+      if (cmp(n, ONE) < 0) throw new Error("całkowite odbicie wymaga n ≥ 1");
+      const s = 1 / approx(exactOf(n));
+      const value = approxOnly(deg(Math.asin(s)));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "\\sin\\alpha_{gr} = \\frac{1}{n}" },
+          { title: "2. Podstawienie danych", body: `\\sin\\alpha_{gr} = \\frac{1}{${L(n)}}` },
+          { title: "3. Sinus", body: `\\sin\\alpha_{gr} = ${trimNum(s)}` },
+          {
+            title: "4. Wynik",
+            body: resultLatex("\\alpha_{gr}", value, places),
+            note: APPROX_NOTE,
+          },
+        ],
+      };
+    }
+    const alfa = num(known["alfa"]);
+    const s = Math.sin((alfa * Math.PI) / 180);
+    if (!(s > 0)) throw new Error("sin α > 0 — kąt ostry");
+    const value = approxOnly(1 / s);
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "n = \\frac{1}{\\sin\\alpha_{gr}}" },
+        { title: "2. Podstawienie danych", body: `n = \\frac{1}{\\sin ${alfa}^\\circ}` },
+        { title: "3. Sinus", body: `\\sin\\alpha_{gr} = ${trimNum(s)}` },
+        { title: "4. Wynik", body: resultLatex("n", value, places), note: APPROX_NOTE },
+      ],
+    };
+  },
+};
+
 export const PHYSICS_PP: FormulaDef[] = [
   moc,
   sprawnosc,
@@ -1684,4 +1984,9 @@ export const PHYSICS_PP: FormulaDef[] = [
   foto,
   emc2,
   rozpad,
+  energiaWewnetrzna,
+  opornikiSzeregowo,
+  opornikiRownolegle,
+  doppler,
+  katGraniczny,
 ];

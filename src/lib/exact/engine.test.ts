@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { binom, factorial, fromString } from "./rational";
-import { approx, logExact, trigExact } from "./exact";
+import { approx, logExact, rootRational, trigExact } from "./exact";
 import { formatExactText } from "./format";
 
 describe("factorial/binom", () => {
@@ -44,5 +44,20 @@ describe("logExact", () => {
 
   it("falls back to approx otherwise", () => {
     expect(approx(logExact(fromString("2"), fromString("3")))).toBeCloseTo(Math.log2(3), 10);
+  });
+});
+
+describe("rootRational", () => {
+  it("finds exact integer roots", () => {
+    expect(formatExactText(rootRational(fromString("16"), 4))).toBe("2");
+    expect(formatExactText(rootRational(fromString("27"), 3))).toBe("3");
+    expect(formatExactText(rootRational(fromString("1/4"), 2))).toBe("1/2");
+    expect(formatExactText(rootRational(fromString("-8"), 3))).toBe("-2");
+  });
+
+  it("throws for irrational and invalid input", () => {
+    expect(() => rootRational(fromString("2"), 2)).toThrow();
+    expect(() => rootRational(fromString("-4"), 2)).toThrow();
+    expect(() => rootRational(fromString("8"), 1)).toThrow();
   });
 });

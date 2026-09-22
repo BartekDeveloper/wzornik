@@ -57,9 +57,13 @@ describe("solver matematyka", () => {
     );
   });
 
-  it("ciąg geometryczny odrzuca niewiadomą q", () => {
-    const r = run("matematyka", "ciag-geometryczny", { an: "8", a1: "2", q: "", n: "3" });
-    expect(r.ok).toBe(false);
+  it("ciąg geometryczny liczy q i n", () => {
+    const q = run("matematyka", "ciag-geometryczny", { an: "8", a1: "2", q: "", n: "3" });
+    if (!q.ok) throw new Error(q.error);
+    expect(q.values.map(formatExactText)).toEqual(["2"]);
+    const n = run("matematyka", "ciag-geometryczny", { an: "8", a1: "2", q: "2", n: "" });
+    if (!n.ok) throw new Error(n.error);
+    expect(n.values.map(formatExactText)).toEqual(["3"]);
   });
 
   it("kula r=3 → 36π", () => {

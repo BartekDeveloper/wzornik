@@ -19,6 +19,8 @@ import { MATH_WYODREBNIA_GRUP } from "./math_wyodrebnia_grup";
 import { MATH_POLY } from "./math_poly";
 import { MATH_DZIEL_HORNER } from "./math_dziel_horner";
 import { MATH_PISEMNE } from "./math_pisemne";
+import { MATH_SUMY } from "./math_sumy";
+import { MATH_TROJKATY } from "./math_trojkaty";
 
 export const FORMULAS: FormulaDef[] = [
   ...MATH_FORMULAS,
@@ -34,6 +36,8 @@ export const FORMULAS: FormulaDef[] = [
   ...MATH_POLY,
   ...MATH_DZIEL_HORNER,
   ...MATH_PISEMNE,
+  ...MATH_SUMY,
+  ...MATH_TROJKATY,
   ...PHYSICS_FORMULAS,
   ...PHYSICS_PP,
   ...PHYSICS_PR,

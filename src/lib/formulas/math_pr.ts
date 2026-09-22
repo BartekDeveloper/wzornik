@@ -538,6 +538,48 @@ const podwojonyKat: FormulaDef = {
   },
 };
 
+const bernoulli: FormulaDef = {
+  id: "schemat-bernoulliego",
+  subject: "matematyka",
+  topic: "Prawdopodobieństwo · ROZSZ",
+  name: "Schemat Bernoulliego",
+  latex: "P_n(k) = \\binom{n}{k}p^k(1-p)^{n-k}",
+  vars: [
+    { id: "n", label: "n (prób)" },
+    { id: "k", label: "k (sukcesów)" },
+    { id: "p", label: "p (0–1)" },
+  ],
+  mode: "fixed",
+  outputId: "P",
+  outputLabel: "Pₙ(k)",
+  solve(_unknown, known, places): FormulaSolution {
+    const n = requireNatural(known["n"], "n");
+    const k = requireNatural(known["k"], "k");
+    const p = asRational(known["p"], "p");
+    if (k > n) throw new Error("k ≤ n — sukcesów nie więcej niż prób");
+    if (cmp(p, ZERO) < 0 || cmp(p, ONE) > 0) throw new Error("p w [0, 1]");
+    const c = binom(BigInt(n), BigInt(k));
+    const pk = pow(p, k);
+    const qk = pow(sub(ONE, p), n - k);
+    const value = exactOf(mul(mul({ p: c, q: 1n }, pk), qk));
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Wzór", body: "P_n(k) = \\binom{n}{k}p^k(1-p)^{n-k}" },
+        {
+          title: "2. Podstawienie danych",
+          body: `P_{${n}}(${k}) = \\binom{${n}}{${k}}${L(p)}^{${k}}(1-${L(p)})^{${n - k}}`,
+        },
+        {
+          title: "3. Składniki",
+          body: `\\binom{${n}}{${k}} = ${c}, \\; p^${k} = ${L(pk)}, \\; (1-p)^{${n - k}} = ${L(qk)}`,
+        },
+        { title: "4. Wynik", body: resultLatex(`P_{${n}}(${k})`, value, places) },
+      ],
+    };
+  },
+};
+
 export const MATH_PR: FormulaDef[] = [
   newton,
   silnia,
@@ -551,4 +593,5 @@ export const MATH_PR: FormulaDef[] = [
   rownanieLogarytmiczne,
   vieta,
   podwojonyKat,
+  bernoulli,
 ];

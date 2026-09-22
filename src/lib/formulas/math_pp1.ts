@@ -22,6 +22,7 @@ import {
   cbrtRational,
   exactOf,
   logExact,
+  rootRational,
   solveQuadratic,
   sqrtRational,
 } from "../exact/exact";
@@ -54,8 +55,55 @@ const potega: FormulaDef = {
   outputId: "",
   outputLabel: "",
   solve(unknown, known, places): FormulaSolution {
-    if (unknown !== "w") {
-      throw new Error("ten kalkulator liczy tylko wynik — odwrotności to pierwiastki i logarytmy");
+    if (unknown === "p") {
+      const w = asRational(known["w"], "w");
+      const n = intVal(asRational(known["n"], "n"), "n");
+      if (n === 0) {
+        if (cmp(w, ONE) === 0) throw new Error("p^0 = 1 — podstawa dowolna niezerowa");
+        throw new Error("sprzeczność — żadne p nie spełnia równania");
+      }
+      const k = Math.abs(n);
+      let value: Exact;
+      let note: string | undefined;
+      try {
+        const r = rootRational(w, k);
+        value = n < 0 ? exactOf(div(ONE, r.rat)) : r;
+      } catch {
+        const wf = approx(exactOf(w));
+        if (!(wf > 0)) throw new Error("podstawa rzeczywista wymaga w > 0");
+        value = approxOnly(wf ** (1 / n));
+        note = "wynik tylko przybliżony";
+      }
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: `p = \\sqrt[${k}]{w}` },
+          { title: "2. Podstawienie danych", body: `p = \\sqrt[${k}]{${L(w)}}` },
+          { title: "3. Wynik", body: resultLatex("p", value, places), note },
+        ],
+      };
+    }
+    if (unknown === "n") {
+      const p = asRational(known["p"], "p");
+      const w = asRational(known["w"], "w");
+      if (cmp(p, ZERO) <= 0 || cmp(sub(p, ONE), ZERO) === 0 || cmp(w, ZERO) <= 0) {
+        throw new Error("wykładnik wyznaczam dla p > 0, p ≠ 1 i w > 0");
+      }
+      const lg = logExact(p, w);
+      const nf = Math.round(approx(lg));
+      if (!Number.isInteger(nf) || cmp(pow(p, nf), w) !== 0) {
+        throw new Error("te dane nie dają całkowitego n — sprawdź liczby");
+      }
+      const value = exactOf(of(nf));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "n = \\log_p w" },
+          { title: "2. Podstawienie danych", body: `n = \\log_{${L(p)}} ${L(w)}` },
+          { title: "3. Logarytm", body: `\\log_p w = ${formatLatex(lg)}` },
+          { title: "4. Wynik", body: resultLatex("n", value, places) },
+        ],
+      };
     }
     const p = asRational(known["p"], "p");
     const n = intVal(asRational(known["n"], "n"), "n");
@@ -97,7 +145,28 @@ const pierwiastek: FormulaDef = {
   outputId: "",
   outputLabel: "",
   solve(unknown, known, places): FormulaSolution {
-    if (unknown === "n") throw new Error("stopień policz logarytmem");
+    if (unknown === "n") {
+      const m = asRational(known["m"], "m");
+      const w = asRational(known["w"], "w");
+      if (cmp(m, ZERO) <= 0 || cmp(w, ZERO) <= 0 || cmp(sub(w, ONE), ZERO) === 0) {
+        throw new Error("stopień wyznaczam dla m > 0 i w > 0, w ≠ 1");
+      }
+      const lg = logExact(w, m);
+      const nf = Math.round(approx(lg));
+      if (!Number.isInteger(nf) || nf < 1 || cmp(pow(w, nf), m) !== 0) {
+        throw new Error("te dane nie dają naturalnego stopnia — sprawdź liczby");
+      }
+      const value = exactOf(of(nf));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "n = \\log_w m" },
+          { title: "2. Podstawienie danych", body: `n = \\log_{${L(w)}} ${L(m)}` },
+          { title: "3. Logarytm", body: `\\log_w m = ${formatLatex(lg)}` },
+          { title: "4. Wynik", body: resultLatex("n", value, places) },
+        ],
+      };
+    }
     if (unknown === "m") {
       const w = asRational(known["w"], "w");
       const n = requireNatural(known["n"], "n");
@@ -242,7 +311,35 @@ const logarytm: FormulaDef = {
       });
       return { values: [value], steps };
     }
-    throw new Error("podstawę policz pierwiastkiem odpowiedniego stopnia");
+    const b = asRational(known["b"], "b");
+    const c = asRational(known["c"], "c");
+    if (cmp(b, ZERO) <= 0) throw new Error("podstawę wyznaczam dla b > 0");
+    let value: Exact;
+    let note: string | undefined;
+    if (isIntegerR(c) && c.p !== 0n) {
+      const k = Number(c.p < 0n ? -c.p : c.p);
+      try {
+        const r = rootRational(b, k);
+        value = c.p < 0n ? exactOf(div(ONE, r.rat)) : r;
+      } catch {
+        value = approxOnly(approx(exactOf(b)) ** (1 / Number(c.p)));
+        note = "wynik tylko przybliżony";
+      }
+    } else if (!isIntegerR(c)) {
+      value = approxOnly(approx(exactOf(b)) ** (1 / approx(exactOf(c))));
+      note = "wynik tylko przybliżony";
+    } else {
+      throw new Error("c = 0: wtedy b = 1, a podstawa dowolna");
+    }
+    if (cmp(value.rat, ZERO) <= 0 && !value.irr) throw new Error("podstawa musi być dodatnia");
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "a = \\sqrt[c]{b}" },
+        { title: "2. Podstawienie danych", body: `a = \\sqrt[${L(c)}]{${L(b)}}` },
+        { title: "3. Wynik", body: resultLatex("a", value, places), note },
+      ],
+    };
   },
 };
 
@@ -290,7 +387,34 @@ const procentSkladany: FormulaDef = {
   outputId: "",
   outputLabel: "",
   solve(unknown, known, places): FormulaSolution {
-    if (unknown === "n") throw new Error("liczbę okresów policz logarytmem");
+    if (unknown === "n") {
+      const K = asRational(known["K"], "K");
+      const K0 = asRational(known["K0"], "K₀");
+      const p = asRational(known["p"], "p");
+      const base = add(ONE, div(p, of(100)));
+      const ratio = div(K, K0);
+      if (cmp(ratio, ZERO) <= 0 || cmp(base, ZERO) <= 0 || cmp(sub(base, ONE), ZERO) === 0) {
+        throw new Error("okresy wyznaczam dla K/K₀ > 0 i podstawy dodatniej ≠ 1");
+      }
+      const lg = logExact(base, ratio);
+      const nf = Math.round(approx(lg));
+      if (!Number.isInteger(nf) || nf < 1 || cmp(pow(base, nf), ratio) !== 0) {
+        throw new Error("te dane nie dają naturalnego n — sprawdź liczby");
+      }
+      const value = exactOf(of(nf));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "n = \\log_{1+p/100}(K/K_0)" },
+          {
+            title: "2. Podstawienie danych",
+            body: `n = \\log_{${L(base)}}(${L(K)}/${L(K0)})`,
+          },
+          { title: "3. Logarytm", body: `\\log = ${formatLatex(lg)}` },
+          { title: "4. Wynik", body: resultLatex("n", value, places) },
+        ],
+      };
+    }
     const n = requireNatural(known["n"], "n");
     const base_of = (p: Rational): Rational => add(ONE, div(p, of(100)));
     if (unknown === "K") {
@@ -611,7 +735,35 @@ const hornerPierwiastki: FormulaDef = {
     const B = b.p * (Lcm / b.q);
     const C = c.p * (Lcm / c.q);
     const D = d.p * (Lcm / d.q);
-    if (D === 0n) throw new Error("d = 0 — wyłącz x przed nawias i rozwiąż równanie kwadratowe");
+    if (D === 0n) {
+      const q = solveQuadratic(a, b, c);
+      if (q.kind === "linear") throw new Error("horner: nieoczekiwany przypadek liniowy");
+      const zero = exactOf({ p: 0n, q: 1n });
+      const steps: FormulaSolution["steps"] = [
+        {
+          title: "1. Wyłączenie x",
+          body: `W(x) = x(${L(a)}x^2 + ${L(b)}x + ${L(c)})`,
+        },
+        {
+          title: "2. Delta trójmianu",
+          body: `\\Delta = ${L(b)}^2 - 4 \\cdot ${L(a)} \\cdot ${L(c)} = ${formatLatex(q.delta)}`,
+        },
+      ];
+      if (q.kind === "none") {
+        steps.push({
+          title: "3. Wynik",
+          body: "x_1 = 0",
+          note: "trójmian w nawiasie bez pierwiastków rzeczywistych",
+        });
+        return { values: [zero], steps };
+      }
+      const vals = [zero, ...q.roots];
+      steps.push({
+        title: "3. Wynik",
+        body: vals.map((v, i) => `x_{${i + 1}} = ${formatLatex(v)}`).join(", \\; "),
+      });
+      return { values: vals, steps };
+    }
     if (D > 100000n || D < -100000n || A > 100000n || A < -100000n) {
       throw new Error("za duże współczynniki do szukania pierwiastków");
     }

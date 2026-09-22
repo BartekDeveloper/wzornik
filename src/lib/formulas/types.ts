@@ -68,20 +68,3 @@ export function resultLatex(prefix: string, value: Exact, places: number): strin
   const dec = formatDecimal(value, places);
   return latex === dec ? `${prefix} = ${latex}` : `${prefix} = ${latex} \\approx ${dec}`;
 }
-
-export function stdSteps(
-  transform: string,
-  substitution: string,
-  value: Exact,
-  places: number,
-  note?: string,
-): SolveStep[] {
-  const latex = formatLatex(value);
-  const dec = formatDecimal(value, places);
-  const body = latex === dec ? latex : `${latex} \\approx ${dec}`;
-  return [
-    { title: "1. Przekształcenie wzoru", body: transform },
-    { title: "2. Podstawienie danych", body: substitution },
-    { title: "3. Wynik", body, note },
-  ];
-}

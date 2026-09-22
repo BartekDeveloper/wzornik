@@ -164,6 +164,99 @@ const ruchJednostajniePrzyspieszony: FormulaDef = {
   },
 };
 
+const predkoscChwilowa: FormulaDef = {
+  id: "predkosc-chwilowa",
+  subject: "fizyka",
+  topic: "Kinematyka",
+  name: "Prędkość w ruchu jednostajnie zmiennym",
+  latex: "v = v_0 + at",
+  vars: [
+    { id: "v", label: "v (prędkość)", unit: "m/s" },
+    { id: "v0", label: "v₀ (początkowa)", unit: "m/s" },
+    { id: "a", label: "a (przyspieszenie)", unit: "m/s²" },
+    { id: "t", label: "t (czas)", unit: "s" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places) {
+    if (unknown === "v") {
+      const v0 = asRational(known["v0"], "v₀");
+      const a = asRational(known["a"], "a");
+      const t = asRational(known["t"], "t");
+      const at = mul(a, t);
+      const value = exactOf(add(v0, at));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "v = v_0 + at" },
+          {
+            title: "2. Podstawienie danych",
+            body: `v = ${L(v0)} + ${L(a)} \\cdot ${L(t)}`,
+          },
+          { title: "3. Przyrost prędkości", body: `at = ${L(at)}` },
+          { title: "4. Wynik", body: resultLatex("v", value, places) },
+        ],
+      };
+    }
+    if (unknown === "v0") {
+      const v = asRational(known["v"], "v");
+      const a = asRational(known["a"], "a");
+      const t = asRational(known["t"], "t");
+      const at = mul(a, t);
+      const value = exactOf(sub(v, at));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "v_0 = v - at" },
+          {
+            title: "2. Podstawienie danych",
+            body: `v_0 = ${L(v)} - ${L(a)} \\cdot ${L(t)}`,
+          },
+          { title: "3. Przyrost prędkości", body: `at = ${L(at)}` },
+          { title: "4. Wynik", body: resultLatex("v_0", value, places) },
+        ],
+      };
+    }
+    if (unknown === "a") {
+      const v = asRational(known["v"], "v");
+      const v0 = asRational(known["v0"], "v₀");
+      const t = asRational(known["t"], "t");
+      const dv = sub(v, v0);
+      const value = exactOf(div(dv, t));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "a = \\frac{v - v_0}{t}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `a = \\frac{${L(v)} - ${L(v0)}}{${L(t)}}`,
+          },
+          { title: "3. Licznik", body: `v - v_0 = ${L(dv)}` },
+          { title: "4. Wynik", body: resultLatex("a", value, places) },
+        ],
+      };
+    }
+    const v = asRational(known["v"], "v");
+    const v0 = asRational(known["v0"], "v₀");
+    const a = asRational(known["a"], "a");
+    const dv = sub(v, v0);
+    const value = exactOf(div(dv, a));
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "t = \\frac{v - v_0}{a}" },
+        {
+          title: "2. Podstawienie danych",
+          body: `t = \\frac{${L(v)} - ${L(v0)}}{${L(a)}}`,
+        },
+        { title: "3. Licznik", body: `v - v_0 = ${L(dv)}` },
+        { title: "4. Wynik", body: resultLatex("t", value, places) },
+      ],
+    };
+  },
+};
+
 const sila: FormulaDef = {
   id: "sila",
   subject: "fizyka",
@@ -505,6 +598,7 @@ const praca: FormulaDef = {
 
 export const PHYSICS_FORMULAS: FormulaDef[] = [
   predkosc,
+  predkoscChwilowa,
   ruchJednostajniePrzyspieszony,
   sila,
   energiaKinetyczna,

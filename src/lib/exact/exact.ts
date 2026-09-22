@@ -124,6 +124,32 @@ export function cbrtRational(r: Rational): Exact {
   return { rat: norm(cn, cd), irr: null };
 }
 
+function iroot(n: bigint, k: number): bigint | null {
+  if (n === 0n) return 0n;
+  const neg = n < 0n;
+  if (neg && k % 2 === 0) return null;
+  const a = neg ? -n : n;
+  if (a > 1_000_000_000_000_000n) return null;
+  const c = BigInt(Math.round(Math.pow(Number(a), 1 / k)));
+  const kk = BigInt(k);
+  for (const d of [c - 2n, c - 1n, c, c + 1n, c + 2n]) {
+    if (d >= 0n && d ** kk === a) return neg ? -d : d;
+  }
+  return null;
+}
+
+export function rootRational(r: Rational, k: number): Exact {
+  if (!Number.isInteger(k) || k < 2 || k > 1000)
+    throw new Error("dokładne: stopień pierwiastka to liczba całkowita 2–1000");
+  if (isZero(r)) return { rat: ZERO, irr: null };
+  if (cmp(r, ZERO) < 0 && k % 2 === 0)
+    throw new Error("dokładne: parzysty pierwiastek z ujemnej (liczymy na rzeczywistych)");
+  const pr = iroot(r.p, k);
+  const qr = iroot(r.q, k);
+  if (pr === null || qr === null || qr === 0n) throw new Error("dokładne: pierwiastek niewymierny");
+  return { rat: norm(pr, qr), irr: null };
+}
+
 function irrValue(x: Irr | null): number {
   if (!x) return 0;
   if (x.type === "sqrt") return toNumber(x.coef) * Math.sqrt(Number(x.radicand));

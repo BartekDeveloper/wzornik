@@ -1,4 +1,3 @@
-import { ZERO, cmp } from "../exact/rational";
 import type { Rational } from "../exact/rational";
 import type { FormulaDef, FormulaSolution } from "./types";
 import { addWritten, divWritten, mulWritten, subWritten } from "./pisemne";
@@ -28,7 +27,6 @@ function ratToDecimal(r: Rational): string {
 function decInput(known: Record<string, { rat: Rational }>, id: string): string {
   const v = known[id];
   if (!v) throw new Error(`uzupełnij pole ${id}`);
-  if (cmp(v.rat, ZERO) < 0) throw new Error("działania pisemne: tylko liczby nieujemne");
   return ratToDecimal(v.rat);
 }
 

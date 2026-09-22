@@ -21,6 +21,9 @@ export const PARSE_LABELS: Record<string, string> = {
   tales: "proporcja (Tales)",
   "skala-mapy": "skala mapy",
   "stezenie-procentowe": "stężenie procentowe",
+  "rozklad-wielomianu": "rozkład wielomianu",
+  "wartosc-bezwzgledna": "wartość bezwzględna",
+  "postacie-kwadratowej": "postacie funkcji kwadratowej",
 };
 
 export function parseLabel(id: string): string {
@@ -114,6 +117,52 @@ function parseEqLinXY(eq: string): { x: number; y: number; k: number } | null {
   const r = parseLinXY(parts[1]!);
   if (!l || !r) return null;
   return { x: l.x - r.x, y: l.y - r.y, k: r.k - l.k };
+}
+
+function parsePolySide(expr: string): Record<number, number> | null {
+  const coefs: Record<number, number> = {};
+  for (const t of splitTerms(expr)) {
+    const m = /^(.*?)x(?:\^(\d+))?$/.exec(t);
+    if (m && t.includes("x")) {
+      if (/[a-z]/.test(m[1]!)) return null;
+      const coef = parseCoeff(m[1]!);
+      if (coef === null) return null;
+      const pw = m[2] === undefined ? 1 : Number(m[2]);
+      if (pw > 6) return null;
+      coefs[pw] = (coefs[pw] ?? 0) + coef;
+    } else {
+      if (/[a-z]/.test(t)) return null;
+      const coef = parseCoeff(t);
+      if (coef === null) return null;
+      coefs[0] = (coefs[0] ?? 0) + coef;
+    }
+  }
+  return coefs;
+}
+
+function tryPoly(s: string): ParsedEquation | null {
+  if (!s.includes("x")) return null;
+  const parts = s.split("=");
+  if (parts.length !== 2) return null;
+  const l = parsePolySide(parts[0]!);
+  const r = parsePolySide(parts[1]!);
+  if (!l || !r) return null;
+  const deg = Math.max(0, ...Object.keys({ ...l, ...r }).map(Number));
+  if (deg < 3 || deg > 4) return null;
+  const get = (p: number): number => (l[p] ?? 0) - (r[p] ?? 0);
+  if (get(deg) === 0) return null;
+  const ids = ["a6", "a5", "a4", "a3", "a2", "a1", "a0"];
+  const values: Record<string, string> = {};
+  for (let p = 6; p >= 0; p--) {
+    values[ids[6 - p]!] = p <= deg ? String(get(p)) : "0";
+  }
+  return {
+    subject: "matematyka",
+    id: "rozklad-wielomianu",
+    values,
+    selects: { deg: String(deg) },
+    label: parseLabel("rozklad-wielomianu"),
+  };
 }
 
 function num(s: string): number | null {
@@ -288,6 +337,16 @@ export function parseEquation(input: string): ParsedEquation | null {
     };
   }
 
+  const log10 = new RegExp(`^log\\(x\\)=(${NUM})$`).exec(s);
+  if (log10) {
+    return {
+      subject: "matematyka",
+      id: "rownanie-logarytmiczne",
+      values: { a: "10", c: log10[1]! },
+      label: parseLabel("rownanie-logarytmiczne"),
+    };
+  }
+
   const pct = new RegExp(`^(${NUM})%(?:z|of|\\*)(${NUM})$`).exec(s);
   if (pct) {
     return {
@@ -350,6 +409,42 @@ export function parseEquation(input: string): ParsedEquation | null {
   }
 
   if (!s.includes("x")) return null;
+
+  const poly = tryPoly(s);
+  if (poly) return poly;
+
+  const canon = new RegExp(`^(${NUM})\\(x([+-]${NUM})\\)\\^2([+-]${NUM})?(=0)?$`).exec(s);
+  if (canon) {
+    const a = Number(canon[1]!);
+    const p = -Number(canon[2]!);
+    const q = canon[3] === undefined ? 0 : Number(canon[3]!);
+    const b = -2 * a * p;
+    const c = a * p * p + q;
+    if ([a, b, c].every(Number.isFinite)) {
+      return {
+        subject: "matematyka",
+        id: "postacie-kwadratowej",
+        values: { a: String(a), b: String(b), c: String(c) },
+        label: parseLabel("postacie-kwadratowej"),
+      };
+    }
+  }
+
+  const abs = new RegExp(`^\\|x((?:[+-]${NUM})?)\\|=(${NUM})$`).exec(s);
+  if (abs) {
+    const inner = abs[1]!;
+    const w = abs[2]!;
+    const a = inner === "" ? 0 : -Number(inner);
+    if (Number.isFinite(a)) {
+      return {
+        subject: "matematyka",
+        id: "wartosc-bezwzgledna",
+        values: { a: String(a), w },
+        label: parseLabel("wartosc-bezwzgledna"),
+      };
+    }
+  }
+
   const parts = s.split("=");
   if (parts.length > 2) return null;
   const lhs = parts[0]!;

@@ -150,6 +150,45 @@ describe("parseEquation", () => {
       label: "stężenie procentowe",
     });
   });
+
+  it("parses cubic equations into rozklad-wielomianu", () => {
+    expect(parseEquation("x^3-6x^2+11x-6=0")).toEqual({
+      subject: "matematyka",
+      id: "rozklad-wielomianu",
+      values: { a6: "0", a5: "0", a4: "0", a3: "1", a2: "-6", a1: "11", a0: "-6" },
+      selects: { deg: "3" },
+      label: "rozkład wielomianu",
+    });
+    expect(parseEquation("x^2-5x+6=0")?.id).toBe("rownanie-kwadratowe");
+  });
+
+  it("parses absolute value equations", () => {
+    expect(parseEquation("|x-2|=3")).toEqual({
+      subject: "matematyka",
+      id: "wartosc-bezwzgledna",
+      values: { a: "2", w: "3" },
+      label: "wartość bezwzględna",
+    });
+    expect(parseEquation("|x|=3")?.values).toEqual({ a: "0", w: "3" });
+  });
+
+  it("parses vertex form into postacie-kwadratowej", () => {
+    expect(parseEquation("2(x-1)^2+3")).toEqual({
+      subject: "matematyka",
+      id: "postacie-kwadratowej",
+      values: { a: "2", b: "-4", c: "5" },
+      label: "postacie funkcji kwadratowej",
+    });
+  });
+
+  it("parses decimal logarithm", () => {
+    expect(parseEquation("log(x)=2")).toEqual({
+      subject: "matematyka",
+      id: "rownanie-logarytmiczne",
+      values: { a: "10", c: "2" },
+      label: "równanie logarytmiczne",
+    });
+  });
 });
 
 describe("looksLikeEquation", () => {

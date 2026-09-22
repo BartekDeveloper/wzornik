@@ -69,7 +69,52 @@ function dashRow(m: number): string {
   return Array(m).fill("\\text{-}").join(" & ");
 }
 
+function absStr(w: WrittenNumber): string {
+  return toString({ ...w, isNegative: false });
+}
+
+function withSign(steps: WrittenStep[], neg: boolean, rule: string): WrittenStep[] {
+  const bumped = steps.map((s) => ({
+    ...s,
+    title: s.title.replace(/^(\d+)\./, (_m, d) => `${Number(d) + 1}.`),
+  }));
+  const out: WrittenStep[] = [{ title: "1. Reguła znaków", body: rule }, ...bumped];
+  if (neg) {
+    const last = out[out.length - 1];
+    if (last && last.title.includes("Wynik")) last.body = last.body.replace(/^= /, "= -");
+  }
+  return out;
+}
+
+function ruleOnly(equation: string): WrittenStep[] {
+  return [
+    { title: "1. Reguła znaków", body: equation },
+    { title: "2. Wynik", body: "= 0" },
+  ];
+}
+
 export function addWritten(aStr: string, bStr: string): WrittenStep[] {
+  const a = parseNumber(aStr);
+  const b = parseNumber(bStr);
+  if (!a.isNegative && !b.isNegative) return addAbs(aStr, bStr);
+  const A = absStr(a);
+  const B = absStr(b);
+  if (a.isNegative === b.isNegative) {
+    return withSign(addAbs(A, B), true, `${aStr} + ${bStr} = -(${A} + ${B})`);
+  }
+  const c = compareAbs(a, b);
+  if (c === 0) return ruleOnly(`${aStr} + ${bStr} = 0`);
+  const big = c > 0 ? A : B;
+  const small = c > 0 ? B : A;
+  const steps = subColumns(parseNumber(big), parseNumber(small));
+  return withSign(
+    steps,
+    c > 0 ? a.isNegative : b.isNegative,
+    `${aStr} + ${bStr} = ${(c > 0 ? a.isNegative : b.isNegative) ? "-" : ""}(${big} - ${small})`,
+  );
+}
+
+function addAbs(aStr: string, bStr: string): WrittenStep[] {
   const [A, B] = align(parseNumber(aStr), parseNumber(bStr));
   const n = A.digits.length;
   let carry = 0;
@@ -108,19 +153,44 @@ export function addWritten(aStr: string, bStr: string): WrittenStep[] {
 }
 
 export function subWritten(aStr: string, bStr: string): WrittenStep[] {
-  const steps: WrittenStep[] = [];
   const A = parseNumber(aStr);
   const B = parseNumber(bStr);
-  if (compareAbs(A, B) < 0) {
-    const r = subAbs(B, A);
-    steps.push({
-      title: "1. Kolejność",
-      body: `|${aStr}| < |${bStr}|`,
-      note: `liczę ${bStr} - ${aStr} i dopisuję minus`,
-    });
-    steps.push({ title: "2. Wynik", body: `= -${toString(r)}` });
-    return steps;
+  if (!A.isNegative && !B.isNegative) {
+    if (compareAbs(A, B) < 0) {
+      const r = subAbs(B, A);
+      return [
+        {
+          title: "1. Kolejność",
+          body: `|${aStr}| < |${bStr}|`,
+          note: `liczę ${bStr} - ${aStr} i dopisuję minus`,
+        },
+        { title: "2. Wynik", body: `= -${toString(r)}` },
+      ];
+    }
+    return subColumns(A, B);
   }
+  const S = absStr(A);
+  const T = absStr(B);
+  if (A.isNegative === B.isNegative) {
+    const c = compareAbs(A, B);
+    if (c === 0) return ruleOnly(`${aStr} - ${bStr} = 0`);
+    const big = c > 0 ? S : T;
+    const small = c > 0 ? T : S;
+    const neg = c > 0 ? A.isNegative : !A.isNegative;
+    return withSign(
+      subColumns(parseNumber(big), parseNumber(small)),
+      neg,
+      `${aStr} - ${bStr} = ${neg ? "-" : ""}(${big} - ${small})`,
+    );
+  }
+  return withSign(
+    addAbs(S, T),
+    A.isNegative,
+    `${aStr} - ${bStr} = ${A.isNegative ? "-" : ""}(${S} + ${T})`,
+  );
+}
+
+function subColumns(A: WrittenNumber, B: WrittenNumber): WrittenStep[] {
   const [AA, BB] = align(A, B);
   const n = AA.digits.length;
   let borrow = 0;
@@ -161,9 +231,10 @@ export function subWritten(aStr: string, bStr: string): WrittenStep[] {
   lines.push(`& ${dashRow(m)} \\\\`);
   lines.push(`& ${rowCells(result, f, m)} \\\\`);
   lines.push("\\end{aligned}");
-  steps.push({ title: "1. Zapis kolumnowy", body: lines.join("\n") });
-  steps.push({ title: "2. Wynik", body: `= ${toString(res)}` });
-  return steps;
+  return [
+    { title: "1. Zapis kolumnowy", body: lines.join("\n") },
+    { title: "2. Wynik", body: `= ${toString(res)}` },
+  ];
 }
 
 function compareAbs(a: WrittenNumber, b: WrittenNumber): number {
@@ -201,6 +272,19 @@ function subAbs(a: WrittenNumber, b: WrittenNumber): WrittenNumber {
 }
 
 export function mulWritten(aStr: string, bStr: string): WrittenStep[] {
+  const a = parseNumber(aStr);
+  const b = parseNumber(bStr);
+  if (!a.isNegative && !b.isNegative) return mulAbs(aStr, bStr);
+  const A = absStr(a);
+  const B = absStr(b);
+  return withSign(
+    mulAbs(A, B),
+    a.isNegative !== b.isNegative,
+    `${aStr} \\times ${bStr} = ${a.isNegative !== b.isNegative ? "-" : ""}(${A} \\times ${B})`,
+  );
+}
+
+function mulAbs(aStr: string, bStr: string): WrittenStep[] {
   const a = parseNumber(aStr);
   const b = parseNumber(bStr);
   const totalDec = fracLen(a) + fracLen(b);
@@ -265,12 +349,25 @@ function digitsWithPoint(digits: number[], pointPos: number): string {
 export function divWritten(aStr: string, bStr: string, maxFrac = 2): WrittenStep[] {
   const a = parseNumber(aStr);
   const b = parseNumber(bStr);
+  if (!a.isNegative && !b.isNegative) return divAbs(aStr, bStr, maxFrac);
+  const A = absStr(a);
+  const B = absStr(b);
+  return withSign(
+    divAbs(A, B, maxFrac),
+    a.isNegative !== b.isNegative,
+    `${aStr} : ${bStr} = ${a.isNegative !== b.isNegative ? "-" : ""}(${A} : ${B})`,
+  );
+}
+
+function divAbs(aStr: string, bStr: string, maxFrac = 2): WrittenStep[] {
+  const a = parseNumber(aStr);
+  const b = parseNumber(bStr);
   if (b.digits.every((d) => d === "0")) throw new Error("dzielenie przez zero");
   const steps: WrittenStep[] = [];
   const k = fracLen(b);
   const dd: number[] = [...a.digits.map((d) => parseInt(d, 10)), ...Array(k).fill(0)];
   const pointPos = a.decimalIndex + k;
-  const divNum = dividendToNumber(b.digits);
+  const divNum = b.digits.reduce((acc, d) => acc * 10n + BigInt(d), 0n);
   if (k > 0 || fracLen(a) > 0) {
     steps.push({
       title: "1. Przesunięcie przecinka",
@@ -280,78 +377,79 @@ export function divWritten(aStr: string, bStr: string, maxFrac = 2): WrittenStep
       )} : ${digitsWithPoint(
         b.digits.map((d) => parseInt(d, 10)),
         b.decimalIndex,
-      )} = ${digitsWithPoint(dd, pointPos)} : ${b.digits.join("")} \\; (\\times 10^{${Math.max(k, 0)}})`,
+      )} = ${digitsWithPoint(dd, pointPos)} : ${b.digits.join("")} \\; (\\times 10^{${k}})`,
     });
   }
-  const quotient: number[] = [];
-  let work: number[] = [];
+  const quotient: bigint[] = [];
+  let work = 0n;
   const trail: string[] = [];
   let i = 0;
-  let fracCount = 0;
+  const seen = new Map<bigint, number>();
+  let periodFrom = -1;
   for (;;) {
-    if (i >= dd.length && (digitsToNumber(work) === 0 || quotient.length - pointPos >= maxFrac)) {
-      break;
-    }
-    if (i < dd.length) {
-      work.push(dd[i]);
-      i++;
+    if (i >= dd.length) {
+      if (work === 0n) break;
+      const prev = seen.get(work);
+      if (prev !== undefined) {
+        periodFrom = prev;
+        break;
+      }
+      if (quotient.length - pointPos >= maxFrac) break;
+      seen.set(work, quotient.length);
+      work = work * 10n;
     } else {
-      if (fracCount >= maxFrac) break;
-      work.push(0);
-      fracCount++;
+      work = work * 10n + BigInt(dd[i]);
+      i++;
     }
-    while (work.length > 1 && work[0] === 0) work = work.slice(1);
-    const wNum = digitsToNumber(work);
-    if (wNum < divNum) {
-      quotient.push(0);
+    if (work < divNum) {
+      quotient.push(0n);
       continue;
     }
-    const q = Math.floor(wNum / divNum);
-    quotient.push(q);
+    const q = work / divNum;
     const prod = q * divNum;
-    const remainder = wNum - prod;
-    trail.push(`${wNum} - ${prod} = ${remainder}`);
-    work = remainder > 0 ? numberToDigits(remainder) : [];
+    const remainder = work - prod;
+    quotient.push(q);
+    trail.push(`${work} - ${prod} = ${remainder}`);
+    work = remainder;
   }
-  const intDigits = quotient.slice(0, pointPos);
-  while (intDigits.length > 1 && intDigits[0] === 0) intDigits.shift();
-  const fracDigits = quotient.slice(pointPos);
-  while (fracDigits.length > 0 && fracDigits[fracDigits.length - 1] === 0) fracDigits.pop();
-  const qStr =
-    fracDigits.length > 0 ? `${intDigits.join("")}.${fracDigits.join("")}` : intDigits.join("");
-  const remainder = digitsToNumber(work);
+  const intDigits = quotient.slice(0, pointPos).map(String);
+  while (intDigits.length > 1 && intDigits[0] === "0") intDigits.shift();
+  const fracDigits = quotient.slice(pointPos).map(String);
+  const intStr = intDigits.join("") || "0";
+  let qStr: string;
+  let periodNote: string | undefined;
+  let remainder = work;
+  if (periodFrom >= 0) {
+    const pre = fracDigits.slice(0, periodFrom - pointPos).join("");
+    let per = fracDigits.slice(periodFrom - pointPos).join("");
+    while (
+      per.length % 2 === 0 &&
+      per.length > 0 &&
+      per.slice(0, per.length / 2) === per.slice(per.length / 2)
+    ) {
+      per = per.slice(0, per.length / 2);
+    }
+    qStr = `${intStr}.${pre}(${per})`;
+    periodNote = "ułamek okresowy — cyfry w nawiasie powtarzają się w nieskończoność";
+    remainder = 0n;
+  } else {
+    while (fracDigits.length > 0 && fracDigits[fracDigits.length - 1] === "0") fracDigits.pop();
+    qStr = fracDigits.length > 0 ? `${intStr}.${fracDigits.join("")}` : intStr;
+  }
   const lines = ["\\begin{aligned}"];
   lines.push(
     `& ${digitsWithPoint(dd, pointPos)} : ${b.digits.join("")} = ${qStr.split("").join(" ")} \\\\`,
   );
   for (const t of trail) lines.push(`& ${t} \\\\`);
-  if (remainder !== 0) lines.push(`& \\text{reszta } ${remainder} \\\\`);
+  if (remainder !== 0n) lines.push(`& \\text{reszta } ${remainder} \\\\`);
   lines.push("\\end{aligned}");
   steps.push({ title: `${steps.length + 1}. Dzielenie pod kreską`, body: lines.join("\n") });
   steps.push({
     title: `${steps.length + 1}. Wynik`,
-    body: `= ${qStr}${remainder !== 0 ? ` \\text{ r } ${remainder}` : ""}`,
-    note: remainder !== 0 ? `reszta ${remainder} (ograniczono do ${maxFrac} miejsc)` : undefined,
+    body: `= ${qStr}${remainder !== 0n ? ` \\text{ r } ${remainder}` : ""}`,
+    note: remainder !== 0n ? `reszta ${remainder} (ograniczono do ${maxFrac} miejsc)` : periodNote,
   });
   return steps;
-}
-
-function dividendToNumber(d: string[]): number {
-  return d.reduce((acc, x) => acc * 10 + parseInt(x, 10), 0);
-}
-
-function digitsToNumber(d: number[]): number {
-  return d.reduce((acc, x) => acc * 10 + x, 0);
-}
-
-function numberToDigits(n: number): number[] {
-  if (n === 0) return [0];
-  const d: number[] = [];
-  while (n > 0) {
-    d.unshift(n % 10);
-    n = Math.floor(n / 10);
-  }
-  return d;
 }
 
 export function hornerTableWritten(coeffs: number[], x0: number): WrittenStep[] {

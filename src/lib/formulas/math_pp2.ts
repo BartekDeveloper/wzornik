@@ -1069,6 +1069,49 @@ const stozek: FormulaDef = {
   },
 };
 
+const rombBok: FormulaDef = {
+  id: "romb-bok",
+  subject: "matematyka",
+  topic: "Pola figur",
+  name: "Pole rombu (bok i wysokość)",
+  latex: "P = a \\cdot h",
+  vars: [
+    { id: "P", label: "P (pole)" },
+    { id: "a", label: "a (bok)" },
+    { id: "h", label: "h (wysokość)" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places): FormulaSolution {
+    if (unknown === "P") {
+      const a = asRational(known["a"], "a");
+      const h = asRational(known["h"], "h");
+      const value = exactOf(mul(a, h));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "P = a \\cdot h" },
+          { title: "2. Podstawienie danych", body: `P = ${L(a)} \\cdot ${L(h)}` },
+          { title: "3. Wynik", body: resultLatex("P", value, places) },
+        ],
+      };
+    }
+    const P = asRational(known["P"], "P");
+    const other = unknown === "a" ? "h" : "a";
+    const o = asRational(known[other], other);
+    const value = exactOf(div(P, o));
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${unknown} = \\frac{P}{${other}}` },
+        { title: "2. Podstawienie danych", body: `${unknown} = \\frac{${L(P)}}{${L(o)}}` },
+        { title: "3. Wynik", body: resultLatex(unknown, value, places) },
+      ],
+    };
+  },
+};
+
 export const MATH_PP2: FormulaDef[] = [
   katyOkrag,
   poleTrapez,
@@ -1086,4 +1129,5 @@ export const MATH_PP2: FormulaDef[] = [
   ostroslup,
   walec,
   stozek,
+  rombBok,
 ];

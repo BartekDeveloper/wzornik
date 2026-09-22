@@ -17,7 +17,7 @@ import {
 import type { Rational } from "../exact/rational";
 import { approx, approxOnly, exactOf, logExact, trigExact } from "../exact/exact";
 import type { Exact } from "../exact/exact";
-import { formatDecimal, formatLatex, formatRatLatex } from "../exact/format";
+import { formatDecimal, formatLatex, formatRatLatex, trimNum } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
 import { asRational, requireNatural, resultLatex } from "./types";
 
@@ -580,6 +580,59 @@ const bernoulli: FormulaDef = {
   },
 };
 
+const sumaKatowTryg: FormulaDef = {
+  id: "suma-katow-tryg",
+  subject: "matematyka",
+  topic: "Trygonometria · ROZSZ",
+  name: "Sinus i cosinus sumy i różnicy",
+  latex: "\\sin(\\alpha \\pm \\beta), \\; \\cos(\\alpha \\pm \\beta)",
+  vars: [
+    { id: "alfa", label: "α [°]" },
+    { id: "beta", label: "β [°]" },
+    {
+      id: "fn",
+      label: "funkcja",
+      kind: "select",
+      options: ["sin", "cos"],
+    },
+    {
+      id: "pm",
+      label: "znak",
+      kind: "select",
+      options: ["+", "−"],
+    },
+  ],
+  mode: "fixed",
+  outputId: "w",
+  outputLabel: "wynik",
+  solve(_unknown, known, places, selects): FormulaSolution {
+    const alfa = approx(exactOf(asRational(known["alfa"], "α")));
+    const beta = approx(exactOf(asRational(known["beta"], "β")));
+    const fn = selects?.["fn"] ?? "sin";
+    const pm = selects?.["pm"] ?? "+";
+    const angle = pm === "+" ? alfa + beta : alfa - beta;
+    const value = fn === "sin" ? trigExact("sin", angle) : trigExact("cos", angle);
+    const note = value.irr?.type === "approx" ? "wynik tylko przybliżony" : undefined;
+    const fname = fn === "sin" ? "\\sin" : "\\cos";
+    const op = pm === "+" ? "+" : "-";
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Wzór", body: `${fname}(\\alpha ${op} \\beta)` },
+        {
+          title: "2. Kąt",
+          body: `\\alpha ${op} \\beta = ${trimNum(alfa)} ${op} ${trimNum(beta)} = ${trimNum(angle)}^\\circ`,
+        },
+        {
+          title: "3. Wynik",
+          body: resultLatex(`${fname}(${trimNum(angle)}^\\circ)`, value, places),
+          note,
+        },
+      ],
+    };
+  },
+};
+
 export const MATH_PR: FormulaDef[] = [
   newton,
   silnia,
@@ -594,4 +647,5 @@ export const MATH_PR: FormulaDef[] = [
   vieta,
   podwojonyKat,
   bernoulli,
+  sumaKatowTryg,
 ];

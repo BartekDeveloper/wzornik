@@ -6,6 +6,7 @@ import {
   cmp,
   div,
   factorial,
+  fromString,
   gcd,
   isIntegerR,
   isZero,
@@ -348,24 +349,85 @@ const wartoscBezwzgledna: FormulaDef = {
   subject: "matematyka",
   topic: "Wartość bezwzględna",
   name: "Wartość bezwzględna",
-  latex: "w = |x|",
-  vars: [{ id: "x", label: "x" }],
-  mode: "fixed",
-  outputId: "w",
-  outputLabel: "w",
-  solve(_unknown, known, places): FormulaSolution {
+  latex: "w = |x - a|",
+  vars: [
+    { id: "x", label: "x" },
+    { id: "a", label: "a (przesunięcie)" },
+    { id: "w", label: "w (wynik)" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places): FormulaSolution {
+    if (unknown === "w") {
+      const x = asRational(known["x"], "x");
+      const a = asRational(known["a"], "a");
+      const d = sub(x, a);
+      const value = exactOf(cmp(d, ZERO) < 0 ? neg(d) : d);
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Definicja", body: "w = |x - a|" },
+          { title: "2. Podstawienie danych", body: `w = |${L(x)} - ${L(a)}|` },
+          { title: "3. Różnica", body: `x - a = ${L(d)}` },
+          { title: "4. Wynik", body: resultLatex("w", value, places) },
+        ],
+      };
+    }
+    if (unknown === "x") {
+      const a = asRational(known["a"], "a");
+      const w = asRational(known["w"], "w");
+      if (cmp(w, ZERO) < 0) throw new Error("wartość bezwzględna nie jest ujemna");
+      const x1 = exactOf(add(a, w));
+      const x2 = exactOf(sub(a, w));
+      if (isZero(w)) {
+        return {
+          values: [x1],
+          steps: [
+            { title: "1. Definicja", body: "x = a \\pm w" },
+            { title: "2. Podstawienie danych", body: `x = ${L(a)} \\pm ${L(w)}` },
+            { title: "3. Wynik", body: resultLatex("x", x1, places), note: "pierwiastek podwójny" },
+          ],
+        };
+      }
+      return {
+        values: [x1, x2],
+        labels: ["x₁", "x₂"],
+        steps: [
+          { title: "1. Definicja", body: "x = a \\pm w" },
+          { title: "2. Podstawienie danych", body: `x = ${L(a)} \\pm ${L(w)}` },
+          {
+            title: "3. Wynik",
+            body: `${resultLatex("x_1", x1, places)}, \\; ${resultLatex("x_2", x2, places)}`,
+          },
+        ],
+      };
+    }
     const x = asRational(known["x"], "x");
-    const ax = cmp(x, ZERO) < 0 ? neg(x) : x;
-    const value = exactOf(ax);
+    const w = asRational(known["w"], "w");
+    if (cmp(w, ZERO) < 0) throw new Error("wartość bezwzględna nie jest ujemna");
+    const a1 = exactOf(add(x, w));
+    const a2 = exactOf(sub(x, w));
+    if (isZero(w)) {
+      return {
+        values: [a1],
+        steps: [
+          { title: "1. Definicja", body: "a = x \\mp w" },
+          { title: "2. Podstawienie danych", body: `a = ${L(x)} \\mp ${L(w)}` },
+          { title: "3. Wynik", body: resultLatex("a", a1, places) },
+        ],
+      };
+    }
     return {
-      values: [value],
+      values: [a1, a2],
+      labels: ["a₁", "a₂"],
       steps: [
-        { title: "1. Definicja", body: "w = |x| = x \\; (x \\ge 0), \\; -x \\; (x < 0)" },
+        { title: "1. Definicja", body: "a = x \\mp w" },
+        { title: "2. Podstawienie danych", body: `a = ${L(x)} \\mp ${L(w)}` },
         {
-          title: "2. Znak liczby",
-          body: cmp(x, ZERO) < 0 ? `${L(x)} < 0, \\; w = -x` : `${L(x)} \\ge 0, \\; w = x`,
+          title: "3. Wynik",
+          body: `${resultLatex("a_1", a1, places)}, \\; ${resultLatex("a_2", a2, places)}`,
         },
-        { title: "3. Wynik", body: resultLatex("w", value, places) },
       ],
     };
   },
@@ -1282,6 +1344,99 @@ const znakWielomianu: FormulaDef = {
   },
 };
 
+const statystyka: FormulaDef = {
+  id: "statystyka",
+  subject: "matematyka",
+  topic: "Statystyka",
+  name: "Średnia, mediana i odchylenie",
+  latex: "\\bar{x} = \\frac{\\sum x_i}{n}",
+  vars: [{ id: "xs", label: "dane (po ; lub ,)", kind: "list" }],
+  mode: "fixed",
+  outputId: "stat",
+  outputLabel: "statystyki",
+  solve(_unknown, _known, places, selects): FormulaSolution {
+    const raw = (selects?.["xs"] ?? "").trim();
+    if (raw === "") throw new Error("wpisz liczby oddzielone średnikiem, przecinkiem albo spacją");
+    let xs: Rational[];
+    try {
+      xs = raw
+        .split(/[;,\s]+/)
+        .filter((t) => t !== "")
+        .map((t) => fromString(t));
+    } catch {
+      throw new Error("zły zapis liczby — dozwolone np. 2,5 albo 1/3");
+    }
+    if (xs.length === 0) throw new Error("wpisz co najmniej jedną liczbę");
+    const n = xs.length;
+    const sum = xs.reduce((acc, x) => add(acc, x), ZERO);
+    const mean = div(sum, of(n));
+    const sorted = [...xs].sort((a, b) => (cmp(a, b) < 0 ? -1 : cmp(a, b) > 0 ? 1 : 0));
+    const mid = Math.floor(n / 2);
+    const median = n % 2 === 1 ? sorted[mid]! : div(add(sorted[mid - 1]!, sorted[mid]!), of(2));
+    const counts = new Map<string, { v: Rational; c: number }>();
+    for (const x of xs) {
+      const key = `${x.p}/${x.q}`;
+      const e = counts.get(key);
+      if (e) e.c++;
+      else counts.set(key, { v: x, c: 1 });
+    }
+    let mode = sorted[0]!;
+    let best = 0;
+    for (const { v, c } of counts.values()) {
+      if (c > best) {
+        best = c;
+        mode = v;
+      }
+    }
+    const variance = div(
+      xs.reduce((acc, x) => add(acc, mul(sub(x, mean), sub(x, mean))), ZERO),
+      of(n),
+    );
+    let std: Exact;
+    let note: string | undefined;
+    try {
+      std = sqrtRational(variance);
+    } catch {
+      std = approxOnly(Math.sqrt(approx(exactOf(variance))));
+      note = "odchylenie tylko przybliżone";
+    }
+    const meanV = exactOf(mean);
+    const medV = exactOf(median);
+    const show = (e: Exact): string => {
+      const lx = formatLatex(e);
+      const dc = formatDecimal(e, places);
+      return lx === dc ? lx : `${lx} \\approx ${dc}`;
+    };
+    return {
+      values: [meanV, medV, std],
+      labels: ["x̄", "Me", "σ"],
+      steps: [
+        { title: "1. Dane", body: `n = ${n}, \\; ${sorted.map(L).join(", \\; ")}` },
+        {
+          title: "2. Średnia",
+          body: `\\bar{x} = \\frac{${sorted.map(L).join("+")}}{${n}} = ${show(meanV)}`,
+        },
+        {
+          title: "3. Mediana",
+          body:
+            n % 2 === 1
+              ? `Me = ${L(median)}`
+              : `Me = \\frac{${L(sorted[mid - 1]!)} + ${L(sorted[mid]!)}}{2} = ${L(median)}`,
+        },
+        {
+          title: "4. Odchylenie",
+          body: `\\sigma = \\sqrt{\\frac{\\sum(x_i - \\bar{x})^2}{n}} = ${show(std)}`,
+        },
+        {
+          title: "5. Wynik",
+          body: `${resultLatex("\\bar{x}", meanV, places)}, \\; ${resultLatex("Me", medV, places)}, \\; ${resultLatex("\\sigma", std, places)}`,
+          note: `dominanta: ${L(mode)}${note ? `; ${note}` : ""}`,
+        },
+      ],
+    };
+  },
+};
+
 export const MATH_PP1: FormulaDef[] = [
   potega,
   pierwiastek,
@@ -1300,4 +1455,5 @@ export const MATH_PP1: FormulaDef[] = [
   postacieKwadratowej,
   rozkladLiczby,
   znakWielomianu,
+  statystyka,
 ];

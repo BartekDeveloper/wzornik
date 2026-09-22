@@ -185,6 +185,12 @@ export const DESCRIPTIONS: Record<string, string> = {
   "oporniki-rownolegle": "Opór zastępczy równoległy; pojedyncze oporniki wstecz.",
   doppler: "Częstotliwość przy zbliżającym się źródle (V = 340 m/s).",
   "kat-graniczny": "Kąt całkowitego wewnętrznego odbicia; współczynnik n wstecz.",
+  statystyka: "Średnia, mediana, dominanta i odchylenie z listy liczb.",
+  "romb-bok": "Pole rombu z boku i wysokości; bok i wysokość wstecz.",
+  "suma-katow-tryg": "Sinus/cosinus sumy i różnicy kątów (stopnie).",
+  boyle: "Izoterma p₁V₁ = p₂V₂; każda wielkość wstecz.",
+  gaylussac: "Izobara V₁/T₁ = V₂/T₂; każda wielkość wstecz.",
+  charles: "Izochora p₁/T₁ = p₂/T₂; każda wielkość wstecz.",
   "czas-sloneczny": "Różnica czasu z różnicy długości geograficznej (1° = 4 min).",
   "bilans-wodny": "Opad minus parowanie; każdy składnik wstecz.",
 };

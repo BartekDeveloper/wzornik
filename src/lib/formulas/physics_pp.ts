@@ -1957,6 +1957,190 @@ const katGraniczny: FormulaDef = {
   },
 };
 
+const boyle: FormulaDef = {
+  id: "boyle",
+  subject: "fizyka",
+  topic: "Termodynamika",
+  name: "Prawo Boyle'a-Mariotte'a (izoterma)",
+  latex: "p_1V_1 = p_2V_2",
+  vars: [
+    { id: "p1", label: "p₁ [Pa]" },
+    { id: "V1", label: "V₁ [m³]" },
+    { id: "p2", label: "p₂ [Pa]" },
+    { id: "V2", label: "V₂ [m³]" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places): FormulaSolution {
+    const g = (id: string) => asRational(known[id], id);
+    const side = (a: string, b: string) => mul(g(a), g(b));
+    if (unknown === "p1" || unknown === "p2") {
+      const other = unknown === "p1" ? "p2" : "p1";
+      const vThis = unknown === "p1" ? "V1" : "V2";
+      const vOther = unknown === "p1" ? "V2" : "V1";
+      const num = side(other, vOther);
+      const value = exactOf(div(num, g(vThis)));
+      return {
+        values: [value],
+        steps: [
+          {
+            title: "1. Przekształcenie wzoru",
+            body: `${unknown} = \\frac{${other} \\cdot ${vOther}}{${vThis}}`,
+          },
+          {
+            title: "2. Podstawienie danych",
+            body: `${unknown} = \\frac{${L(g(other))} \\cdot ${L(g(vOther))}}{${L(g(vThis))}}`,
+          },
+          { title: "3. Licznik", body: `${L(num)}` },
+          { title: "4. Wynik", body: resultLatex(unknown, value, places) },
+        ],
+      };
+    }
+    const num = unknown === "V1" ? "p2" : "p1";
+    const numV = unknown === "V1" ? "V2" : "V1";
+    const den = unknown === "V1" ? "p1" : "p2";
+    const prod = side(num, numV);
+    const value = exactOf(div(prod, g(den)));
+    const lab = unknown === "V1" ? "V_1" : "V_2";
+    return {
+      values: [value],
+      steps: [
+        {
+          title: "1. Przekształcenie wzoru",
+          body: `${lab} = \\frac{${num} \\cdot ${numV}}{${den}}`,
+        },
+        {
+          title: "2. Podstawienie danych",
+          body: `${lab} = \\frac{${L(g(num))} \\cdot ${L(g(numV))}}{${L(g(den))}}`,
+        },
+        { title: "3. Licznik", body: `${L(prod)}` },
+        { title: "4. Wynik", body: resultLatex(lab, value, places) },
+      ],
+    };
+  },
+};
+
+const gaylussac: FormulaDef = {
+  id: "gaylussac",
+  subject: "fizyka",
+  topic: "Termodynamika",
+  name: "Prawo Gay-Lussaca (izobara)",
+  latex: "\\frac{V_1}{T_1} = \\frac{V_2}{T_2}",
+  vars: [
+    { id: "V1", label: "V₁ [m³]" },
+    { id: "T1", label: "T₁ [K]" },
+    { id: "V2", label: "V₂ [m³]" },
+    { id: "T2", label: "T₂ [K]" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places): FormulaSolution {
+    const g = (id: string) => asRational(known[id], id);
+    const pair = (a: string, b: string) => mul(g(a), g(b));
+    if (unknown === "V1" || unknown === "V2") {
+      const other = unknown === "V1" ? "V2" : "V1";
+      const tThis = unknown === "V1" ? "T1" : "T2";
+      const tOther = unknown === "V1" ? "T2" : "T1";
+      const num = pair(other, tThis);
+      const value = exactOf(div(num, g(tOther)));
+      const lab = unknown === "V1" ? "V_1" : "V_2";
+      const lo = unknown === "V1" ? "V_2" : "V_1";
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: `${lab} = ${lo}\\frac{${tThis}}{${tOther}}` },
+          {
+            title: "2. Podstawienie danych",
+            body: `${lab} = ${L(g(other))} \\cdot \\frac{${L(g(tThis))}}{${L(g(tOther))}}`,
+          },
+          { title: "3. Licznik", body: `${L(num)}` },
+          { title: "4. Wynik", body: resultLatex(lab, value, places) },
+        ],
+      };
+    }
+    const numV = unknown === "T1" ? "V1" : "V2";
+    const denV = unknown === "T1" ? "V2" : "V1";
+    const tO = unknown === "T1" ? "T2" : "T1";
+    const numerator = mul(g(numV), g(tO));
+    const value = exactOf(div(numerator, g(denV)));
+    const lab = unknown === "T1" ? "T_1" : "T_2";
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${lab} = ${tO}\\frac{${numV}}{${denV}}` },
+        {
+          title: "2. Podstawienie danych",
+          body: `${lab} = ${L(g(tO))} \\cdot \\frac{${L(g(numV))}}{${L(g(denV))}}`,
+        },
+        { title: "3. Licznik", body: `${L(numerator)}` },
+        { title: "4. Wynik", body: resultLatex(lab, value, places) },
+      ],
+    };
+  },
+};
+
+const charles: FormulaDef = {
+  id: "charles",
+  subject: "fizyka",
+  topic: "Termodynamika",
+  name: "Prawo Charlesa (izochora)",
+  latex: "\\frac{p_1}{T_1} = \\frac{p_2}{T_2}",
+  vars: [
+    { id: "p1", label: "p₁ [Pa]" },
+    { id: "T1", label: "T₁ [K]" },
+    { id: "p2", label: "p₂ [Pa]" },
+    { id: "T2", label: "T₂ [K]" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places): FormulaSolution {
+    const g = (id: string) => asRational(known[id], id);
+    const pair = (a: string, b: string) => mul(g(a), g(b));
+    if (unknown === "p1" || unknown === "p2") {
+      const other = unknown === "p1" ? "p2" : "p1";
+      const tThis = unknown === "p1" ? "T1" : "T2";
+      const tOther = unknown === "p1" ? "T2" : "T1";
+      const num = pair(other, tThis);
+      const value = exactOf(div(num, g(tOther)));
+      const lab = unknown === "p1" ? "p_1" : "p_2";
+      const lo = unknown === "p1" ? "p_2" : "p_1";
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: `${lab} = ${lo}\\frac{${tThis}}{${tOther}}` },
+          {
+            title: "2. Podstawienie danych",
+            body: `${lab} = ${L(g(other))} \\cdot \\frac{${L(g(tThis))}}{${L(g(tOther))}}`,
+          },
+          { title: "3. Licznik", body: `${L(num)}` },
+          { title: "4. Wynik", body: resultLatex(lab, value, places) },
+        ],
+      };
+    }
+    const numV = unknown === "T1" ? "p1" : "p2";
+    const denV = unknown === "T1" ? "p2" : "p1";
+    const tO = unknown === "T1" ? "T2" : "T1";
+    const numerator = mul(g(numV), g(tO));
+    const value = exactOf(div(numerator, g(denV)));
+    const lab = unknown === "T1" ? "T_1" : "T_2";
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: `${lab} = ${tO}\\frac{${numV}}{${denV}}` },
+        {
+          title: "2. Podstawienie danych",
+          body: `${lab} = ${L(g(tO))} \\cdot \\frac{${L(g(numV))}}{${L(g(denV))}}`,
+        },
+        { title: "3. Licznik", body: `${L(numerator)}` },
+        { title: "4. Wynik", body: resultLatex(lab, value, places) },
+      ],
+    };
+  },
+};
+
 export const PHYSICS_PP: FormulaDef[] = [
   moc,
   sprawnosc,
@@ -1989,4 +2173,7 @@ export const PHYSICS_PP: FormulaDef[] = [
   opornikiRownolegle,
   doppler,
   katGraniczny,
+  boyle,
+  gaylussac,
+  charles,
 ];

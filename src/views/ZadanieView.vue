@@ -28,6 +28,10 @@ const examples: { example: string; desc: string }[] = [
   { example: "a1=2;r=3;n=5", desc: "ciąg arytmetyczny" },
   { example: "a1=2;q=3;n=4", desc: "ciąg geometryczny" },
   { example: "x/4=6/8", desc: "proporcja (Tales)" },
+  { example: "x^3-6x^2+11x-6=0", desc: "rozkład wielomianu" },
+  { example: "|x-2|=3", desc: "wartość bezwzględna" },
+  { example: "2(x-1)^2+3", desc: "postacie funkcji kwadratowej" },
+  { example: "log(x)=2", desc: "logarytm dziesiętny" },
   { example: "1:50000", desc: "skala mapy" },
   { example: "ms=5;mr=100", desc: "stężenie procentowe" },
 ];

@@ -177,6 +177,19 @@ const plotData = computed(() => {
     if (a !== 0) return quadraticPlot(a, b, c);
     return b !== 0 ? linearPlot(b, c) : null;
   }
+  if (
+    d.id === "postacie-kwadratowej" ||
+    d.id === "kwadratowa-iloczynowa" ||
+    d.id === "delta" ||
+    d.id === "ekstrema-kwadratowej" ||
+    d.id === "nierownosc-kwadratowa"
+  ) {
+    const a = numInput("a");
+    const b = numInput("b");
+    const c = numInput("c");
+    if (a === null || b === null || c === null || a === 0) return null;
+    return quadraticPlot(a, b, c);
+  }
   if (d.id === "funkcja-liniowa") {
     const a = numInput("a");
     const b = numInput("b");

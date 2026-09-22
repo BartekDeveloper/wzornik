@@ -188,6 +188,12 @@ export const KEYWORDS: Record<string, string[]> = {
   "oporniki-rownolegle": ["równolegle", "oporniki", "opór zastępczy"],
   doppler: ["doppler", "częstotliwość", "źródło dźwięku"],
   "kat-graniczny": ["kąt graniczny", "całkowite odbicie", "odbicie wewnętrzne"],
+  statystyka: ["statystyka", "średnia", "mediana", "dominanta", "odchylenie"],
+  "romb-bok": ["romb", "bok", "wysokość", "pole rombu"],
+  "suma-katow-tryg": ["sinus sumy", "cosinus różnicy", "wzory trygonometryczne"],
+  boyle: ["boyle", "mariotte", "izoterma", "pV"],
+  gaylussac: ["gay-lussac", "izobara", "V/T"],
+  charles: ["charles", "izochora", "p/T"],
   "czas-sloneczny": ["czas słoneczny", "długość geograficzna", "południk"],
   "bilans-wodny": ["bilans wodny", "opad", "parowanie", "hydrologia"],
 };

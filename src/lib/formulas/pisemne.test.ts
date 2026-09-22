@@ -16,6 +16,17 @@ describe("addWritten", () => {
     const steps = addWritten("2.5", "3.75");
     expect(steps[steps.length - 1].body).toBe("= 6.25");
   });
+
+  it("liczy ujemne (-5 + 3 = -2)", () => {
+    const steps = addWritten("-5", "3");
+    expect(steps[steps.length - 1].body).toBe("= -2");
+    expect(steps[0].title).toBe("1. Reguła znaków");
+  });
+
+  it("liczy dwa minusy (-5 + -3 = -8)", () => {
+    const steps = addWritten("-5", "-3");
+    expect(steps[steps.length - 1].body).toBe("= -8");
+  });
 });
 
 describe("subWritten", () => {
@@ -38,6 +49,11 @@ describe("subWritten", () => {
     const steps = subWritten("5.5", "2.25");
     expect(steps[steps.length - 1].body).toBe("= 3.25");
   });
+
+  it("liczy ujemne (-5 - -3 = -2)", () => {
+    const steps = subWritten("-5", "-3");
+    expect(steps[steps.length - 1].body).toBe("= -2");
+  });
 });
 
 describe("mulWritten", () => {
@@ -54,6 +70,11 @@ describe("mulWritten", () => {
   it("mnoży 12 × 12", () => {
     const steps = mulWritten("12", "12");
     expect(steps[steps.length - 1].body).toBe("= 144");
+  });
+
+  it("liczy ujemne (-2 × 3 = -6)", () => {
+    const steps = mulWritten("-2", "3");
+    expect(steps[steps.length - 1].body).toBe("= -6");
   });
 });
 
@@ -90,6 +111,26 @@ describe("divWritten", () => {
     expect(last.body).toContain("10.28");
     expect(last.body).toContain("\\text{ r }");
     expect(last.note).toContain("reszta");
+  });
+
+  it("liczy ujemne (-7 : 2 = -3.5)", () => {
+    const steps = divWritten("-7", "2");
+    expect(steps[steps.length - 1].body).toBe("= -3.5");
+  });
+
+  it("wykrywa okres 1 : 6 = 0.1(6)", () => {
+    const steps = divWritten("1", "6", 10);
+    expect(steps[steps.length - 1].body).toBe("= 0.1(6)");
+  });
+
+  it("wykrywa okres 2 : 3 = 0.(6)", () => {
+    const steps = divWritten("2", "3", 10);
+    expect(steps[steps.length - 1].body).toBe("= 0.(6)");
+  });
+
+  it("liczy duże liczby na BigInt", () => {
+    const steps = divWritten("100000000000000000000", "10");
+    expect(steps[steps.length - 1].body).toBe("= 10000000000000000000");
   });
 
   it("rzuca przy dzieleniu przez zero", () => {

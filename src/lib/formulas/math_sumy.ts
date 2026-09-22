@@ -1,6 +1,6 @@
 import { ONE, ZERO, add, cmp, div, isZero, mul, of, pow, sub } from "../exact/rational";
-import { approx, exactOf, logExact } from "../exact/exact";
-import { formatLatex, formatRatLatex } from "../exact/format";
+import { approx, approxOnly, exactOf, logExact } from "../exact/exact";
+import { formatLatex, formatRatLatex, trimNum } from "../exact/format";
 import type { FormulaDef, FormulaSolution } from "./types";
 import { asRational, requireNatural, resultLatex } from "./types";
 
@@ -101,8 +101,76 @@ const sumaGeometryczny: FormulaDef = {
   outputId: "",
   outputLabel: "",
   solve(unknown, known, places): FormulaSolution {
-    if (unknown === "q")
-      throw new Error("iloraz z sumy wymaga pierwiastków wyższych stopni — policz numerycznie");
+    if (unknown === "q") {
+      const Sn = asRational(known["Sn"], "Sₙ");
+      const a1 = asRational(known["a1"], "a₁");
+      const n = requireNatural(known["n"], "n");
+      if (n < 2) throw new Error("dla n = 1 iloraz q jest dowolny");
+      if (cmp(a1, ZERO) === 0) throw new Error("a₁ ≠ 0 — inaczej suma to 0");
+      const target = approx(exactOf(div(Sn, a1)));
+      const f = (q: number): number => {
+        if (Math.abs(q - 1) < 1e-12) return n - target;
+        return (1 - q ** n) / (1 - q) - target;
+      };
+      const brackets: [number, number][] = [
+        [-100, -1.001],
+        [-0.999, 0.999],
+        [1.001, 1 + Math.abs(target) + n],
+      ];
+      let root: number | null = null;
+      for (const [lo0, hi0] of brackets) {
+        let lo = lo0;
+        let hi = hi0;
+        let flo = f(lo);
+        let fhi = f(hi);
+        if (!Number.isFinite(flo) || !Number.isFinite(fhi) || flo === 0) {
+          if (flo === 0) root = lo;
+          else continue;
+          break;
+        }
+        if (fhi === 0) {
+          root = hi;
+          break;
+        }
+        if (flo * fhi > 0) continue;
+        for (let i = 0; i < 200; i++) {
+          const mid = (lo + hi) / 2;
+          const fm = f(mid);
+          if (!Number.isFinite(fm)) break;
+          if (flo * fm <= 0) {
+            hi = mid;
+            fhi = fm;
+          } else {
+            lo = mid;
+            flo = fm;
+          }
+        }
+        root = (lo + hi) / 2;
+        break;
+      }
+      if (root === null || !Number.isFinite(root)) {
+        throw new Error("nie znaleziono ilorazu — sprawdź dane");
+      }
+      const check = Math.abs(f(root)) / (1 + Math.abs(target));
+      if (!(check < 1e-9)) throw new Error("nie znaleziono ilorazu — sprawdź dane");
+      const value = approxOnly(root);
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Równanie", body: "S_n = a_1\\frac{1-q^n}{1-q}" },
+          {
+            title: "2. Podstawienie danych",
+            body: `${L(Sn)} = ${L(a1)}\\frac{1-q^{${n}}}{1-q}`,
+          },
+          { title: "3. Bisekcja", body: `q \\approx ${trimNum(root)}` },
+          {
+            title: "4. Wynik",
+            body: resultLatex("q", value, places),
+            note: "wynik tylko przybliżony (bisekcja)",
+          },
+        ],
+      };
+    }
     if (unknown === "n") {
       const Sn = asRational(known["Sn"], "Sₙ");
       const a1 = asRational(known["a1"], "a₁");

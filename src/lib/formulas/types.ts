@@ -7,7 +7,7 @@ export interface FormulaVar {
   id: string;
   label: string;
   unit?: string;
-  kind?: "text" | "select";
+  kind?: "text" | "select" | "list";
   options?: string[];
 }
 

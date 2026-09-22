@@ -2,12 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://bartekdeveloper.github.io/wzornik/</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/zadanie</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/historia</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/konwerter</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/ustawienia</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/konwerter</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/historia</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/ustawienia</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/zadanie</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/chemia</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/geografia</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/pitagoras</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/pole-trojkata</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/pole-prostokata</loc></url>
@@ -37,6 +39,8 @@
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/tales</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/postacie-kwadratowej</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/rozklad-liczby</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/znak-wielomianu</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/statystyka</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/katy-okrag</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/pole-trapez</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/pole-rombu</loc></url>
@@ -53,6 +57,13 @@
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/ostroslup</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/walec</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/stozek</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/romb-bok</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/zamiana-miary</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kat-trojkat</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kat-miedzy-prostymi</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/trojkaty-podobne</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kat-z-bokow</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/suma-katow</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/newton</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/silnia</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/szesciany</loc></url>
@@ -65,14 +76,31 @@
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/rownanie-logarytmiczne</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/vieta</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/podwojony-kat</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/zamiana-miary</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kat-trojkat</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kat-miedzy-prostymi</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/trojkaty-podobne</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kat-z-bokow</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/suma-katow</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/znak-wielomianu</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/schemat-bernoulliego</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/suma-katow-tryg</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/delta</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kwadratowa-iloczynowa</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kwadratowa-ogolna</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kwadrat-sumy-roznicy</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/roznica-kwadratow</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/wzor-herona</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/wyodrebnianie-czynnika</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/grupowanie</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/rozklad-wielomianu</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/dzielenie-wielomianow</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/schemat-hornera</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/dodawanie-pisemne</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/odejmowanie-pisemne</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/mnozenie-pisemne</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/dzielenie-pisemne</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/suma-ciagu-arytmetycznego</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/suma-ciagu-geometrycznego</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/szereg-geometryczny</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/tw-sinusow</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/tw-cosinusow</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/okrag-opisany-wpisany</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/predkosc</loc></url>
+  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/predkosc-chwilowa</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/droga-jednostajnie-przyspieszona</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/sila</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/energia-kinetyczna</loc></url>
@@ -106,15 +134,11 @@
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/foto</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/emc2</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/rozpad</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/predkosc-chwilowa</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/energia-wewnetrzna</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/oporniki-szeregowo</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/oporniki-rownolegle</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/doppler</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/kat-graniczny</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/statystyka</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/romb-bok</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/suma-katow-tryg</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/boyle</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/gaylussac</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/fizyka/charles</loc></url>
@@ -153,28 +177,6 @@
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/chemia/ogniwo</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/chemia/elektroliza</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/chemia/bufor</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/delta</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kwadratowa-iloczynowa</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kwadratowa-ogolna</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/kwadrat-sumy-roznicy</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/roznica-kwadratow</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/wzor-herona</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/wyodrebnianie-czynnika</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/grupowanie</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/rozklad-wielomianu</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/dzielenie-wielomianow</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/schemat-hornera</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/dodawanie-pisemne</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/odejmowanie-pisemne</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/mnozenie-pisemne</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/dzielenie-pisemne</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/suma-ciagu-arytmetycznego</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/suma-ciagu-geometrycznego</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/szereg-geometryczny</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/tw-sinusow</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/tw-cosinusow</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/okrag-opisany-wpisany</loc></url>
-  <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/matematyka/schemat-bernoulliego</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/geografia/skala-mapy</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/geografia/gestosc-zaludnienia</loc></url>
   <url><loc>https://bartekdeveloper.github.io/wzornik/wzornik/geografia/przyrost-naturalny</loc></url>

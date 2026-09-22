@@ -1,11 +1,12 @@
 {
   "name": "wzornik-maturalny",
   "private": true,
-  "version": "0.7.2",
+  "version": "0.7.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "vue-tsc -b && vite-node scripts/generate-sitemap.ts && vite build",
+    "sitemap": "vite-node scripts/generate-sitemap.ts",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "oxlint src",

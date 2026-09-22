@@ -9,8 +9,9 @@ z telefonu.
 
 ## Co tu jest
 
-- **~110 wzorów** — matematyka i fizyka, podstawa i rozszerzenie, każdy
-  z własnym solverem (poziom PR dopisany w temacie).
+- **182 wzory** — matematyka, fizyka, chemia i geografia, podstawa
+  i rozszerzenie, każdy z własnym solverem (poziom PR dopisany w temacie;
+  chemia i geografia w rozbudowie).
 - **Wyniki do przepisania** — dokładne tam, gdzie się da; przybliżenie
   z wybraną liczbą miejsc obok. Wpisz `25π` albo `1/3`, też zrozumie.
 - **Kroki rozwiązania** — przekształcenie, podstawienie, wynik, renderowane
@@ -43,7 +44,8 @@ npm run dev
 | `npm test`           | testy (vitest)                          |
 | `npm run lint`       | lint (oxlint)                           |
 | `npm run format:check` / `:write` | format (oxfmt)               |
-| `npm run build`      | build produkcyjny (`vue-tsc` + vite)    |
+| `npm run build`      | build produkcyjny (`vue-tsc` + generowanie `sitemap.xml` + vite) |
+| `npm run sitemap`    | ręczne odświeżenie `public/sitemap.xml` z rejestru wzorów |
 | `npm run preview`    | podgląd buildu + test offline w DevTools |
 
 Pre-commit (husky) odpala `lint + format:check + test`. Po klonie:
@@ -59,19 +61,27 @@ Pre-commit (husky) odpala `lint + format:check + test`. Po klonie:
   `latex.test.ts`. Nowy wzór = dopisać wpis, keywords do szukajki i 1–2
   przypadki testowe.
 - `src/views/` — `WzornikView` (lista + search), `SolverView` (liczenie),
-  `ConverterView`, `HistoriaView`, `SettingsView`.
+  `ZadanieView` (wklejanie zadań), `ConverterView`, `HistoriaView`,
+  `SettingsView`, `NotFoundView`.
 - `src/components/` — `Formula` (KaTeX), `FormulaDiagram` (SVG),
-  `FunctionPlot` (Canvas).
+  `FunctionPlot` (Canvas), `NavRail` (nawigacja).
+- `src/lib/seo.ts` — jedno źródło URL-i (`siteUrls`) i meta per-route
+  (`metaFor`: tytuł, opis, OG, canonical; solver bierze nazwę z rejestru,
+  a opis z `DESCRIPTIONS`).
+- `scripts/generate-sitemap.ts` — buduje `public/sitemap.xml` z rejestru
+  (`npm run sitemap`, wpięte w `npm run build`).
 
 ## Deploy
 
 Push na `main` buduje i publikuje na GitHub Pages (workflow `deploy`,
 CI na każdym pushu/PR). Fork pod inną ścieżkę? Ustaw `PAGES_BASE`
 w workflow — reszta (router, manifest, precache) podąża sama.
-Sitemapę (`public/sitemap.xml`) i `robots.txt` trzymamy w repo ręcznie
-(statyczny SPA, ~120 URL-i), a test `sitemap.test.ts` pilnuje, żeby każda
-zarejestrowana formuła miała w niej wpis — nowy wzór = dopisz URL
-do sitemapy.
+Sitemapę (`public/sitemap.xml`, ~190 URL-i) buduje generator
+(`scripts/generate-sitemap.ts`) z rejestru wzorów — odpalany w `npm run build`
+i komendą `npm run sitemap`. `robots.txt` leży w `public/` statycznie.
+Test `sitemap.test.ts` pilnuje, żeby commited `sitemap.xml` zgadzał się
+z generatorem — nowy wzór = sam dopisujesz wpis do rejestru, URL pojawia się
+w sitemapie bez ręcznej edycji.
 
 ---
 

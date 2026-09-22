@@ -1,11 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-
-const SUBJECT_LABELS: Record<string, string> = {
-  matematyka: "Matematyka",
-  fizyka: "Fizyka",
-  chemia: "Chemia",
-  geografia: "Geografia",
-};
+import { metaFor } from "../lib/seo";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -64,40 +58,16 @@ const router = createRouter({
   ],
 });
 
-const BASE_DESC = "Wzory i kalkulatory maturalne — działa offline, dokładność szkolna.";
-
-function titleFor(
-  name: string | symbol | null | undefined,
-  params: Record<string, string | string[]>,
-): string {
-  const subject = typeof params.subject === "string" ? SUBJECT_LABELS[params.subject] : undefined;
-  switch (name) {
-    case "home":
-      return "Wzornik Maturalny — wzory i kalkulatory maturalne offline";
-    case "wzornik":
-      return subject
-        ? `Wzornik — ${subject} | Wzornik Maturalny`
-        : "Wzornik — wszystkie wzory | Wzornik Maturalny";
-    case "solver":
-      return typeof params.formula === "string"
-        ? `Kalkulator — ${params.formula} | Wzornik Maturalny`
-        : "Kalkulator | Wzornik Maturalny";
-    case "historia":
-      return "Historia i ulubione | Wzornik Maturalny";
-    case "zadanie":
-      return "Wklej zadanie | Wzornik Maturalny";
-    case "konwerter":
-      return "Konwerter jednostek | Wzornik Maturalny";
-    case "ustawienia":
-      return "Ustawienia | Wzornik Maturalny";
-    default:
-      return "Wzornik Maturalny";
-  }
-}
-
 router.afterEach((to) => {
-  document.title = titleFor(to.name, to.params as Record<string, string | string[]>);
-  document.querySelector('meta[name="description"]')?.setAttribute("content", BASE_DESC);
+  const meta = metaFor(to.name, to.params as Record<string, string | string[]>);
+  document.title = meta.title;
+  const setContent = (selector: string, content: string) =>
+    document.querySelector(selector)?.setAttribute("content", content);
+  setContent('meta[name="description"]', meta.description);
+  setContent('meta[property="og:title"]', meta.title);
+  setContent('meta[property="og:description"]', meta.description);
+  setContent('meta[property="og:url"]', meta.url);
+  document.querySelector('link[rel="canonical"]')?.setAttribute("href", meta.url);
 });
 
 export default router;

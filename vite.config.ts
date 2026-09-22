@@ -37,7 +37,8 @@ export default defineConfig({
         // Precache the whole app shell so navigation works with no network at all.
         // woff are KaTeX fonts bundled from its CSS (ttf skipped: legacy only);
         // app fonts live in public/fonts as woff2.
-        globPatterns: ["**/*.{js,css,html,svg,woff2,woff}"],
+        globPatterns: ["**/*.{js,css,html,svg,woff2,woff,xml,txt}"],
+        navigateFallbackDenylist: [/sitemap\.xml$/, /robots\.txt$/, /\/[^/?]+\.[^/?]+($|\?)/],
         runtimeCaching: [],
         // Bump this (or rely on precache manifest hashing) on every release so
         // clients on an old cached shell pick up the update instead of getting stuck.

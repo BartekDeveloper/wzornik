@@ -77,3 +77,43 @@ describe("parseExact periods", () => {
     expect(formatExactText(parseExact("(3)"))).toBe("1/3");
   });
 });
+
+describe("parseExact radicals", () => {
+  it("parses √n and coefficient forms", () => {
+    expect(formatExactText(parseExact("√3"))).toBe("√3");
+    expect(formatExactText(parseExact("2√3"))).toBe("2√3");
+    expect(formatExactText(parseExact("√3/2"))).toBe("(1/2·√3)");
+    expect(formatExactText(parseExact("-3√2/4"))).toBe("(-3/4·√2)");
+    expect(formatExactText(parseExact("sqrt(5)"))).toBe("√5");
+    expect(formatExactText(parseExact("2sqrt(3)"))).toBe("2√3");
+  });
+
+  it("simplifies perfect squares and composite radicands", () => {
+    expect(formatExactText(parseExact("√4"))).toBe("2");
+    expect(formatExactText(parseExact("2√4"))).toBe("4");
+    expect(formatExactText(parseExact("√12"))).toBe("2√3");
+    expect(formatExactText(parseExact("√0"))).toBe("0");
+  });
+
+  it("rejects negative radicands", () => {
+    expect(() => parseExact("√-4")).toThrow();
+  });
+});
+
+describe("parseExact pi fractions", () => {
+  it("parses π with coefficients and denominators", () => {
+    expect(formatExactText(parseExact("π"))).toBe("π");
+    expect(formatExactText(parseExact("2π"))).toBe("2π");
+    expect(formatExactText(parseExact("π/6"))).toBe("(1/6·π)");
+    expect(formatExactText(parseExact("2π/3"))).toBe("(2/3·π)");
+    expect(formatExactText(parseExact("-π/4"))).toBe("(-1/4·π)");
+    expect(formatExactText(parseExact("3π/2"))).toBe("(3/2·π)");
+    expect(formatExactText(parseExact("25π"))).toBe("25π");
+  });
+
+  it("keeps approximate value close to Math.PI fractions", () => {
+    expect(approx(parseExact("π/6"))).toBeCloseTo(Math.PI / 6, 10);
+    expect(approx(parseExact("2π/3"))).toBeCloseTo((2 * Math.PI) / 3, 10);
+    expect(approx(parseExact("-π/4"))).toBeCloseTo(-Math.PI / 4, 10);
+  });
+});

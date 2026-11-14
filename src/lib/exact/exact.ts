@@ -62,12 +62,24 @@ export function parseExact(s: string): Exact {
     const den = pow10f * (pow10p - 1n);
     return { rat: norm(neg ? -num : num, den), irr: null };
   }
-  const m = /^(.*?)pi$/.exec(t);
-  if (m) {
-    const raw = m[1].replace(/\*$/, "");
-    const coef = raw === "" || raw === "+" ? ONE : raw === "-" ? neg(ONE) : fromString(raw);
+  const coefOf = (raw: string): Rational =>
+    raw === "" || raw === "+" ? ONE : raw === "-" ? neg(ONE) : fromString(raw.replace(/\*$/, ""));
+
+  const piM = /^(.*?)pi(?:\/(\d+))?$/.exec(t);
+  if (piM) {
+    let coef = coefOf(piM[1] ?? "");
+    if (piM[2] !== undefined) coef = div(coef, of(BigInt(piM[2])));
     return { rat: ZERO, irr: { type: "pi", coef } };
   }
+
+  const sqM = /^(.*?)(?:√(\d+)|sqrt\((\d+)\))(?:\/(\d+))?$/.exec(t);
+  if (sqM) {
+    const radicand = sqM[2] ?? sqM[3];
+    let coef = coefOf(sqM[1] ?? "");
+    if (sqM[4] !== undefined) coef = div(coef, of(BigInt(sqM[4])));
+    return mulRat(sqrtRational(fromString(radicand)), coef);
+  }
+
   return { rat: fromString(s), irr: null };
 }
 

@@ -193,6 +193,16 @@ export const DESCRIPTIONS: Record<string, string> = {
   charles: "Izochora p₁/T₁ = p₂/T₂; każda wielkość wstecz.",
   "czas-sloneczny": "Różnica czasu z różnicy długości geograficznej (1° = 4 min).",
   "bilans-wodny": "Opad minus parowanie; każdy składnik wstecz.",
+  "trojkat-rownoboczny":
+    "Wysokość, pole, promień okręgu opisanego i wpisanego trójkąta równobocznego z boku a (wyniki dokładne z √3).",
+  "jedynka-trygonometryczna":
+    "Znając jedną funkcję trygonometryczną i ćwiartkę, wylicza pozostałe trzy z właściwymi znakami (jedynka trygonometryczna).",
+  "dziedzina-ulamka-wymiernego":
+    "Dziedzina funkcji wymiernej f(x)=P(x)/Q(x): punkty, w których mianownik się zeruje.",
+  "monotonicznosc-kwadratowej":
+    "Monotoniczność, zbiór wartości, wierzchołek i wartość najmniejsza/największa funkcji kwadratowej.",
+  "wzory-redukcyjne":
+    "Sprowadza sin/cos/tg dowolnego kąta do kąta ostrego (wzory redukcyjne) i liczy dokładną wartość.",
 };
 
 export function getDescription(id: string): string | undefined {

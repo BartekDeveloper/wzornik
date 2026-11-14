@@ -196,6 +196,26 @@ export const KEYWORDS: Record<string, string[]> = {
   charles: ["charles", "izochora", "p/T"],
   "czas-sloneczny": ["czas słoneczny", "długość geograficzna", "południk"],
   "bilans-wodny": ["bilans wodny", "opad", "parowanie", "hydrologia"],
+  "trojkat-rownoboczny": ["trójkąt równoboczny", "wysokość", "promień okręgu", "a√3/2"],
+  "jedynka-trygonometryczna": [
+    "jedynka trygonometryczna",
+    "sin",
+    "cos",
+    "tg",
+    "ctg",
+    "ćwiartka",
+    "znaki funkcji",
+  ],
+  "dziedzina-ulamka-wymiernego": ["dziedzina", "funkcja wymierna", "mianownik", "wykluczone"],
+  "monotonicznosc-kwadratowej": [
+    "monotoniczność",
+    "zbiór wartości",
+    "minimum",
+    "maksimum",
+    "wierzchołek",
+    "parabola",
+  ],
+  "wzory-redukcyjne": ["wzory redukcyjne", "kąt", "sinus", "cosinus", "tangens", "redukcja"],
 };
 
 export function norm(s: string): string {

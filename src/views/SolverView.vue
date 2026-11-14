@@ -316,7 +316,14 @@ onUnmounted(() => window.clearTimeout(saveTimer));
           <select v-if="v.kind === 'select'" v-model="inputs[v.id]" :aria-label="v.label">
             <option v-for="o in v.options ?? []" :key="o" :value="o">{{ o }}</option>
           </select>
-          <input v-else v-model="inputs[v.id]" inputmode="decimal" />
+          <input
+            v-else
+            v-model="inputs[v.id]"
+            inputmode="text"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+          />
         </label>
         <label>
           miejsca
@@ -324,7 +331,7 @@ onUnmounted(() => window.clearTimeout(saveTimer));
         </label>
       </div>
       <p class="hint" v-if="def.mode === 'nvar'">
-        Zostaw jedno pole puste — to będzie niewiadoma. Możesz wpisać π, np. 25π.
+        Zostaw jedno pole puste — to będzie niewiadoma. Wpisz π, √3, ułamek 1/3 albo 2π/3.
       </p>
 
       <div v-if="view.state === 'idle'">

@@ -375,6 +375,16 @@ const CASES: [string, string, Record<string, string>][] = [
   ["geografia", "bilans-wodny", { B: "", P: "800", E: "500" }],
   ["geografia", "bilans-wodny", { B: "300", P: "", E: "500" }],
   ["geografia", "bilans-wodny", { B: "300", P: "800", E: "" }],
+  ["matematyka", "trojkat-rownoboczny", { a: "6" }],
+  ["matematyka", "jedynka-trygonometryczna", { fn: "sin α", cw: "I (0–90°)", v: "1/2" }],
+  ["matematyka", "jedynka-trygonometryczna", { fn: "cos α", cw: "II (90–180°)", v: "1/2" }],
+  ["matematyka", "jedynka-trygonometryczna", { fn: "tg α", cw: "III (180–270°)", v: "1" }],
+  ["matematyka", "dziedzina-ulamka-wymiernego", { deg: "2", q2: "1", q1: "-5", q0: "6" }],
+  ["matematyka", "dziedzina-ulamka-wymiernego", { deg: "1", q2: "0", q1: "2", q0: "-4" }],
+  ["matematyka", "monotonicznosc-kwadratowej", { a: "1", b: "-4", c: "3" }],
+  ["matematyka", "monotonicznosc-kwadratowej", { a: "-1", b: "0", c: "2" }],
+  ["matematyka", "wzory-redukcyjne", { fn: "sin", a: "150" }],
+  ["matematyka", "wzory-redukcyjne", { fn: "cos", a: "210" }],
 ];
 
 describe("latex validity", () => {

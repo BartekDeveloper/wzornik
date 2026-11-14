@@ -21,6 +21,9 @@ import { MATH_DZIEL_HORNER } from "./math_dziel_horner";
 import { MATH_PISEMNE } from "./math_pisemne";
 import { MATH_SUMY } from "./math_sumy";
 import { MATH_TROJKATY } from "./math_trojkaty";
+import { MATH_TROJKAT_ROWNOBOCZNY } from "./math_trojkat_rownoboczny";
+import { MATH_TRYGONOMETRIA } from "./math_trygonometria";
+import { MATH_FUNKCJE } from "./math_funkcje";
 
 export const FORMULAS: FormulaDef[] = [
   ...MATH_FORMULAS,
@@ -38,6 +41,9 @@ export const FORMULAS: FormulaDef[] = [
   ...MATH_PISEMNE,
   ...MATH_SUMY,
   ...MATH_TROJKATY,
+  ...MATH_TROJKAT_ROWNOBOCZNY,
+  ...MATH_TRYGONOMETRIA,
+  ...MATH_FUNKCJE,
   ...PHYSICS_FORMULAS,
   ...PHYSICS_PP,
   ...PHYSICS_PR,

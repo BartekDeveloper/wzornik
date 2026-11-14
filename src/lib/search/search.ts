@@ -216,6 +216,37 @@ export const KEYWORDS: Record<string, string[]> = {
     "parabola",
   ],
   "wzory-redukcyjne": ["wzory redukcyjne", "kąt", "sinus", "cosinus", "tangens", "redukcja"],
+  "minmax-kwadratowej-przedzial": ["najmniejsza", "największa", "przedział", "wartość", "parabola"],
+  "pole-trojkata-sinus": ["pole trójkąta", "sinus", "dwa boki", "kąt"],
+  "trojkat-prostokatny-relacje": [
+    "trójkąt prostokątny",
+    "wysokość",
+    "przeciwprostokątna",
+    "okrąg wpisany",
+    "opisany",
+  ],
+  "miejsca-zerowe-kwadratowej": ["miejsca zerowe", "pierwiastki", "funkcja kwadratowa", "delta"],
+  "kwadratowa-z-kanonicznej": [
+    "postać kanoniczna",
+    "postać ogólna",
+    "wierzchołek",
+    "przekształcenie",
+  ],
+  "monotonicznosc-liniowej": [
+    "funkcja liniowa",
+    "monotoniczność",
+    "miejsce zerowe",
+    "rosnąca",
+    "malejąca",
+  ],
+  "vieta-rozszerzone": ["viete", "wyrażenia symetryczne", "suma kwadratów", "pierwiastki"],
+  "kwadratowa-z-wierzcholka-i-punktu": ["wierzchołek", "punkt", "wzór funkcji", "kanoniczna"],
+  "nierownosc-bezwzgledna": ["nierówność", "wartość bezwzględna", "moduł", "przedział"],
+  "potega-wymierna": ["potęga wymierna", "pierwiastek", "wykładnik ułamkowy"],
+  "dzialania-na-logarytmach": ["logarytm iloczynu", "logarytm ilorazu", "własności logarytmów"],
+  "zamiana-podstawy-log": ["zamiana podstawy", "logarytm", "nowa podstawa"],
+  "tw-dwusiecznej": ["dwusieczna", "twierdzenie", "proporcja odcinków"],
+  "sieczna-styczna": ["sieczna", "styczna", "twierdzenie", "okrąg"],
 };
 
 export function norm(s: string): string {

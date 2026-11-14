@@ -1,4 +1,4 @@
-import { ZERO, cmp, div, isZero, mul, neg, of, sub } from "../exact/rational";
+import { ZERO, add, cmp, div, isZero, mul, neg, of, sub } from "../exact/rational";
 import type { Rational } from "../exact/rational";
 import { exactOf, solveQuadratic } from "../exact/exact";
 import type { Exact } from "../exact/exact";
@@ -180,4 +180,76 @@ const monotonicznoscKwadratowej: FormulaDef = {
   },
 };
 
-export const MATH_FUNKCJE: FormulaDef[] = [dziedzinaWymierna, monotonicznoscKwadratowej];
+const minmaxKwadratowej: FormulaDef = {
+  id: "minmax-kwadratowej-przedzial",
+  subject: "matematyka",
+  topic: "Funkcja kwadratowa",
+  name: "Najmniejsza i największa wartość w przedziale",
+  latex: "f(x) = ax^2+bx+c, \\; x \\in [\\alpha, \\beta]",
+  vars: [
+    { id: "a", label: "a" },
+    { id: "b", label: "b" },
+    { id: "c", label: "c" },
+    { id: "alfa", label: "α (lewy koniec)" },
+    { id: "beta", label: "β (prawy koniec)" },
+  ],
+  mode: "fixed",
+  outputId: "w",
+  outputLabel: "min, max",
+  solve(_unknown, known, places): FormulaSolution {
+    const a = asRational(known["a"], "a");
+    const b = asRational(known["b"], "b");
+    const c = asRational(known["c"], "c");
+    if (isZero(a)) throw new Error("a ≠ 0 — to nie jest funkcja kwadratowa");
+    let alfa = asRational(known["alfa"], "α");
+    let beta = asRational(known["beta"], "β");
+    if (cmp(alfa, beta) > 0) [alfa, beta] = [beta, alfa];
+    const f = (x: Rational): Rational => add(add(mul(a, mul(x, x)), mul(b, x)), c);
+    const p = div(neg(b), mul(of(2), a));
+    const inInterval = cmp(alfa, p) <= 0 && cmp(p, beta) <= 0;
+    const cands: { x: Rational; y: Rational; label: string }[] = [
+      { x: alfa, y: f(alfa), label: `f(${L(alfa)})` },
+      { x: beta, y: f(beta), label: `f(${L(beta)})` },
+    ];
+    if (inInterval) cands.push({ x: p, y: f(p), label: `f(${L(p)})` });
+    let minC = cands[0]!;
+    let maxC = cands[0]!;
+    for (const cnd of cands) {
+      if (cmp(cnd.y, minC.y) < 0) minC = cnd;
+      if (cmp(cnd.y, maxC.y) > 0) maxC = cnd;
+    }
+    const minV = exactOf(minC.y);
+    const maxV = exactOf(maxC.y);
+    return {
+      values: [minV, maxV],
+      labels: ["min", "max"],
+      steps: [
+        {
+          title: "1. Wierzchołek",
+          body: `p = -\\frac{b}{2a} = ${L(p)}`,
+          note: inInterval
+            ? "wierzchołek leży w przedziale [α, β]"
+            : "wierzchołek poza przedziałem [α, β]",
+        },
+        {
+          title: "2. Wartości w kandydatach",
+          body: `${cands.map((cd) => `${cd.label} = ${L(cd.y)}`).join(", \\; ")}`,
+        },
+        {
+          title: "3. Wynik",
+          body: `\\min f = ${formatLatex(minV)} \\text{ dla } x = ${L(minC.x)}, \\; \\max f = ${formatLatex(maxV)} \\text{ dla } x = ${L(maxC.x)}`,
+          note:
+            places > 0
+              ? `przybliżenia: min ≈ ${formatDecimal(minV, places)}, max ≈ ${formatDecimal(maxV, places)}`
+              : undefined,
+        },
+      ],
+    };
+  },
+};
+
+export const MATH_FUNKCJE: FormulaDef[] = [
+  dziedzinaWymierna,
+  monotonicznoscKwadratowej,
+  minmaxKwadratowej,
+];

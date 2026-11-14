@@ -137,7 +137,8 @@ export const DESCRIPTIONS: Record<string, string> = {
   ogniwo: "SEM ogniwa: E = E_katody − E_anody; każda elektroda i SEM wstecz.",
   elektroliza: "Masa osadzona na elektrodzie (I × t × ekwiwalent); prąd, czas, ekwiwalent wstecz.",
   bufor: "pH buforu Henderson–Hasselbalch: pKa + log(Cs/Ck); każdy składnik wstecz.",
-  delta: "Wyróżnik równania kwadratowego; klasyfikuje liczbę pierwiastków rzeczywistych.",
+  delta:
+    "Wyróżnik równania kwadratowego; liczy Δ i √Δ, a także wyznacza brakujący współczynnik a, b lub c przy danej Δ.",
   "kwadratowa-iloczynowa": "Przekształca ax²+bx+c na a(x−x₁)(x−x₂) z obliczeniem Δ i pierwiastków.",
   "kwadratowa-ogolna":
     "Z postaci iloczynowej (a, x₁, x₂) oblicza postać ogólną ax²+bx+c (wzory Viete'a).",
@@ -203,6 +204,32 @@ export const DESCRIPTIONS: Record<string, string> = {
     "Monotoniczność, zbiór wartości, wierzchołek i wartość najmniejsza/największa funkcji kwadratowej.",
   "wzory-redukcyjne":
     "Sprowadza sin/cos/tg dowolnego kąta do kąta ostrego (wzory redukcyjne) i liczy dokładną wartość.",
+  "minmax-kwadratowej-przedzial":
+    "Najmniejsza i największa wartość funkcji kwadratowej na domkniętym przedziale [α, β].",
+  "pole-trojkata-sinus":
+    "Pole trójkąta z dwóch boków i sinusa kąta między nimi; każda wielkość wstecz.",
+  "trojkat-prostokatny-relacje":
+    "Wysokość na przeciwprostokątną oraz promienie okręgu wpisanego i opisanego trójkąta prostokątnego.",
+  "miejsca-zerowe-kwadratowej":
+    "Miejsca zerowe funkcji kwadratowej ax²+bx+c (Δ, √Δ i pierwiastki) jako osobny kalkulator.",
+  "kwadratowa-z-kanonicznej":
+    "Przekształca postać kanoniczną a(x−p)²+q na ogólną ax²+bx+c i wylicza Δ oraz miejsca zerowe.",
+  "monotonicznosc-liniowej":
+    "Monotoniczność, miejsce zerowe, punkt przecięcia z osią OY, znak i kąt nachylenia funkcji liniowej.",
+  "vieta-rozszerzone":
+    "Wzory Viète'a i wyrażenia symetryczne: x₁²+x₂², 1/x₁+1/x₂, (x₁−x₂)², x₁³+x₂³.",
+  "kwadratowa-z-wierzcholka-i-punktu":
+    "Wyznacza wzór funkcji kwadratowej (kanoniczny i ogólny) znając wierzchołek i jeden punkt.",
+  "nierownosc-bezwzgledna":
+    "Rozwiązuje nierówność |x−a| < r (oraz ≤, >, ≥) i zapisuje zbiór rozwiązań jako przedział.",
+  "potega-wymierna":
+    "Potęga o wykładniku wymiernym a^(m/n) = ⁿ√(aᵐ); liczy dokładnie albo przybliżoną.",
+  "dzialania-na-logarytmach":
+    "Logarytm iloczynu, ilorazu i potęgi rozpisany na sumę/różnicę/iloczyn logarytmów.",
+  "zamiana-podstawy-log":
+    "Zamienia podstawę logarytmu: log_b c = log_a c / log_a b (dowolna nowa podstawa a).",
+  "tw-dwusiecznej": "Twierdzenie o dwusiecznej kąta: |AD|/|DB| = |AC|/|BC|; każdy odcinek wstecz.",
+  "sieczna-styczna": "Twierdzenie o siecznej i stycznej: |PA|·|PB| = |PC|²; każdy odcinek wstecz.",
 };
 
 export function getDescription(id: string): string | undefined {

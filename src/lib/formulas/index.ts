@@ -24,6 +24,12 @@ import { MATH_TROJKATY } from "./math_trojkaty";
 import { MATH_TROJKAT_ROWNOBOCZNY } from "./math_trojkat_rownoboczny";
 import { MATH_TRYGONOMETRIA } from "./math_trygonometria";
 import { MATH_FUNKCJE } from "./math_funkcje";
+import { MATH_PLANIMETRIA } from "./math_planimetria";
+import { MATH_KWADRATOWA_ROZSZERZENIE } from "./math_kwadratowa_rozszerzenie";
+import { MATH_DODATKOWE } from "./math_dodatkowe";
+import { MATH_LICZBY } from "./math_liczby";
+import { MATH_LOGARYTMY } from "./math_logarytmy";
+import { MATH_TWIERDZENIA } from "./math_twierdzenia";
 
 export const FORMULAS: FormulaDef[] = [
   ...MATH_FORMULAS,
@@ -44,6 +50,12 @@ export const FORMULAS: FormulaDef[] = [
   ...MATH_TROJKAT_ROWNOBOCZNY,
   ...MATH_TRYGONOMETRIA,
   ...MATH_FUNKCJE,
+  ...MATH_PLANIMETRIA,
+  ...MATH_KWADRATOWA_ROZSZERZENIE,
+  ...MATH_DODATKOWE,
+  ...MATH_LICZBY,
+  ...MATH_LOGARYTMY,
+  ...MATH_TWIERDZENIA,
   ...PHYSICS_FORMULAS,
   ...PHYSICS_PP,
   ...PHYSICS_PR,

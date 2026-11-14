@@ -33,6 +33,12 @@ import { MATH_TWIERDZENIA } from "./math_twierdzenia";
 import { MATH_POTEGI } from "./math_potegi";
 import { MATH_WIELOMIANY2 } from "./math_wielomiany2";
 import { MATH_CIAGI } from "./math_ciagi";
+import { MATH_TRYGONOMETRIA2 } from "./math_trygonometria2";
+import { MATH_PLANIMETRIA2 } from "./math_planimetria2";
+import { MATH_ANALITYCZNA } from "./math_analityczna";
+import { MATH_STEREOMETRIA } from "./math_stereometria";
+import { MATH_DZIAL9 } from "./math_dzial9";
+import { MATH_POCHODNE } from "./math_pochodne";
 
 export const FORMULAS: FormulaDef[] = [
   ...MATH_FORMULAS,
@@ -62,6 +68,12 @@ export const FORMULAS: FormulaDef[] = [
   ...MATH_POTEGI,
   ...MATH_WIELOMIANY2,
   ...MATH_CIAGI,
+  ...MATH_TRYGONOMETRIA2,
+  ...MATH_PLANIMETRIA2,
+  ...MATH_ANALITYCZNA,
+  ...MATH_STEREOMETRIA,
+  ...MATH_DZIAL9,
+  ...MATH_POCHODNE,
   ...PHYSICS_FORMULAS,
   ...PHYSICS_PP,
   ...PHYSICS_PR,

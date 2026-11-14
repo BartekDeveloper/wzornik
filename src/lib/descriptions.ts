@@ -251,6 +251,61 @@ export const DESCRIPTIONS: Record<string, string> = {
     "Wyznacza różnicę r lub iloraz q z dwóch dowolnych wyrazów a_k i a_n ciągu.",
   "granica-wymierna":
     "Granica ciągu wymiernego (a·n^p)/(b·n^q) przy n→∞ — porównanie stopni licznika i mianownika.",
+  "monotonicznosc-ciagu":
+    "Bada monotoniczność ciągu arytmetycznego (r) lub geometrycznego (a₁, q).",
+  "trygonometria-trojkat-punkt":
+    "Definicje sin/cos/tg dla punktu M(x,y) na płaszczyźnie (promień wodzący r=√(x²+y²)).",
+  "tangens-sumy-podwojony":
+    "Tangens sumy/różnicy kątów i podwojonego kąta oraz cosinus 2α (dokładne dla kątów 0/30/45/60/90).",
+  "sumy-iloczyny-tryg": "Sumy i różnice sin/cos zamienione na iloczyny (wzory suma → iloczyn).",
+  "rownanie-trygonometryczne":
+    "Rozwiązuje sin x = a, cos x = a, tg x = a z pełną serią rozwiązań (k ∈ ℤ).",
+  "pole-trojkata-promienie":
+    "Trójkąt z boków: wzór Herona, promień okręgu wpisanego r=P/p i opisanego R=abc/4P.",
+  "pole-czworokata-sinus":
+    "Pole równoległoboku P=ab·sinα lub czworokąta z przekątnych P=½d₁d₂·sinγ.",
+  "czworokat-okrag":
+    "Czworokąt wpisany w okrąg: pole ze wzoru Brahmaguptey + warunek Pitota dla wpisanego okręgu.",
+  "pola-objetosci-podobnych":
+    "Figury/bryły podobne: stosunek pól k² i objętości k³ dla skali podobieństwa k.",
+  "wektory-analityczna":
+    "Wektory: długość |u|=√(x²+y²), iloczyn skalarny, sprawdzenie prostopadłości (⊥) i równoległości (∥).",
+  "pole-trojkata-analitycznie":
+    "Pole trójkąta z współrzędnych wierzchołków A, B, C (wyznacznik); wykrywa punkty współliniowe.",
+  "srodek-ciezkosci-trojkata":
+    "Środek ciężkości trójkąta S = (średnia x, średnia y) z wierzchołków A, B, C.",
+  "przeksztalcenia-geometryczne":
+    "Przekształcenia punktu: przesunięcie o (a,b), symetria względem osi X, osi Y i środka układu.",
+  "prosta-przeksztalcenia":
+    "Prosta Ax+By+C=0: postać kierunkowa (m, wyraz wolny) i przecięcia z osiami x₀, y₀.",
+  "okrag-postac-ogolna":
+    "Okrąg x²+y²+Dx+Ey+F=0: środek S=(−D/2, −E/2), promień R i postać kanoniczna.",
+  "pole-przekatna-prostopadloscianu":
+    "Prostopadłościan: pole całkowite 2(ab+bc+ac), przekątna d=√(a²+b²+c²), objętość (wariant sześcianu).",
+  "pole-graniastoslupa-ostroslupa":
+    "Graniastosłup prosty trójkątny i ostrosłup prawidłowy czworokątny: pole podstawy, boczne, całkowite, objętość.",
+  "pole-walca": "Walec: pole boczne 2πrh, całkowite 2πr(r+h) i objętość πr²h.",
+  "pole-tworzaca-stozka":
+    "Stożek: tworząca l=√(r²+h²), pole boczne πrl, całkowite i objętość ⅓πr²h.",
+  "bryly-sciete":
+    "Bryły ścięte: stożek ścięty (l, pole boczne, objętość) i ostrosłup ścięty (objętość).",
+  "wariacje-z-powtorzeniami":
+    "Wariacje z powtórzeniami V = nᵏ — liczbą k-elementowych ciągów z klasy n-elementowej.",
+  "kombinacje-z-powtorzeniami":
+    "Kombinacje z powtórzeniami C̄ = C(n+k−1, k) — wybór k elementów z n rodzajów.",
+  "prawdo-wlasnosci":
+    "P(A∪B) z P(A), P(B), P(A∩B); zdarzenie przeciwne P(A') = 1−P(A) i test niezależności.",
+  "tw-bayesa":
+    "Twierdzenie Bayesa: P(A|B) z P(A), P(B|A) i P(B|A′) (wzór na prawdopodobieństwo całkowite).",
+  "wartosc-oczekiwana":
+    "Wartość oczekiwana E(X)=Σxᵢpᵢ i wariancja D²(X) z rozkładu (lista xᵢ i pᵢ).",
+  "srednie-statystyczne": "Średnia ważona, kwadratowa i geometryczna z danych (opcjonalne wagi).",
+  "rownanie-stycznej":
+    "Równanie stycznej do paraboli f(x)=ax²+bx+c w punkcie x₀: nachylenie, wartość i pełne równanie.",
+  "monotonicznosc-ekstrema-wielomianu":
+    "Badanie przebiegu wielomianu 3. stopnia: f'(x), punkty krytyczne, przedziały monotoniczności, ekstrema lokalne.",
+  "pochodna-ilorazu-iloczynu":
+    "Pochodna ilorazu (ax+b)/(cx+d) = (ad−bc)/(cx+d)² lub iloczynu dwóch funkcji liniowych.",
 };
 
 export function getDescription(id: string): string | undefined {

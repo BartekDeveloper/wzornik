@@ -367,10 +367,78 @@ const granicaWymierna: FormulaDef = {
   },
 };
 
+const monotonicznoscCiagu: FormulaDef = {
+  id: "monotonicznosc-ciagu",
+  subject: "matematyka",
+  topic: "Ciągi",
+  name: "Monotoniczność ciągu",
+  latex: "a_{n+1} - a_n",
+  vars: [
+    { id: "typ", label: "rodzaj", kind: "select", options: ["arytmetyczny", "geometryczny"] },
+    { id: "a1", label: "a₁" },
+    { id: "q", label: "q" },
+    { id: "r", label: "r" },
+  ],
+  mode: "fixed",
+  outputId: "w",
+  outputLabel: "werdykt",
+  solve(_unknown, known, places, selects): FormulaSolution {
+    void places;
+    const typ = selects?.["typ"] ?? "arytmetyczny";
+    const a1 = asRational(known["a1"], "a₁");
+    const q = asRational(known["q"], "q");
+    const r = asRational(known["r"], "r");
+    let body: string;
+    let note: string | undefined;
+    if (typ === "arytmetyczny") {
+      const c = cmp(r, ZERO);
+      if (c > 0) {
+        body = "r > 0";
+        note = "ciąg rosnący";
+      } else if (c < 0) {
+        body = "r < 0";
+        note = "ciąg malejący";
+      } else {
+        body = "r = 0";
+        note = "ciąg stały";
+      }
+    } else if (cmp(q, ZERO) === 0) {
+      body = "q = 0";
+      note = "od drugiego wyrazu same zera";
+    } else if (cmp(q, ZERO) < 0) {
+      body = "q < 0";
+      note = "wyrazy naprzemienne — ciąg niemonotoniczny";
+    } else if (cmp(sub(q, ONE), ZERO) === 0) {
+      body = "q = 1";
+      note = "ciąg stały";
+    } else if (cmp(sub(q, ONE), ZERO) > 0) {
+      body = `q > 1, \\; a_1 ${cmp(a1, ZERO) > 0 ? "> 0" : "< 0"}`;
+      note = cmp(a1, ZERO) > 0 ? "ciąg rosnący" : "ciąg malejący";
+    } else {
+      body = `0 < q < 1, \\; a_1 ${cmp(a1, ZERO) > 0 ? "> 0" : "< 0"}`;
+      note = cmp(a1, ZERO) > 0 ? "ciąg malejący" : "ciąg rosnący";
+    }
+    return {
+      values: [],
+      steps: [
+        {
+          title: "1. Różnica / iloraz",
+          body:
+            typ === "arytmetyczny"
+              ? `a_{n+1} - a_n = r = ${L(r)}`
+              : `\\frac{a_{n+1}}{a_n} = q = ${L(q)}`,
+        },
+        { title: "2. Wynik", body, note },
+      ],
+    };
+  },
+};
+
 export const MATH_CIAGI: FormulaDef[] = [
   sumaArytmetycznegoR,
   sasiednieArytmetyczny,
   sasiednieGeometryczny,
   ciagZDwochWyrazow,
   granicaWymierna,
+  monotonicznoscCiagu,
 ];

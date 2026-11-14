@@ -401,6 +401,9 @@ const CASES: [string, string, Record<string, string>][] = [
   ["matematyka", "miejsca-zerowe-kwadratowej", { a: "1", b: "2", c: "1" }],
   ["matematyka", "kwadratowa-z-kanonicznej", { a: "2", p: "1", q: "-8" }],
   ["matematyka", "kwadratowa-z-kanonicznej", { a: "1", p: "0", q: "1" }],
+  ["matematyka", "wierzcholek-p-q", { p: "", a: "1", b: "-4" }],
+  ["matematyka", "wierzcholek-p-q", { p: "2", a: "1", b: "" }],
+  ["matematyka", "kwadratowa-z-iloczynowej", { a: "1", x1: "2", x2: "3" }],
   ["matematyka", "monotonicznosc-liniowej", { a: "2", b: "-4" }],
   ["matematyka", "monotonicznosc-liniowej", { a: "0", b: "3" }],
   ["matematyka", "vieta-rozszerzone", { a: "1", b: "-5", c: "6" }],
@@ -413,6 +416,21 @@ const CASES: [string, string, Record<string, string>][] = [
   ["matematyka", "zamiana-podstawy-log", { a: "10", b: "2", c: "8" }],
   ["matematyka", "tw-dwusiecznej", { AD: "", DB: "3", AC: "4", BC: "6" }],
   ["matematyka", "sieczna-styczna", { PA: "4", PB: "9", PC: "" }],
+  ["matematyka", "dzialania-na-potegach", { a: "2", r: "3", s: "2" }],
+  ["matematyka", "roznica-n-tych-poteg", { a: "3", b: "2", n: "3" }],
+  ["matematyka", "wyraz-newtona", { n: "6", k: "2", a: "2", b: "1" }],
+  ["matematyka", "tw-bezouta", { a: "2", b: "3", c: "-14" }],
+  ["matematyka", "vieta-3-stopnia", { a: "1", b: "-6", c: "11", d: "-6" }],
+  ["matematyka", "suma-arytmetycznego-r", { Sn: "", a1: "2", r: "3", n: "4" }],
+  ["matematyka", "suma-arytmetycznego-r", { Sn: "26", a1: "", r: "3", n: "4" }],
+  ["matematyka", "sasiednie-arytmetyczny", { anm1: "5", an: "", anp1: "11" }],
+  ["matematyka", "sasiednie-geometryczny", { anm1: "4", an: "", anp1: "9" }],
+  [
+    "matematyka",
+    "ciag-z-dwoch-wyrazow",
+    { typ: "arytmetyczny", ak: "2", an: "11", k: "1", n: "4" },
+  ],
+  ["matematyka", "granica-wymierna", { a: "3", p: "2", b: "5", q: "2" }],
 ];
 
 describe("latex validity", () => {

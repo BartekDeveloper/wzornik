@@ -30,6 +30,9 @@ import { MATH_DODATKOWE } from "./math_dodatkowe";
 import { MATH_LICZBY } from "./math_liczby";
 import { MATH_LOGARYTMY } from "./math_logarytmy";
 import { MATH_TWIERDZENIA } from "./math_twierdzenia";
+import { MATH_POTEGI } from "./math_potegi";
+import { MATH_WIELOMIANY2 } from "./math_wielomiany2";
+import { MATH_CIAGI } from "./math_ciagi";
 
 export const FORMULAS: FormulaDef[] = [
   ...MATH_FORMULAS,
@@ -56,6 +59,9 @@ export const FORMULAS: FormulaDef[] = [
   ...MATH_LICZBY,
   ...MATH_LOGARYTMY,
   ...MATH_TWIERDZENIA,
+  ...MATH_POTEGI,
+  ...MATH_WIELOMIANY2,
+  ...MATH_CIAGI,
   ...PHYSICS_FORMULAS,
   ...PHYSICS_PP,
   ...PHYSICS_PR,

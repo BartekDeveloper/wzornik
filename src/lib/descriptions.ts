@@ -214,6 +214,10 @@ export const DESCRIPTIONS: Record<string, string> = {
     "Miejsca zerowe funkcji kwadratowej ax²+bx+c (Δ, √Δ i pierwiastki) jako osobny kalkulator.",
   "kwadratowa-z-kanonicznej":
     "Przekształca postać kanoniczną a(x−p)²+q na ogólną ax²+bx+c i wylicza Δ oraz miejsca zerowe.",
+  "wierzcholek-p-q":
+    "Współrzędna p wierzchołka paraboli (p = −b/2a); wyznacz p, a lub b (rozbity wzór).",
+  "kwadratowa-z-iloczynowej":
+    "Z postaci iloczynowej a(x−x₁)(x−x₂) wylicza postać ogólną, wierzchołek i postać kanoniczną.",
   "monotonicznosc-liniowej":
     "Monotoniczność, miejsce zerowe, punkt przecięcia z osią OY, znak i kąt nachylenia funkcji liniowej.",
   "vieta-rozszerzone":
@@ -230,6 +234,23 @@ export const DESCRIPTIONS: Record<string, string> = {
     "Zamienia podstawę logarytmu: log_b c = log_a c / log_a b (dowolna nowa podstawa a).",
   "tw-dwusiecznej": "Twierdzenie o dwusiecznej kąta: |AD|/|DB| = |AC|/|BC|; każdy odcinek wstecz.",
   "sieczna-styczna": "Twierdzenie o siecznej i stycznej: |PA|·|PB| = |PC|²; każdy odcinek wstecz.",
+  "dzialania-na-potegach":
+    "Działania na potęgach: iloczyn, iloraz i potęga potęgi o wspólnej podstawie (a^r·a^s = a^(r+s)).",
+  "roznica-n-tych-poteg": "Rozkłada aⁿ−bⁿ na (a−b)(aⁿ⁻¹ + aⁿ⁻²b + … + bⁿ⁻¹) i liczy wartość.",
+  "wyraz-newtona": "k-ty wyraz (T_{k+1}) rozwinięcia (a+b)ⁿ ze współczynnikiem dwumianowym.",
+  "tw-bezouta": "Znajduje parametr m, dla którego W(x) = x³+mx²+bx+c dzieli się przez (x−a).",
+  "vieta-3-stopnia":
+    "Wzory Viète'a dla wielomianu 3. stopnia: suma, suma iloczynów par i iloczyn pierwiastków.",
+  "suma-arytmetycznego-r":
+    "Suma n wyrazów ciągu arytmetycznego z a₁ i różnicy r (S_n = (2a₁+(n−1)r)·n/2); każdy składnik wstecz.",
+  "sasiednie-arytmetyczny":
+    "Trzy kolejne wyrazy ciągu arytmetycznego: a_n = (a_{n−1}+a_{n+1})/2; dowolny wstecz.",
+  "sasiednie-geometryczny":
+    "Trzy kolejne wyrazy ciągu geometrycznego: a_n² = a_{n−1}·a_{n+1}; dowolny wstecz (z ±).",
+  "ciag-z-dwoch-wyrazow":
+    "Wyznacza różnicę r lub iloraz q z dwóch dowolnych wyrazów a_k i a_n ciągu.",
+  "granica-wymierna":
+    "Granica ciągu wymiernego (a·n^p)/(b·n^q) przy n→∞ — porównanie stopni licznika i mianownika.",
 };
 
 export function getDescription(id: string): string | undefined {

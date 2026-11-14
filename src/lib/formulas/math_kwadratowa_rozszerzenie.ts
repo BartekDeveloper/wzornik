@@ -1,4 +1,4 @@
-import { ZERO, add, cmp, isZero, mul, neg, of, sub } from "../exact/rational";
+import { ZERO, add, cmp, div, isZero, mul, neg, of, sub } from "../exact/rational";
 import type { Rational } from "../exact/rational";
 import { exactOf, solveQuadratic, sqrtRational } from "../exact/exact";
 import type { Exact } from "../exact/exact";
@@ -147,4 +147,119 @@ const kwadratowaZKanonicznej: FormulaDef = {
   },
 };
 
-export const MATH_KWADRATOWA_ROZSZERZENIE: FormulaDef[] = [miejscaZerowe, kwadratowaZKanonicznej];
+const wierzcholekP: FormulaDef = {
+  id: "wierzcholek-p-q",
+  subject: "matematyka",
+  topic: "Funkcja kwadratowa",
+  name: "Współrzędna p wierzchołka (rozbite)",
+  latex: "p = -\\frac{b}{2a}",
+  vars: [
+    { id: "p", label: "p" },
+    { id: "a", label: "a" },
+    { id: "b", label: "b" },
+  ],
+  mode: "nvar",
+  outputId: "",
+  outputLabel: "",
+  solve(unknown, known, places): FormulaSolution {
+    if (unknown === "p") {
+      const a = asRational(known["a"], "a");
+      const b = asRational(known["b"], "b");
+      if (isZero(a)) throw new Error("a ≠ 0");
+      const value = exactOf(div(neg(b), mul(of(2), a)));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Wzór", body: "p = -\\frac{b}{2a}" },
+          { title: "2. Podstawienie danych", body: `p = -\\frac{${L(b)}}{2 \\cdot ${L(a)}}` },
+          { title: "3. Wynik", body: resultLatex("p", value, places) },
+        ],
+      };
+    }
+    if (unknown === "b") {
+      const a = asRational(known["a"], "a");
+      const p = asRational(known["p"], "p");
+      if (isZero(a)) throw new Error("a ≠ 0");
+      const value = exactOf(mul(neg(mul(of(2), a)), p));
+      return {
+        values: [value],
+        steps: [
+          { title: "1. Przekształcenie wzoru", body: "b = -2ap" },
+          { title: "2. Podstawienie danych", body: `b = -2 \\cdot ${L(a)} \\cdot ${L(p)}` },
+          { title: "3. Wynik", body: resultLatex("b", value, places) },
+        ],
+      };
+    }
+    const b = asRational(known["b"], "b");
+    const p = asRational(known["p"], "p");
+    if (isZero(p)) throw new Error("p ≠ 0 — inaczej a nieokreślone");
+    const value = exactOf(div(neg(b), mul(of(2), p)));
+    return {
+      values: [value],
+      steps: [
+        { title: "1. Przekształcenie wzoru", body: "a = -\\frac{b}{2p}" },
+        { title: "2. Podstawienie danych", body: `a = -\\frac{${L(b)}}{2 \\cdot ${L(p)}}` },
+        { title: "3. Wynik", body: resultLatex("a", value, places) },
+      ],
+    };
+  },
+};
+
+const kwadratowaZIloczynowej: FormulaDef = {
+  id: "kwadratowa-z-iloczynowej",
+  subject: "matematyka",
+  topic: "Funkcja kwadratowa",
+  name: "Postać ogólna i kanoniczna z iloczynowej",
+  latex: "f(x) = a(x-x_1)(x-x_2) \\Rightarrow ax^2+bx+c = a(x-p)^2+q",
+  vars: [
+    { id: "a", label: "a" },
+    { id: "x1", label: "x₁" },
+    { id: "x2", label: "x₂" },
+  ],
+  mode: "fixed",
+  outputId: "w",
+  outputLabel: "b, c, p, q",
+  solve(_unknown, known, places): FormulaSolution {
+    const a = asRational(known["a"], "a");
+    const x1 = asRational(known["x1"], "x₁");
+    const x2 = asRational(known["x2"], "x₂");
+    if (isZero(a)) throw new Error("a ≠ 0");
+    const sum = add(x1, x2);
+    const prod = mul(x1, x2);
+    const b = mul(neg(a), sum);
+    const c = mul(a, prod);
+    const p = div(sum, of(2));
+    const delta = sub(mul(b, b), mul(mul(of(4), a), c));
+    const q = div(neg(delta), mul(of(4), a));
+    const show = (e: Exact): string => {
+      const lx = formatLatex(e);
+      const dc = formatDecimal(e, places);
+      return lx === dc ? lx : `${lx} \\approx ${dc}`;
+    };
+    const sgn = (v: Rational, name: string): string =>
+      isZero(v) ? "" : cmp(v, ZERO) > 0 ? `+${L(v)}${name}` : `-${L(neg(v))}${name}`;
+    return {
+      values: [exactOf(b), exactOf(c), exactOf(p), exactOf(q)],
+      labels: ["b", "c", "p", "q"],
+      steps: [
+        { title: "1. Wzory Viète'a", body: `x_1+x_2 = ${L(sum)}, \\; x_1x_2 = ${L(prod)}` },
+        { title: "2. Postać ogólna", body: `f(x) = ${L(a)}x^2${sgn(b, "x")}${sgn(c, "")}` },
+        {
+          title: "3. Wierzchołek",
+          body: `p = \\frac{x_1+x_2}{2} = ${show(exactOf(p))}, \\; q = ${show(exactOf(q))}`,
+        },
+        {
+          title: "4. Postać kanoniczna",
+          body: `f(x) = ${L(a)}(x - ${show(exactOf(p))})^2 + ${show(exactOf(q))}`,
+        },
+      ],
+    };
+  },
+};
+
+export const MATH_KWADRATOWA_ROZSZERZENIE: FormulaDef[] = [
+  miejscaZerowe,
+  kwadratowaZKanonicznej,
+  wierzcholekP,
+  kwadratowaZIloczynowej,
+];

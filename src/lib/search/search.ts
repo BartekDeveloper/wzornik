@@ -232,6 +232,8 @@ export const KEYWORDS: Record<string, string[]> = {
     "wierzchołek",
     "przekształcenie",
   ],
+  "wierzcholek-p-q": ["wierzchołek", "oś symetrii", "parabola", "współrzędna"],
+  "kwadratowa-z-iloczynowej": ["postać iloczynowa", "postać ogólna", "kanoniczna", "viete"],
   "monotonicznosc-liniowej": [
     "funkcja liniowa",
     "monotoniczność",
@@ -247,6 +249,16 @@ export const KEYWORDS: Record<string, string[]> = {
   "zamiana-podstawy-log": ["zamiana podstawy", "logarytm", "nowa podstawa"],
   "tw-dwusiecznej": ["dwusieczna", "twierdzenie", "proporcja odcinków"],
   "sieczna-styczna": ["sieczna", "styczna", "twierdzenie", "okrąg"],
+  "dzialania-na-potegach": ["potęgi", "iloczyn potęg", "iloraz potęg", "potęga potęgi"],
+  "roznica-n-tych-poteg": ["różnica potęg", "rozkład", "a^n-b^n"],
+  "wyraz-newtona": ["k-ty wyraz", "wyraz rozwinięcia", "symbol newtona"],
+  "tw-bezouta": ["bezout", "podzielność", "parametr m", "pierwiastek wielomianu"],
+  "vieta-3-stopnia": ["viete", "wielomian 3 stopnia", "suma pierwiastków", "iloczyn pierwiastków"],
+  "suma-arytmetycznego-r": ["suma ciągu", "arytmetyczny", "różnica", "Sn"],
+  "sasiednie-arytmetyczny": ["wyrazy sąsiednie", "ciąg arytmetyczny", "średnia"],
+  "sasiednie-geometryczny": ["wyrazy sąsiednie", "ciąg geometryczny", "średnia geometryczna"],
+  "ciag-z-dwoch-wyrazow": ["dwa wyrazy", "różnica", "iloraz", "ciąg"],
+  "granica-wymierna": ["granica", "ciąg wymierny", "stopień", "nieskończoność"],
 };
 
 export function norm(s: string): string {

@@ -112,7 +112,7 @@ const wzoryRedukcyjne: FormulaDef = {
     const d = ((deg % 360) + 360) % 360;
     const ref = d <= 90 ? d : d <= 180 ? 180 - d : d <= 270 ? d - 180 : 360 - d;
     const q = d <= 90 ? 1 : d <= 180 ? 2 : d <= 270 ? 3 : 4;
-    const value = trigExact(fn, deg);
+    const value = trigExact(fn === "tg" ? "tan" : fn, deg);
     const fname = fn === "sin" ? "\\sin" : fn === "cos" ? "\\cos" : "\\operatorname{tg}";
     const sign =
       fn === "sin"

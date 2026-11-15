@@ -10,25 +10,34 @@ export function computeVirtualRange(
   count: number,
   scrollTop: number,
   viewportHeight: number,
-  heightAt: (index: number) => number,
+  offsets: number[],
   gap: number,
   overscan = 5,
 ): VirtualRange {
   if (count <= 0) return { start: 0, end: 0, padTop: 0, padBottom: 0, total: 0 };
-  const offsets: number[] = [0];
-  for (let i = 0; i < count; i++) {
-    offsets.push(offsets[i]! + Math.max(0, heightAt(i)) + gap);
-  }
   const total = Math.max(0, offsets[count]! - gap);
   const visStart = Math.max(0, scrollTop);
   const visEnd = visStart + Math.max(1, viewportHeight);
-  let start = 0;
-  while (start < count && offsets[start]! + Math.max(0, heightAt(start)) <= visStart) start++;
-  start = Math.max(0, start - overscan);
+
+  // binary search: first item whose bottom edge is below the visible start
+  let lo = 0;
+  let hi = count;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (offsets[mid + 1]! <= visStart) lo = mid + 1;
+    else hi = mid;
+  }
+  let start = Math.max(0, lo - overscan);
+
   let end = start;
   while (end < count && offsets[end]! < visEnd) end++;
   end = Math.min(count, end + overscan);
-  const padTop = offsets[start]!;
-  const padBottom = Math.max(0, total - offsets[end]!);
-  return { start, end, padTop, padBottom, total };
+
+  return {
+    start,
+    end,
+    padTop: offsets[start]!,
+    padBottom: Math.max(0, total - offsets[end]!),
+    total,
+  };
 }

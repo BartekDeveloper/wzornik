@@ -19,7 +19,7 @@ const SUBJECT_LABELS: Record<string, string> = Object.fromEntries(
 );
 
 const CARD_GAP = 16;
-const CARD_OVERSCAN = 5;
+const CARD_OVERSCAN = 8;
 const CARD_DEFAULT_HEIGHT = 116;
 
 const availableSubjects = computed(() =>
@@ -35,17 +35,24 @@ const scrollTop = ref(0);
 const viewportH = ref(600);
 const measured = ref<Record<string, number>>({});
 
-const vrange = computed(() => {
+const offsets = computed(() => {
   const rs = results.value;
-  return computeVirtualRange(
-    rs.length,
+  const o: number[] = [0];
+  for (let i = 0; i < rs.length; i++) {
+    o.push(o[i]! + (measured.value[keyOf(rs[i]!)] ?? CARD_DEFAULT_HEIGHT) + CARD_GAP);
+  }
+  return o;
+});
+
+const vrange = computed(() =>
+  computeVirtualRange(
+    results.value.length,
     scrollTop.value,
     viewportH.value,
-    (i) => measured.value[keyOf(rs[i]!)] ?? CARD_DEFAULT_HEIGHT,
-    CARD_GAP,
+    offsets.value,
     CARD_OVERSCAN,
-  );
-});
+  ),
+);
 
 const visible = computed(() => results.value.slice(vrange.value.start, vrange.value.end));
 
@@ -66,17 +73,11 @@ function setCardRef(key: string, el: unknown): void {
   if (h > 0 && measured.value[key] !== h) measured.value[key] = h;
 }
 
-let rafId = 0;
-
 function onScroll(): void {
-  if (rafId) return;
-  rafId = requestAnimationFrame(() => {
-    rafId = 0;
-    const el = listEl.value;
-    if (!el) return;
-    viewportH.value = el.clientHeight;
-    scrollTop.value = el.scrollTop;
-  });
+  const el = listEl.value;
+  if (!el) return;
+  viewportH.value = el.clientHeight;
+  scrollTop.value = el.scrollTop;
 }
 
 async function refreshFavs(): Promise<void> {
@@ -105,7 +106,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();
-  if (rafId) cancelAnimationFrame(rafId);
 });
 
 onActivated(() => {

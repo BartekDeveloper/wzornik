@@ -16,7 +16,7 @@ const dziedzinaWymierna: FormulaDef = {
   latex: "f(x) = \\frac{P(x)}{Q(x)}, \\; D_f = \\{ x \\in \\mathbb{R} : Q(x) \\ne 0 \\}",
   vars: [
     { id: "deg", label: "stopień mianownika", kind: "select", options: ["1", "2"] },
-    { id: "q2", label: "a (przy x²)" },
+    { id: "q2", label: "a (przy x²)", showIf: { select: "deg", values: ["2"] } },
     { id: "q1", label: "b (przy x)" },
     { id: "q0", label: "c (wyraz wolny)" },
   ],
@@ -26,7 +26,6 @@ const dziedzinaWymierna: FormulaDef = {
   solve(_unknown, known, places, selects): FormulaSolution {
     void places;
     const deg = Number(selects?.["deg"] ?? "1");
-    const q2 = asRational(known["q2"], "a");
     const q1 = asRational(known["q1"], "b");
     const q0 = asRational(known["q0"], "c");
     const head: FormulaSolution["steps"] = [
@@ -72,7 +71,11 @@ const dziedzinaWymierna: FormulaDef = {
       };
     };
 
-    if (deg === 1 || isZero(q2)) {
+    if (deg === 1) {
+      return linearCase(q1, q0);
+    }
+    const q2 = asRational(known["q2"], "a");
+    if (isZero(q2)) {
       return linearCase(q1, q0);
     }
 

@@ -1,17 +1,26 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onActivated, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { FORMULAS, SUBJECTS } from "../lib/formulas/index";
 import type { FormulaDef } from "../lib/formulas/types";
 import { searchFormulas } from "../lib/search/search";
 import { getFavorites, toggleFavorite } from "../lib/storage/db";
 import { looksLikeEquation, parseEquation, parseLabel } from "../lib/parse-formula";
 import type { ParsedEquation } from "../lib/parse-formula";
+import { computeVirtualRange } from "../lib/virtual/virtual";
 import Formula from "../components/Formula.vue";
 
 const props = defineProps<{ subject?: string }>();
 
 const query = ref("");
 const filter = ref("");
+
+const SUBJECT_LABELS: Record<string, string> = Object.fromEntries(
+  SUBJECTS.map((s) => [s.id, s.label]),
+);
+
+const CARD_GAP = 16;
+const CARD_OVERSCAN = 5;
+const CARD_DEFAULT_HEIGHT = 116;
 
 const availableSubjects = computed(() =>
   SUBJECTS.filter((s) => FORMULAS.some((f) => f.subject === s.id)),
@@ -20,6 +29,25 @@ const availableSubjects = computed(() =>
 const activeSubject = computed(() => (filter.value !== "" ? filter.value : props.subject));
 
 const results = computed(() => searchFormulas(query.value, activeSubject.value || undefined));
+
+const listEl = ref<HTMLElement | null>(null);
+const scrollTop = ref(0);
+const viewportH = ref(600);
+const measured = ref<Record<string, number>>({});
+
+const vrange = computed(() => {
+  const rs = results.value;
+  return computeVirtualRange(
+    rs.length,
+    scrollTop.value,
+    viewportH.value,
+    (i) => measured.value[keyOf(rs[i]!)] ?? CARD_DEFAULT_HEIGHT,
+    CARD_GAP,
+    CARD_OVERSCAN,
+  );
+});
+
+const visible = computed(() => results.value.slice(vrange.value.start, vrange.value.end));
 
 const recognized = computed<ParsedEquation | null>(() => {
   if (!looksLikeEquation(query.value)) return null;
@@ -32,6 +60,25 @@ function keyOf(f: FormulaDef): string {
   return `${f.subject}/${f.id}`;
 }
 
+function setCardRef(key: string, el: unknown): void {
+  if (!(el instanceof HTMLElement)) return;
+  const h = el.offsetHeight;
+  if (h > 0 && measured.value[key] !== h) measured.value[key] = h;
+}
+
+let rafId = 0;
+
+function onScroll(): void {
+  if (rafId) return;
+  rafId = requestAnimationFrame(() => {
+    rafId = 0;
+    const el = listEl.value;
+    if (!el) return;
+    viewportH.value = el.clientHeight;
+    scrollTop.value = el.scrollTop;
+  });
+}
+
 async function refreshFavs(): Promise<void> {
   const list = await getFavorites().catch(() => []);
   favs.value = new Set(list.map((f) => f.key));
@@ -42,8 +89,37 @@ async function toggleFav(f: FormulaDef): Promise<void> {
   await refreshFavs();
 }
 
+let resizeObserver: ResizeObserver | null = null;
+
 onMounted(() => {
   void refreshFavs();
+  const el = listEl.value;
+  if (el) {
+    viewportH.value = el.clientHeight;
+    resizeObserver = new ResizeObserver(() => {
+      viewportH.value = el.clientHeight;
+    });
+    resizeObserver.observe(el);
+  }
+});
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+  if (rafId) cancelAnimationFrame(rafId);
+});
+
+onActivated(() => {
+  const el = listEl.value;
+  if (el) {
+    viewportH.value = el.clientHeight;
+    scrollTop.value = el.scrollTop;
+  }
+});
+
+watch([query, filter, activeSubject], () => {
+  const el = listEl.value;
+  if (el) el.scrollTop = 0;
+  scrollTop.value = 0;
 });
 </script>
 
@@ -92,12 +168,18 @@ onMounted(() => {
         Rozwiąż z automatu →
       </router-link>
     </div>
-    <ul class="cards">
-      <li v-for="f in results" :key="`${f.subject}/${f.id}`">
+    <ul
+      ref="listEl"
+      class="cards"
+      @scroll.passive="onScroll"
+      :style="{
+        paddingTop: `calc(0.25rem + ${vrange.padTop}px)`,
+        paddingBottom: `calc(2rem + ${vrange.padBottom}px)`,
+      }"
+    >
+      <li v-for="f in visible" :key="keyOf(f)" :ref="(el) => setCardRef(keyOf(f), el)">
         <div class="cards__top">
-          <p class="cards__topic">
-            {{ SUBJECTS.find((s) => s.id === f.subject)?.label ?? f.subject }} · {{ f.topic }}
-          </p>
+          <p class="cards__topic">{{ SUBJECT_LABELS[f.subject] ?? f.subject }} · {{ f.topic }}</p>
           <button
             class="heart"
             :class="{ active: favs.has(`${f.subject}/${f.id}`) }"
@@ -125,7 +207,6 @@ onMounted(() => {
     <p v-if="results.length === 0" class="empty">Brak wzorów dla tej frazy.</p>
   </section>
 </template>
-
 <style scoped>
 .wzornik {
   display: flex;

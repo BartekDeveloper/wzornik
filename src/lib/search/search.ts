@@ -308,28 +308,53 @@ export function norm(s: string): string {
     .replace(/\p{Diacritic}/gu, "");
 }
 
-function score(f: FormulaDef, q: string): number {
-  let s = 0;
-  if (norm(f.id).includes(q)) s += 3;
-  if (norm(f.name).includes(q)) s += 3;
-  for (const k of KEYWORDS[f.id] ?? []) {
-    if (norm(k).includes(q) || q.includes(norm(k))) s += 3;
+interface NormEntry {
+  f: FormulaDef;
+  id: string;
+  name: string;
+  topic: string;
+  latex: string;
+  kw: string[];
+}
+
+let normCache: NormEntry[] | null = null;
+
+function normEntries(): NormEntry[] {
+  if (!normCache) {
+    normCache = FORMULAS.map((f) => ({
+      f,
+      id: norm(f.id),
+      name: norm(f.name),
+      topic: norm(f.topic),
+      latex: norm(f.latex),
+      kw: (KEYWORDS[f.id] ?? []).map(norm),
+    }));
   }
-  if (norm(f.topic).includes(q)) s += 1;
-  if (q.length > 1 && norm(f.latex).includes(q)) s += 0.5;
+  return normCache;
+}
+
+function score(e: NormEntry, q: string): number {
+  let s = 0;
+  if (e.id.includes(q)) s += 3;
+  if (e.name.includes(q)) s += 3;
+  for (const k of e.kw) {
+    if (k.includes(q) || q.includes(k)) s += 3;
+  }
+  if (e.topic.includes(q)) s += 1;
+  if (q.length > 1 && e.latex.includes(q)) s += 0.5;
   return s;
 }
 
 export function searchFormulas(query: string, subject?: string): FormulaDef[] {
+  const entries = subject ? normEntries().filter((e) => e.f.subject === subject) : normEntries();
   const q = norm(query.trim());
-  const pool = subject ? FORMULAS.filter((f) => f.subject === subject) : [...FORMULAS];
-  if (q === "") return pool;
+  if (q === "") return entries.map((e) => e.f);
   const fuzzy = fuzzyScore(fuzzyIndex(), query);
-  return pool
-    .map((f) => {
-      const base = score(f, q);
-      const bonus = base === 0 ? (fuzzy.get(f.subject + "/" + f.id) ?? 0) : 0;
-      return { f, s: base + bonus };
+  return entries
+    .map((e) => {
+      const base = score(e, q);
+      const bonus = base === 0 ? (fuzzy.get(e.f.subject + "/" + e.f.id) ?? 0) : 0;
+      return { f: e.f, s: base + bonus };
     })
     .filter((r) => r.s > 0)
     .sort((a, b) => b.s - a.s)

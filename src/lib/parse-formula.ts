@@ -24,6 +24,7 @@ export const PARSE_LABELS: Record<string, string> = {
   "rozklad-wielomianu": "rozkład wielomianu",
   "wartosc-bezwzgledna": "wartość bezwzględna",
   "postacie-kwadratowej": "postacie funkcji kwadratowej",
+  "rownanie-trygonometryczne": "równanie trygonometryczne",
 };
 
 export function parseLabel(id: string): string {
@@ -37,12 +38,21 @@ function clean(s: string): string {
     .toLowerCase()
     .replace(/\s+/g, "")
     .replace(/\*/g, "")
+    .replace(/·/g, "")
+    .replace(/,(?=[a-z]+[0-9]?=)/g, ";")
     .replace(/,/g, ".")
     .replace(/x²/g, "x^2")
+    .replace(/x³/g, "x^3")
+    .replace(/x⁴/g, "x^4")
     .replace(/−/g, "-")
     .replace(/≥/g, ">=")
     .replace(/≤/g, "<=")
     .replace(/≠/g, "!=");
+}
+
+function fmtNum(v: number): string {
+  const t = Number(v.toFixed(9));
+  return String(t);
 }
 
 function splitTerms(lhs: string): string[] {
@@ -143,9 +153,9 @@ function parsePolySide(expr: string): Record<number, number> | null {
 function tryPoly(s: string): ParsedEquation | null {
   if (!s.includes("x")) return null;
   const parts = s.split("=");
-  if (parts.length !== 2) return null;
+  if (parts.length > 2) return null;
   const l = parsePolySide(parts[0]!);
-  const r = parsePolySide(parts[1]!);
+  const r = parts.length === 2 ? parsePolySide(parts[1]!) : {};
   if (!l || !r) return null;
   const deg = Math.max(0, ...Object.keys({ ...l, ...r }).map(Number));
   if (deg < 3 || deg > 4) return null;
@@ -196,7 +206,8 @@ export function looksLikeEquation(q: string): boolean {
     s.includes(":") ||
     s.includes(">") ||
     s.includes("<") ||
-    s.includes("!")
+    s.includes("!") ||
+    s.includes("(")
   );
 }
 
@@ -220,8 +231,42 @@ function finishQuad(a: number, b: number, c: number): ParsedEquation | null {
   return null;
 }
 
+function quadFromProduct(a: number, r1: number, r2: number): ParsedEquation {
+  const b = -a * (r1 + r2);
+  const c = a * r1 * r2;
+  return {
+    subject: "matematyka",
+    id: "postacie-kwadratowej",
+    values: { a: fmtNum(a), b: fmtNum(b), c: fmtNum(c) },
+    label: parseLabel("postacie-kwadratowej"),
+  };
+}
+
+function tryProduct(s: string): ParsedEquation | null {
+  const P = String.raw`(?:\d+(?:\.\d+)?|\.\d+)`;
+  let m = new RegExp(`^([+-]?(?:${P})?)\\(x([+-]${P})\\)\\(x([+-]${P})\\)(?:=0)?$`).exec(s);
+  if (m) {
+    const a = m[1] === undefined || m[1] === "" ? 1 : Number(m[1]);
+    if (a !== 0) return quadFromProduct(a, -Number(m[2]!), -Number(m[3]!));
+    return null;
+  }
+  m = new RegExp(`^x\\(x([+-]${P})\\)(?:=0)?$`).exec(s);
+  if (m) {
+    return quadFromProduct(1, 0, -Number(m[1]!));
+  }
+  return null;
+}
+
 export function parseEquation(input: string): ParsedEquation | null {
   const raw = input.trim();
+  let s = clean(raw);
+  if (s === "") return null;
+
+  const fnPrefix = /^(?:[a-z]\(x\)|y)=(.+)$/.exec(s);
+  if (fnPrefix) {
+    const rest = fnPrefix[1]!;
+    if (!rest.includes("y")) s = rest;
+  }
   const rootMark = raw.match(/^[∛√]/) ? raw[0] : null;
   if (rootMark) {
     const rest = raw.slice(1).replace(/\s+/g, "");
@@ -234,9 +279,6 @@ export function parseEquation(input: string): ParsedEquation | null {
       label: parseLabel("pierwiastek"),
     };
   }
-  const s = clean(raw);
-  if (s === "") return null;
-
   const sysParts = s.split(/[\n;]/).filter((p) => p !== "");
   if (sysParts.length === 2 && s.includes("y")) {
     const e1 = parseEqLinXY(sysParts[0]!);
@@ -258,7 +300,43 @@ export function parseEquation(input: string): ParsedEquation | null {
     }
   }
 
-  const kv = s.includes(";") && !s.includes("x") && !s.includes("y") ? kvPairs(s) : null;
+  if (
+    sysParts.length === 1 &&
+    s.includes("y") &&
+    s.includes("x") &&
+    s.includes("=") &&
+    !s.includes("x^")
+  ) {
+    const xy = parseEqLinXY(s);
+    if (xy && xy.y !== 0) {
+      const a = -xy.x / xy.y;
+      const b = xy.k / xy.y;
+      if (Number.isFinite(a) && Number.isFinite(b)) {
+        return {
+          subject: "matematyka",
+          id: "funkcja-liniowa",
+          values: { a: fmtNum(a), b: fmtNum(b) },
+          label: parseLabel("funkcja-liniowa"),
+        };
+      }
+    }
+  }
+
+  const trigEq =
+    /^(sin|cos|tan|tg)\(x\)=(-?(?:\d+(?:\.\d+)?|\.\d+)(?:\/(?:\d+(?:\.\d+)?|\.\d+))?|√\d+(?:\/\d+)?)$/.exec(
+      s,
+    );
+  if (trigEq) {
+    return {
+      subject: "matematyka",
+      id: "rownanie-trygonometryczne",
+      values: { a: trigEq[2]! },
+      selects: { fn: trigEq[1] === "tan" ? "tg" : trigEq[1]! },
+      label: parseLabel("rownanie-trygonometryczne"),
+    };
+  }
+
+  const kv = s.includes(";") ? kvPairs(s) : null;
   if (kv) {
     if ("ms" in kv && "mr" in kv) {
       return {
@@ -292,6 +370,36 @@ export function parseEquation(input: string): ParsedEquation | null {
           ...(kv["an"] !== undefined ? { an: String(kv["an"]) } : {}),
         },
         label: parseLabel("ciag-geometryczny"),
+      };
+    }
+    if ("a" in kv && "b" in kv && "c" in kv) {
+      return {
+        subject: "matematyka",
+        id: "rownanie-kwadratowe",
+        values: { a: String(kv["a"]), b: String(kv["b"]), c: String(kv["c"]) },
+        label: parseLabel("rownanie-kwadratowe"),
+      };
+    }
+    if ("a" in kv && "p" in kv && "q" in kv) {
+      const a = kv["a"]!;
+      const p = kv["p"]!;
+      const q = kv["q"]!;
+      return {
+        subject: "matematyka",
+        id: "postacie-kwadratowej",
+        values: { a: String(a), b: String(-2 * a * p), c: String(a * p * p + q) },
+        label: parseLabel("postacie-kwadratowej"),
+      };
+    }
+    if ("a" in kv && "x1" in kv && "x2" in kv) {
+      const a = kv["a"]!;
+      const x1 = kv["x1"]!;
+      const x2 = kv["x2"]!;
+      return {
+        subject: "matematyka",
+        id: "postacie-kwadratowej",
+        values: { a: String(a), b: String(-a * (x1 + x2)), c: String(a * x1 * x2) },
+        label: parseLabel("postacie-kwadratowej"),
       };
     }
   }
@@ -413,11 +521,18 @@ export function parseEquation(input: string): ParsedEquation | null {
   const poly = tryPoly(s);
   if (poly) return poly;
 
-  const canon = new RegExp(`^(${NUM})\\(x([+-]${NUM})\\)\\^2([+-]${NUM})?(=0)?$`).exec(s);
+  const product = tryProduct(s);
+  if (product) return product;
+
+  const canon = new RegExp(
+    `^([+-]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)?)\\(x([+-]${NUM})\\)\\^2([+-]${NUM})?(=0)?$`,
+  ).exec(s);
   if (canon) {
-    const a = Number(canon[1]!);
+    const rawA = canon[1]!;
+    const a =
+      rawA === undefined || rawA === "" || rawA === "+" ? 1 : rawA === "-" ? -1 : Number(rawA);
     const p = -Number(canon[2]!);
-    const q = canon[3] === undefined ? 0 : Number(canon[3]!);
+    const q = canon[3] === undefined || canon[3] === "=0" ? 0 : Number(canon[3]!);
     const b = -2 * a * p;
     const c = a * p * p + q;
     if ([a, b, c].every(Number.isFinite)) {

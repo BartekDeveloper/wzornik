@@ -50,7 +50,7 @@ const kombinacjeZPowtorzeniami: FormulaDef = {
   subject: "matematyka",
   topic: "Kombinatoryka",
   name: "Kombinacje z powtórzeniami",
-  latex: "\\\\bar{C}_n^k = \\\\binom{n+k-1}{k}",
+  latex: "\\bar{C}_n^k = \\binom{n+k-1}{k}",
   vars: [
     { id: "n", label: "n" },
     { id: "k", label: "k" },
@@ -66,12 +66,12 @@ const kombinacjeZPowtorzeniami: FormulaDef = {
     return {
       values: [value],
       steps: [
-        { title: "1. Wzór", body: "\\\\bar{C}_n^k = \\\\binom{n+k-1}{k}" },
+        { title: "1. Wzór", body: "\\bar{C}_n^k = \\binom{n+k-1}{k}" },
         {
           title: "2. Podstawienie danych",
-          body: `\\\\bar{C}_{${n}}^{${k}} = \\\\binom{${n + k - 1}}{${k}}`,
+          body: `\\bar{C}_{${n}}^{${k}} = \\binom{${n + k - 1}}{${k}}`,
         },
-        { title: "3. Wynik", body: resultLatex("\\\\bar{C}", value, places) },
+        { title: "3. Wynik", body: resultLatex("\\bar{C}", value, places) },
       ],
     };
   },
@@ -82,7 +82,7 @@ const prawdoWlasnosci: FormulaDef = {
   subject: "matematyka",
   topic: "Prawdopodobieństwo",
   name: "Własności prawdopodobieństwa",
-  latex: "P(A\\\\cup B) = P(A)+P(B)-P(A\\\\cap B), \\\\; P(A') = 1-P(A)",
+  latex: "P(A\\cup B) = P(A)+P(B)-P(A\\cap B), \\; P(A') = 1-P(A)",
   vars: [
     { id: "PA", label: "P(A)" },
     { id: "PB", label: "P(B)" },
@@ -112,14 +112,14 @@ const prawdoWlasnosci: FormulaDef = {
       steps: [
         {
           title: "1. Suma zdarzeń",
-          body: `P(A\\\\cup B) = ${L(PA)} + ${L(PB)} - ${L(PAB)} = ${L(sum)}`,
+          body: `P(A\\cup B) = ${L(PA)} + ${L(PB)} - ${L(PAB)} = ${L(sum)}`,
         },
         { title: "2. Zdarzenie przeciwne", body: `P(A') = 1 - ${L(PA)} = ${L(comp)}` },
         {
           title: "3. Niezależność",
           body: niezalezne
-            ? `P(A\\\\cap B) = P(A)\\\\cdot P(B) = ${L(mul(PA, PB))} — zdarzenia niezależne`
-            : `P(A\\\\cap B) = ${L(PAB)} \\\\neq P(A)\\\\cdot P(B) = ${L(mul(PA, PB))} — zdarzenia zależne`,
+            ? `P(A\\cap B) = P(A)\\cdot P(B) = ${L(mul(PA, PB))} — zdarzenia niezależne`
+            : `P(A\\cap B) = ${L(PAB)} \\neq P(A)\\cdot P(B) = ${L(mul(PA, PB))} — zdarzenia zależne`,
         },
       ],
     };
@@ -131,7 +131,7 @@ const twBayesa: FormulaDef = {
   subject: "matematyka",
   topic: "Prawdopodobieństwo",
   name: "Twierdzenie Bayesa",
-  latex: "P(A|B) = \\\\frac{P(B|A)\\\\,P(A)}{P(B|A)\\\\,P(A) + P(B|A')\\\\,P(A')}",
+  latex: "P(A|B) = \\frac{P(B|A)\\,P(A)}{P(B|A)\\,P(A) + P(B|A')\\,P(A')}",
   vars: [
     { id: "PA", label: "P(A)" },
     { id: "PBA", label: "P(B|A)" },
@@ -165,7 +165,7 @@ const twBayesa: FormulaDef = {
           title: "1. Prawdopodobieństwo całkowite",
           body: `P(B) = P(B|A)P(A) + P(B|A')P(A') = ${L(num)} + ${L(mul(PBNA, PAprim))} = ${L(PB)}`,
         },
-        { title: "2. Wzór Bayesa", body: `P(A|B) = \\\\frac{${L(num)}}{${L(PB)}} = ${L(PA_B)}` },
+        { title: "2. Wzór Bayesa", body: `P(A|B) = \\frac{${L(num)}}{${L(PB)}} = ${L(PA_B)}` },
       ],
     };
   },
@@ -176,7 +176,7 @@ const wartoscOczekiwana: FormulaDef = {
   subject: "matematyka",
   topic: "Statystyka",
   name: "Wartość oczekiwana i wariancja",
-  latex: "E(X) = \\\\sum x_i p_i, \\\\; D^2(X) = \\\\sum x_i^2 p_i - E^2(X)",
+  latex: "E(X) = \\sum x_i p_i, \\; D^2(X) = \\sum x_i^2 p_i - E^2(X)",
   vars: [
     { id: "xs", label: "xᵢ (po ; lub ,)", kind: "list" },
     { id: "ps", label: "pᵢ (po ; lub ,)", kind: "list" },
@@ -216,7 +216,7 @@ const wartoscOczekiwana: FormulaDef = {
       EX = add(EX, mul(x, p));
       EX2 = add(EX2, mul(mul(x, x), p));
       sumP = add(sumP, p);
-      terms.push(`${L(x)}\\\\cdot${L(p)}`);
+      terms.push(`${L(x)}\\cdot${L(p)}`);
     }
     if (cmp(sumP, ONE) !== 0) throw new Error(`suma pᵢ musi być 1 (jest ${L(sumP)})`);
     const varr = sub(EX2, mul(EX, EX));
@@ -229,10 +229,10 @@ const wartoscOczekiwana: FormulaDef = {
           title: "1. Wartość oczekiwana",
           body: `E(X) = ${terms.join(" + ")} = ${show(exactOf(EX), places)}`,
         },
-        { title: "2. Drugi moment", body: `\\\\sum x_i^2 p_i = ${show(exactOf(EX2), places)}` },
+        { title: "2. Drugi moment", body: `\\sum x_i^2 p_i = ${show(exactOf(EX2), places)}` },
         {
           title: "3. Wariancja",
-          body: `D^2(X) = \\\\sum x_i^2 p_i - E^2(X) = ${show(exactOf(varr), places)}`,
+          body: `D^2(X) = \\sum x_i^2 p_i - E^2(X) = ${show(exactOf(varr), places)}`,
         },
       ],
     };
@@ -245,7 +245,7 @@ const srednieStatystyczne: FormulaDef = {
   topic: "Statystyka",
   name: "Średnie: ważona, kwadratowa, geometryczna",
   latex:
-    "\\\\bar{x}_w = \\\\frac{\\\\sum x_i w_i}{\\\\sum w_i}, \\\\; \\\\bar{x}_q = \\\\sqrt{\\\\frac{\\\\sum x_i^2}{n}}, \\\\; \\\\bar{x}_g = \\\\sqrt[n]{x_1\\\\cdots x_n}",
+    "\\bar{x}_w = \\frac{\\sum x_i w_i}{\\sum w_i}, \\; \\bar{x}_q = \\sqrt{\\frac{\\sum x_i^2}{n}}, \\; \\bar{x}_g = \\sqrt[n]{x_1\\cdots x_n}",
   vars: [
     { id: "xs", label: "xᵢ (po ; lub ,)", kind: "list" },
     { id: "ws", label: "wᵢ — wagi (po ; lub ,)", kind: "list" },
@@ -307,15 +307,15 @@ const srednieStatystyczne: FormulaDef = {
       steps: [
         {
           title: "1. Średnia ważona",
-          body: `\\\\bar{x}_w = \\\\frac{\\\\sum x_i w_i}{\\\\sum w_i} = ${show(weighted, places)}`,
+          body: `\\bar{x}_w = \\frac{\\sum x_i w_i}{\\sum w_i} = ${show(weighted, places)}`,
         },
         {
           title: "2. Średnia kwadratowa",
-          body: `\\\\bar{x}_q = \\\\sqrt{\\\\frac{\\\\sum x_i^2}{n}} = ${show(quad, places)}`,
+          body: `\\bar{x}_q = \\sqrt{\\frac{\\sum x_i^2}{n}} = ${show(quad, places)}`,
         },
         {
           title: "3. Średnia geometryczna",
-          body: `\\\\bar{x}_g = \\\\sqrt[${n}]{x_1\\\\cdots x_n} = ${show(geo, places)}`,
+          body: `\\bar{x}_g = \\sqrt[${n}]{x_1\\cdots x_n} = ${show(geo, places)}`,
           note: geoNote,
         },
       ],

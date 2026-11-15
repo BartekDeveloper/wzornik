@@ -375,9 +375,9 @@ const monotonicznoscCiagu: FormulaDef = {
   latex: "a_{n+1} - a_n",
   vars: [
     { id: "typ", label: "rodzaj", kind: "select", options: ["arytmetyczny", "geometryczny"] },
-    { id: "a1", label: "a₁" },
-    { id: "q", label: "q" },
-    { id: "r", label: "r" },
+    { id: "a1", label: "a₁", showIf: { select: "typ", values: ["geometryczny"] } },
+    { id: "q", label: "q", showIf: { select: "typ", values: ["geometryczny"] } },
+    { id: "r", label: "r", showIf: { select: "typ", values: ["arytmetyczny"] } },
   ],
   mode: "fixed",
   outputId: "w",
@@ -385,12 +385,10 @@ const monotonicznoscCiagu: FormulaDef = {
   solve(_unknown, known, places, selects): FormulaSolution {
     void places;
     const typ = selects?.["typ"] ?? "arytmetyczny";
-    const a1 = asRational(known["a1"], "a₁");
-    const q = asRational(known["q"], "q");
-    const r = asRational(known["r"], "r");
     let body: string;
     let note: string | undefined;
     if (typ === "arytmetyczny") {
+      const r = asRational(known["r"], "r");
       const c = cmp(r, ZERO);
       if (c > 0) {
         body = "r > 0";
@@ -402,7 +400,17 @@ const monotonicznoscCiagu: FormulaDef = {
         body = "r = 0";
         note = "ciąg stały";
       }
-    } else if (cmp(q, ZERO) === 0) {
+      return {
+        values: [],
+        steps: [
+          { title: "1. Różnica", body: `a_{n+1} - a_n = r = ${L(r)}` },
+          { title: "2. Wynik", body, note },
+        ],
+      };
+    }
+    const a1 = asRational(known["a1"], "a₁");
+    const q = asRational(known["q"], "q");
+    if (cmp(q, ZERO) === 0) {
       body = "q = 0";
       note = "od drugiego wyrazu same zera";
     } else if (cmp(q, ZERO) < 0) {
@@ -422,11 +430,8 @@ const monotonicznoscCiagu: FormulaDef = {
       values: [],
       steps: [
         {
-          title: "1. Różnica / iloraz",
-          body:
-            typ === "arytmetyczny"
-              ? `a_{n+1} - a_n = r = ${L(r)}`
-              : `\\frac{a_{n+1}}{a_n} = q = ${L(q)}`,
+          title: "1. Iloraz",
+          body: `\\frac{a_{n+1}}{a_n} = q = ${L(q)}`,
         },
         { title: "2. Wynik", body, note },
       ],

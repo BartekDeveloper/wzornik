@@ -229,3 +229,91 @@ describe("solver fizyka", () => {
     expect(r.ok).toBe(false);
   });
 });
+
+describe("showIf — pola warunkowe", () => {
+  it("monotonicznosc arytmetyczny liczy tylko r (a₁ i q ukryte)", () => {
+    const r = run("matematyka", "monotonicznosc-ciagu", {
+      typ: "arytmetyczny",
+      a1: "",
+      q: "",
+      r: "1",
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.steps[1]?.note).toBe("ciąg rosnący");
+  });
+
+  it("monotonicznosc arytmetyczny r=-2 → malejący", () => {
+    const r = run("matematyka", "monotonicznosc-ciagu", {
+      typ: "arytmetyczny",
+      a1: "",
+      q: "",
+      r: "-2",
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.steps[1]?.note).toBe("ciąg malejący");
+  });
+
+  it("monotonicznosc arytmetyczny r=0 → stały", () => {
+    const r = run("matematyka", "monotonicznosc-ciagu", {
+      typ: "arytmetyczny",
+      a1: "",
+      q: "",
+      r: "0",
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.steps[1]?.note).toBe("ciąg stały");
+  });
+
+  it("monotonicznosc geometryczny: a₁ i q widoczne, r ukryte", () => {
+    const r = run("matematyka", "monotonicznosc-ciagu", {
+      typ: "geometryczny",
+      a1: "2",
+      q: "3",
+      r: "",
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.steps[1]?.note).toBe("ciąg rosnący");
+    expect(r.steps[0]?.body).toContain("q = 3");
+  });
+
+  it("monotonicznosc geometryczny q=1/2, a₁>0 → malejący", () => {
+    const r = run("matematyka", "monotonicznosc-ciagu", {
+      typ: "geometryczny",
+      a1: "2",
+      q: "1/2",
+      r: "",
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.steps[1]?.note).toBe("ciąg malejący");
+  });
+
+  it("dziedzina deg=1 działa bez q2", () => {
+    const r = run("matematyka", "dziedzina-ulamka-wymiernego", {
+      deg: "1",
+      q2: "",
+      q1: "1",
+      q0: "-4",
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.values.map((v) => formatExactText(v))).toEqual(["4"]);
+    expect(r.steps.at(-1)?.body).toContain("D_f = \\mathbb{R} \\setminus \\{4\\}");
+  });
+
+  it("dziedzina deg=2 z q2 = 1,-5,6 → pierwiastki 2 i 3", () => {
+    const r = run("matematyka", "dziedzina-ulamka-wymiernego", {
+      deg: "2",
+      q2: "1",
+      q1: "-5",
+      q0: "6",
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.values.map((v) => formatExactText(v))).toEqual(["2", "3"]);
+  });
+});

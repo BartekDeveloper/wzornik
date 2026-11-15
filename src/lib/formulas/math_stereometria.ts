@@ -24,7 +24,7 @@ const prostopadloscian: FormulaDef = {
   subject: "matematyka",
   topic: "Stereometria",
   name: "Prostopadłościan i sześcian: pole, przekątna, objętość",
-  latex: "P_c = 2(ab+bc+ac), \\\\; d = \\\\sqrt{a^2+b^2+c^2}, \\\\; V = abc",
+  latex: "P_c = 2(ab+bc+ac), \\; d = \\sqrt{a^2+b^2+c^2}, \\; V = abc",
   vars: [
     { id: "a", label: "a" },
     { id: "b", label: "b" },
@@ -58,13 +58,13 @@ const prostopadloscian: FormulaDef = {
         },
         {
           title: "2. Przekątna",
-          body: `d = \\\\sqrt{a^2+b^2+c^2} = \\\\sqrt{${L(d2)}} = ${show(d, places)}`,
+          body: `d = \\sqrt{a^2+b^2+c^2} = \\sqrt{${L(d2)}} = ${show(d, places)}`,
         },
         { title: "3. Objętość", body: `V = abc = ${show(exactOf(V), places)}` },
         {
           title: "4. Przypadek sześcianu",
           body: cube
-            ? `a = b = c \\\\Rightarrow P_c = 6a^2 = ${show(exactOf(Pc), places)}, \\\\; d = a\\\\sqrt{3}, \\\\; V = a^3 = ${show(exactOf(V), places)}`
+            ? `a = b = c \\Rightarrow P_c = 6a^2 = ${show(exactOf(Pc), places)}, \\; d = a\\sqrt{3}, \\; V = a^3 = ${show(exactOf(V), places)}`
             : "a ≠ b ≠ c — bryła nie jest sześcianem",
         },
       ],
@@ -77,7 +77,7 @@ const graniastoslupOstrolup: FormulaDef = {
   subject: "matematyka",
   topic: "Stereometria",
   name: "Graniastosłup prosty i ostrosłup prawidłowy",
-  latex: "P_c = 2P_b + P_{bocz}, \\\\; P_c = P_b + P_{bocz}",
+  latex: "P_c = 2P_b + P_{bocz}, \\; P_c = P_b + P_{bocz}",
   vars: [
     {
       id: "typ",
@@ -119,14 +119,14 @@ const graniastoslupOstrolup: FormulaDef = {
         steps: [
           {
             title: "1. Pole podstawy (Heron)",
-            body: `P_b = \\\\sqrt{p(p-a)(p-b)(p-c)} = \\\\sqrt{${L(prod)}} = ${show(Pb, places)}`,
+            body: `P_b = \\sqrt{p(p-a)(p-b)(p-c)} = \\sqrt{${L(prod)}} = ${show(Pb, places)}`,
           },
           {
             title: "2. Pole boczne",
-            body: `P_{bocz} = (a+b+c)\\\\cdot h = ${L(obwod)} \\\\cdot ${L(h)} = ${show(Pbocz, places)}`,
+            body: `P_{bocz} = (a+b+c)\\cdot h = ${L(obwod)} \\cdot ${L(h)} = ${show(Pbocz, places)}`,
           },
           { title: "3. Pole całkowite", body: `P_c = 2P_b + P_{bocz} = ${show(Pc, places)}` },
-          { title: "4. Objętość", body: `V = P_b \\\\cdot h = ${show(V, places)}` },
+          { title: "4. Objętość", body: `V = P_b \\cdot h = ${show(V, places)}` },
         ],
       };
     }
@@ -146,13 +146,13 @@ const graniastoslupOstrolup: FormulaDef = {
         { title: "1. Pole podstawy", body: `P_b = a^2 = ${show(exactOf(Pb), places)}` },
         {
           title: "2. Wysokość ściany bocznej",
-          body: `h_s = \\\\sqrt{h^2 + \\\\frac{a^2}{4}} = ${show(trawers, places)}`,
+          body: `h_s = \\sqrt{h^2 + \\frac{a^2}{4}} = ${show(trawers, places)}`,
         },
         {
           title: "3. Pole boczne i całkowite",
-          body: `P_{bocz} = 4\\\\cdot\\\\frac{1}{2}a\\\\cdot h_s = 2a\\\\cdot h_s = ${show(Pbocz, places)}, \\\\; P_c = P_b + P_{bocz} = ${show(Pc, places)}`,
+          body: `P_{bocz} = 4\\cdot\\frac{1}{2}a\\cdot h_s = 2a\\cdot h_s = ${show(Pbocz, places)}, \\; P_c = P_b + P_{bocz} = ${show(Pc, places)}`,
         },
-        { title: "4. Objętość", body: `V = \\\\frac{1}{3}a^2 h = ${show(V, places)}` },
+        { title: "4. Objętość", body: `V = \\frac{1}{3}a^2 h = ${show(V, places)}` },
       ],
     };
   },
@@ -163,7 +163,7 @@ const walec: FormulaDef = {
   subject: "matematyka",
   topic: "Stereometria",
   name: "Walec: pola i objętość",
-  latex: "P_{bocz} = 2\\\\pi r h, \\\\; P_c = 2\\\\pi r(r+h), \\\\; V = \\\\pi r^2 h",
+  latex: "P_{bocz} = 2\\pi r h, \\; P_c = 2\\pi r(r+h), \\; V = \\pi r^2 h",
   vars: [
     { id: "r", label: "r" },
     { id: "h", label: "h" },
@@ -185,10 +185,10 @@ const walec: FormulaDef = {
       steps: [
         {
           title: "1. Pole boczne",
-          body: `P_{bocz} = 2\\\\pi r h = 2\\\\pi \\\\cdot ${L(r)} \\\\cdot ${L(h)} = ${show(Pbocz, places)}`,
+          body: `P_{bocz} = 2\\pi r h = 2\\pi \\cdot ${L(r)} \\cdot ${L(h)} = ${show(Pbocz, places)}`,
         },
-        { title: "2. Pole całkowite", body: `P_c = 2\\\\pi r(r+h) = ${show(Pc, places)}` },
-        { title: "3. Objętość", body: `V = \\\\pi r^2 h = ${show(V, places)}` },
+        { title: "2. Pole całkowite", body: `P_c = 2\\pi r(r+h) = ${show(Pc, places)}` },
+        { title: "3. Objętość", body: `V = \\pi r^2 h = ${show(V, places)}` },
       ],
     };
   },
@@ -200,7 +200,7 @@ const stozek: FormulaDef = {
   topic: "Stereometria",
   name: "Stożek: tworząca, pola i objętość",
   latex:
-    "l = \\\\sqrt{r^2+h^2}, \\\\; P_{bocz} = \\\\pi r l, \\\\; P_c = \\\\pi r(l+r), \\\\; V = \\\\frac{1}{3}\\\\pi r^2 h",
+    "l = \\sqrt{r^2+h^2}, \\; P_{bocz} = \\pi r l, \\; P_c = \\pi r(l+r), \\; V = \\frac{1}{3}\\pi r^2 h",
   vars: [
     { id: "r", label: "r" },
     { id: "h", label: "h" },
@@ -225,14 +225,14 @@ const stozek: FormulaDef = {
       steps: [
         {
           title: "1. Tworząca",
-          body: `l = \\\\sqrt{r^2+h^2} = \\\\sqrt{${L(mul(r, r))}+${L(mul(h, h))}} = ${show(l, places)}`,
+          body: `l = \\sqrt{r^2+h^2} = \\sqrt{${L(mul(r, r))}+${L(mul(h, h))}} = ${show(l, places)}`,
         },
         {
           title: "2. Pole boczne",
-          body: `P_{bocz} = \\\\pi r l = \\\\pi \\\\cdot ${L(r)} \\\\cdot ${show(l, places)} = ${show(Pbocz, places)}`,
+          body: `P_{bocz} = \\pi r l = \\pi \\cdot ${L(r)} \\cdot ${show(l, places)} = ${show(Pbocz, places)}`,
         },
-        { title: "3. Pole całkowite", body: `P_c = \\\\pi r(l+r) = ${show(PcFull, places)}` },
-        { title: "4. Objętość", body: `V = \\\\frac{1}{3}\\\\pi r^2 h = ${show(V, places)}` },
+        { title: "3. Pole całkowite", body: `P_c = \\pi r(l+r) = ${show(PcFull, places)}` },
+        { title: "4. Objętość", body: `V = \\frac{1}{3}\\pi r^2 h = ${show(V, places)}` },
       ],
     };
   },
@@ -243,8 +243,7 @@ const brylySciete: FormulaDef = {
   subject: "matematyka",
   topic: "Stereometria",
   name: "Bryły ścięte: stożek i ostrosłup",
-  latex:
-    "V = \\\\frac{\\\\pi h}{3}(R^2+Rr+r^2), \\\\; V = \\\\frac{h}{3}(P_1+\\\\sqrt{P_1P_2}+P_2)",
+  latex: "V = \\frac{\\pi h}{3}(R^2+Rr+r^2), \\; V = \\frac{h}{3}(P_1+\\sqrt{P_1P_2}+P_2)",
   vars: [
     { id: "typ", label: "bryła", kind: "select", options: ["stozek sciaty", "ostroslup sciaty"] },
     { id: "R", label: "R (większy promień / pole)" },
@@ -277,12 +276,12 @@ const brylySciete: FormulaDef = {
         steps: [
           {
             title: "1. Tworząca",
-            body: `l = \\\\sqrt{h^2+(R-r)^2} = \\\\sqrt{${L(mul(h, h))}+${L(mul(dRr, dRr))}} = ${show(l, places)}`,
+            body: `l = \\sqrt{h^2+(R-r)^2} = \\sqrt{${L(mul(h, h))}+${L(mul(dRr, dRr))}} = ${show(l, places)}`,
           },
-          { title: "2. Pole boczne", body: `P_{bocz} = \\\\pi(R+r)l = ${show(Pbocz, places)}` },
+          { title: "2. Pole boczne", body: `P_{bocz} = \\pi(R+r)l = ${show(Pbocz, places)}` },
           {
             title: "3. Objętość",
-            body: `V = \\\\frac{\\\\pi h}{3}(R^2+Rr+r^2) = ${show(V, places)}`,
+            body: `V = \\frac{\\pi h}{3}(R^2+Rr+r^2) = ${show(V, places)}`,
           },
         ],
       };
@@ -296,11 +295,11 @@ const brylySciete: FormulaDef = {
       steps: [
         {
           title: "1. Średnia proporcjonalna",
-          body: `\\\\sqrt{P_1 P_2} = \\\\sqrt{${L(Rr)}} = ${show(s, places)}`,
+          body: `\\sqrt{P_1 P_2} = \\sqrt{${L(Rr)}} = ${show(s, places)}`,
         },
         {
           title: "2. Objętość",
-          body: `V = \\\\frac{h}{3}(P_1+\\\\sqrt{P_1P_2}+P_2) = ${show(V, places)}`,
+          body: `V = \\frac{h}{3}(P_1+\\sqrt{P_1P_2}+P_2) = ${show(V, places)}`,
         },
       ],
     };

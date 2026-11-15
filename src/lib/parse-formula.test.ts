@@ -189,6 +189,71 @@ describe("parseEquation", () => {
       label: "równanie logarytmiczne",
     });
   });
+
+  it("strips f(x)= / y= prefixes", () => {
+    expect(parseEquation("y=2x-4")).toEqual({
+      subject: "matematyka",
+      id: "funkcja-liniowa",
+      values: { a: "2", b: "-4" },
+      label: "funkcja liniowa",
+    });
+    expect(parseEquation("f(x)=x^2-4")?.id).toBe("rownanie-kwadratowe");
+    expect(parseEquation("W(x)=x^3-3x+2")?.id).toBe("rozklad-wielomianu");
+  });
+
+  it("parses bare canonical form without coefficient", () => {
+    expect(parseEquation("(x-3)^2")).toEqual({
+      subject: "matematyka",
+      id: "postacie-kwadratowej",
+      values: { a: "1", b: "-6", c: "9" },
+      label: "postacie funkcji kwadratowej",
+    });
+    expect(parseEquation("-(x+1)^2+4=0")?.values).toEqual({ a: "-1", b: "-2", c: "3" });
+  });
+
+  it("parses product (iloczynowa) form", () => {
+    expect(parseEquation("2(x-1)(x-3)")).toEqual({
+      subject: "matematyka",
+      id: "postacie-kwadratowej",
+      values: { a: "2", b: "-8", c: "6" },
+      label: "postacie funkcji kwadratowej",
+    });
+    expect(parseEquation("(x+2)(x-5)=0")?.values).toEqual({ a: "1", b: "-3", c: "-10" });
+    expect(parseEquation("x(x-4)")?.values).toEqual({ a: "1", b: "-4", c: "0" });
+  });
+
+  it("parses trigonometric equations", () => {
+    expect(parseEquation("sin(x)=1/2")).toEqual({
+      subject: "matematyka",
+      id: "rownanie-trygonometryczne",
+      values: { a: "1/2" },
+      selects: { fn: "sin" },
+      label: "równanie trygonometryczne",
+    });
+    expect(parseEquation("tg(x)=√3")?.selects).toEqual({ fn: "tg" });
+    expect(parseEquation("cos(x)=√2/2")?.values).toEqual({ a: "√2/2" });
+  });
+
+  it("converts a single line with x and y into slope form", () => {
+    expect(parseEquation("2x+3y=6")).toEqual({
+      subject: "matematyka",
+      id: "funkcja-liniowa",
+      values: { a: "-0.666666667", b: "2" },
+      label: "funkcja liniowa",
+    });
+  });
+
+  it("parses quadratic parameters after semicolons or commas", () => {
+    expect(parseEquation("a=1;b=-5;c=6")).toEqual({
+      subject: "matematyka",
+      id: "rownanie-kwadratowe",
+      values: { a: "1", b: "-5", c: "6" },
+      label: "równanie kwadratowe",
+    });
+    expect(parseEquation("a=1,b=-5,c=6")?.id).toBe("rownanie-kwadratowe");
+    expect(parseEquation("a=2;p=1;q=-4")?.id).toBe("postacie-kwadratowej");
+    expect(parseEquation("a=2;x1=1;x2=3")?.values).toEqual({ a: "2", b: "-8", c: "6" });
+  });
 });
 
 describe("looksLikeEquation", () => {

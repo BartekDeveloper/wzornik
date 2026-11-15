@@ -163,6 +163,46 @@ function draw(): void {
   }
   ctx.stroke();
 
+  if (props.data.secondaryFn) {
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = INK;
+    ctx.setLineDash([6, 5]);
+    ctx.beginPath();
+    pen = false;
+    for (let i = 0; i <= n; i++) {
+      const x = x0 + ((x1 - x0) * i) / n;
+      const y = props.data.secondaryFn(x);
+      if (!Number.isFinite(y)) {
+        pen = false;
+        continue;
+      }
+      const [px, py] = toPx(x, y);
+      if (!pen) {
+        ctx.moveTo(px, py);
+        pen = true;
+      } else {
+        ctx.lineTo(px, py);
+      }
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  if (props.data.asymptotes && props.data.asymptotes.length > 0) {
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = SOFT;
+    ctx.setLineDash([5, 5]);
+    for (const ax of props.data.asymptotes) {
+      if (!Number.isFinite(ax) || ax < x0 || ax > x1) continue;
+      const [px] = toPx(ax, 0);
+      ctx.beginPath();
+      ctx.moveTo(px, 8);
+      ctx.lineTo(px, HEIGHT - pad);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+  }
+
   ctx.font = '11px "IBM Plex Mono", monospace';
   for (const p of props.data.points) {
     if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) continue;

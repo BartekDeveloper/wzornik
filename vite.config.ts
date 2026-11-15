@@ -9,6 +9,18 @@ export default defineConfig({
   // Base './' (Pages) vs '/' (local): build for GitHub Pages with
   // PAGES_BASE=/wzornik/ so router, manifest and precache all carry the subpath.
   base: process.env.PAGES_BASE ?? "/",
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes("node_modules/katex")) return "katex";
+          if (id.includes("/src/lib/formulas/") || id.includes("/src/lib/descriptions")) {
+            return "formulas";
+          }
+        },
+      },
+    },
+  },
   plugins: [
     vue(),
     VitePWA({

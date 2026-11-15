@@ -2,21 +2,35 @@
 import { computed, onUnmounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { getFormula, SUBJECTS } from "../lib/formulas/index";
-import { solveFormula } from "../lib/solver/solver";
+import { solveFormula, isVarVisible } from "../lib/solver/solver";
 import { parseEquation } from "../lib/parse-formula";
 import { formatDecimal, formatLatex, trimNum } from "../lib/exact/format";
 import { approx, isApproxOnly, parseExact } from "../lib/exact/exact";
 import type { Exact } from "../lib/exact/exact";
 import { solveQuadratic } from "../lib/exact/exact";
-import { linearPlot, polyPlot, quadraticPlot, trajectoryPlot } from "../lib/plots/plot";
+import {
+  absPlot,
+  homograficznaPlot,
+  linearPlot,
+  parabolaStycznaPlot,
+  polyPlot,
+  quadraticPlot,
+  quadraticReciprocalPlot,
+  rationalRootsOf,
+  trajectoryPlot,
+  ukladPlot,
+} from "../lib/plots/plot";
 import type { InequalityOp } from "../lib/plots/plot";
 import { inequalityBands } from "../lib/plots/plot";
 import { addHistory, isFavorite, toggleFavorite } from "../lib/storage/db";
 import { loadSettings } from "../lib/settings";
 import { getDescription } from "../lib/descriptions";
+import { getRelations, transferQuery } from "../lib/formulas/relations";
+import type { FormulaDef } from "../lib/formulas/types";
 import Formula from "../components/Formula.vue";
 import FormulaDiagram from "../components/FormulaDiagram.vue";
 import FunctionPlot from "../components/FunctionPlot.vue";
+import MathKeyBar from "../components/MathKeyBar.vue";
 
 const props = defineProps<{ subject?: string; formula?: string }>();
 
@@ -32,6 +46,10 @@ const subjectLabel = computed(() =>
 
 const inputs = reactive<Record<string, string>>({});
 const places = ref(loadSettings().places);
+
+const visibleVars = computed(() =>
+  def.value ? def.value.vars.filter((v) => isVarVisible(v, inputs)) : [],
+);
 const isFav = ref(false);
 const quick = ref("");
 const quickError = ref("");
@@ -91,6 +109,11 @@ watch(
     if (d) for (const v of d.vars) inputs[v.id] = v.kind === "select" ? (v.options?.[0] ?? "") : "";
     const fill = route.query.fill;
     if (typeof fill === "string" && fill !== "") applyFill(fill);
+    for (const [k, v] of Object.entries(route.query)) {
+      if (!k.startsWith("v_") || typeof v !== "string" || v === "") continue;
+      const vr = d?.vars.find((x) => x.id === k.slice(2));
+      if (vr && vr.kind === undefined) inputs[vr.id] = v;
+    }
     isFav.value = false;
     if (d && favKey.value) {
       isFavorite(favKey.value)
@@ -131,10 +154,24 @@ const view = computed(() => {
       approx: isApproxOnly(v),
     })),
     raw: r.values as Exact[],
+    labels: r.labels,
     steps: r.steps,
     first: r.values[0],
   };
 });
+
+const related = computed(() =>
+  def.value ? getRelations(def.value.id) : { simpler: [], harder: [] },
+);
+
+function linkQuery(target: FormulaDef): Record<string, string> {
+  const d = def.value;
+  if (!d) return {};
+  const st = view.value;
+  return st.state === "done"
+    ? transferQuery(d, target, { inputs, values: st.raw, labels: st.labels })
+    : transferQuery(d, target, { inputs });
+}
 
 const diagramNums = computed<Record<string, number> | null>(() => {
   const d = def.value;
@@ -187,7 +224,8 @@ const plotData = computed(() => {
     d.id === "kwadratowa-iloczynowa" ||
     d.id === "delta" ||
     d.id === "ekstrema-kwadratowej" ||
-    d.id === "nierownosc-kwadratowa"
+    d.id === "monotonicznosc-kwadratowej" ||
+    d.id === "miejsca-zerowe-kwadratowej"
   ) {
     const a = numInput("a");
     const b = numInput("b");
@@ -195,11 +233,133 @@ const plotData = computed(() => {
     if (a === null || b === null || c === null || a === 0) return null;
     return quadraticPlot(a, b, c);
   }
-  if (d.id === "funkcja-liniowa") {
+  if (d.id === "kwadratowa-z-kanonicznej" || d.id === "wierzcholek-p-q") {
+    const a = numInput("a");
+    const p = numInput("p");
+    const third = numInput(d.id === "kwadratowa-z-kanonicznej" ? "q" : "b");
+    if (a === null || p === null || third === null || a === 0) return null;
+    return quadraticPlot(a, -2 * a * p, a * p * p + third);
+  }
+  if (d.id === "kwadratowa-z-iloczynowej" || d.id === "kwadratowa-ogolna") {
+    const a = numInput("a");
+    const x1 = numInput("x1");
+    const x2 = numInput("x2");
+    if (a === null || x1 === null || x2 === null || a === 0) return null;
+    return quadraticPlot(a, -a * (x1 + x2), a * x1 * x2);
+  }
+  if (d.id === "kwadratowa-z-wierzcholka-i-punktu") {
+    const p = numInput("p");
+    const q = numInput("q");
+    const xA = numInput("xA");
+    const yA = numInput("yA");
+    if (p === null || q === null || xA === null || yA === null) return null;
+    if (xA === p || yA === q) return null;
+    const a = (yA - q) / ((xA - p) * (xA - p));
+    return quadraticPlot(a, -2 * a * p, a * p * p + q);
+  }
+  if (d.id === "minmax-kwadratowej-przedzial") {
+    const a = numInput("a");
+    const b = numInput("b");
+    const c = numInput("c");
+    const alfa = numInput("alfa");
+    const beta = numInput("beta");
+    if (a === null || b === null || c === null || a === 0) return null;
+    if (alfa === null || beta === null || alfa > beta) return null;
+    const base = quadraticPlot(a, b, c);
+    return base ? { ...base, shade: [{ from: alfa, to: beta }] } : null;
+  }
+  if (d.id === "funkcja-liniowa" || d.id === "monotonicznosc-liniowej") {
     const a = numInput("a");
     const b = numInput("b");
     if (a === null || b === null) return null;
     return linearPlot(a, b);
+  }
+  if (d.id === "prosta-przeksztalcenia") {
+    const A = numInput("A");
+    const B = numInput("B");
+    const C = numInput("C");
+    if (A === null || B === null || C === null) return null;
+    if (B !== 0) return linearPlot(-A / B, -C / B);
+    if (A !== 0) {
+      const x = -C / A;
+      return { fn: () => NaN, points: [], xMin: x - 5, xMax: x + 5, asymptotes: [x] };
+    }
+    return null;
+  }
+  if (d.id === "prosta-2-punkty") {
+    const x1 = numInput("x1");
+    const y1 = numInput("y1");
+    const x2 = numInput("x2");
+    const y2 = numInput("y2");
+    if ([x1, y1, x2, y2].some((v) => v === null)) return null;
+    if (x1 === x2) return null;
+    const a = (y2! - y1!) / (x2! - x1!);
+    return linearPlot(a, y1! - a * x1!);
+  }
+  if (d.id === "uklad-rownan") {
+    const vals = ["a1", "b1", "c1", "a2", "b2", "c2"].map(numInput);
+    if (vals.some((v) => v === null)) return null;
+    return ukladPlot(vals[0]!, vals[1]!, vals[2]!, vals[3]!, vals[4]!, vals[5]!);
+  }
+  if (d.id === "rownanie-stycznej") {
+    const a = numInput("a");
+    const b = numInput("b");
+    const c = numInput("c");
+    const x0 = numInput("x0");
+    if ([a, b, c, x0].some((v) => v === null) || a === 0) return null;
+    return parabolaStycznaPlot(a!, b!, c!, x0!);
+  }
+  if (d.id === "monotonicznosc-ekstrema-wielomianu") {
+    const coefs = ["a", "b", "c", "d"].map(numInput);
+    if (coefs.some((v) => v === null) || coefs[0] === 0) return null;
+    return polyPlot(coefs as number[], rationalRootsOf(coefs as number[]));
+  }
+  if (d.id === "wartosc-bezwzgledna") {
+    const a = numInput("a");
+    const w = numInput("w");
+    if (a === null || w === null) return null;
+    return absPlot(a, w);
+  }
+  if (d.id === "nierownosc-bezwzgledna") {
+    const a = numInput("a");
+    const r = numInput("r");
+    if (a === null || r === null || r < 0) return null;
+    const base = absPlot(a, r);
+    if (!base) return null;
+    const op = (inputs.op ?? "<") as InequalityOp;
+    const bands =
+      op === "<" || op === "≤"
+        ? [{ from: a - r, to: a + r }]
+        : [
+            { from: Number.NEGATIVE_INFINITY, to: a - r },
+            { from: a + r, to: Number.POSITIVE_INFINITY },
+          ];
+    return { ...base, shade: bands };
+  }
+  if (d.id === "pochodna-ilorazu-iloczynu") {
+    const a = numInput("a");
+    const b = numInput("b");
+    const c = numInput("c");
+    const dd = numInput("d");
+    if ([a, b, c, dd].some((v) => v === null)) return null;
+    if ((inputs.typ ?? "iloraz") === "iloczyn") {
+      return quadraticPlot(a! * c!, a! * dd! + b! * c!, b! * dd!);
+    }
+    if (c === 0 && dd === 0) return null;
+    return homograficznaPlot(a!, b!, c!, dd!);
+  }
+  if (d.id === "dziedzina-ulamka-wymiernego") {
+    if ((inputs.deg ?? "1") === "1") {
+      const q1 = numInput("q1");
+      const q0 = numInput("q0");
+      if (q1 === null || q0 === null || (q1 === 0 && q0 === 0)) return null;
+      return homograficznaPlot(0, 1, q1, q0);
+    }
+    const q2 = numInput("q2");
+    const q1 = numInput("q1");
+    const q0 = numInput("q0");
+    if (q2 === null || q1 === null || q0 === null) return null;
+    return quadraticReciprocalPlot(q2, q1, q0);
   }
   if (d.id === "rozklad-wielomianu" || d.id === "horner-pierwiastki") {
     const ids =
@@ -285,11 +445,29 @@ onUnmounted(() => window.clearTimeout(saveTimer));
       <p>{{ description }}</p>
     </details>
 
+    <nav v-if="related.simpler.length > 0" class="rel" aria-label="Prostsze i składowe wzory">
+      <h3 class="rel__title">↑ Prostsze / składowe wzory</h3>
+      <router-link
+        v-for="f in related.simpler"
+        :key="f.id"
+        class="rel__chip"
+        :to="{
+          name: 'solver',
+          params: { subject: f.subject, formula: f.id },
+          query: linkQuery(f),
+        }"
+      >
+        <span class="rel__name">{{ f.name }}</span>
+        <span class="rel__tex"><Formula :source="f.latex" /></span>
+      </router-link>
+    </nav>
+
     <div class="solver">
       <div class="quick">
         <input
           v-model="quick"
           class="quick__input"
+          data-keybar="equation"
           inputmode="text"
           enterkeyhint="go"
           placeholder="Wklej całe równanie, np. 4x^2-2x+10=0"
@@ -311,7 +489,7 @@ onUnmounted(() => window.clearTimeout(saveTimer));
         >
       </p>
       <div class="solver__inputs">
-        <label v-for="v in def.vars" :key="v.id">
+        <label v-for="v in visibleVars" :key="v.id">
           {{ v.label }}<span v-if="v.unit" class="unit"> [{{ v.unit }}]</span>
           <select v-if="v.kind === 'select'" v-model="inputs[v.id]" :aria-label="v.label">
             <option v-for="o in v.options ?? []" :key="o" :value="o">{{ o }}</option>
@@ -367,6 +545,23 @@ onUnmounted(() => window.clearTimeout(saveTimer));
       <FunctionPlot v-if="plotData" :data="plotData" />
     </div>
 
+    <nav v-if="related.harder.length > 0" class="rel" aria-label="Wykorzystaj dalej">
+      <h3 class="rel__title">↓ Wykorzystaj dalej</h3>
+      <router-link
+        v-for="f in related.harder"
+        :key="f.id"
+        class="rel__chip"
+        :to="{
+          name: 'solver',
+          params: { subject: f.subject, formula: f.id },
+          query: linkQuery(f),
+        }"
+      >
+        <span class="rel__name">{{ f.name }}</span>
+        <span class="rel__tex"><Formula :source="f.latex" /></span>
+      </router-link>
+    </nav>
+
     <p class="back">
       <router-link :to="{ name: 'wzornik', params: { subject: def.subject } }"
         >← wszystkie wzory</router-link
@@ -378,6 +573,8 @@ onUnmounted(() => window.clearTimeout(saveTimer));
     <h2>Nie ma takiego kalkulatora</h2>
     <p><router-link :to="{ name: 'wzornik' }">Wróć do wzornika</router-link></p>
   </section>
+
+  <MathKeyBar fallback="numeric" />
 </template>
 
 <style scoped>
@@ -434,6 +631,50 @@ onUnmounted(() => window.clearTimeout(saveTimer));
 .solver {
   margin-top: 1.5rem;
   max-width: var(--content-max);
+}
+
+.rel {
+  margin-top: 1.25rem;
+  max-width: var(--content-max);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rel__title {
+  width: 100%;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+  margin: 0 0 0.25rem;
+}
+
+.rel__chip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-paper-raised);
+  text-decoration: none;
+  min-height: 44px;
+  justify-content: center;
+}
+
+.rel__chip:hover {
+  border-color: var(--color-accent);
+}
+
+.rel__name {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--color-ink);
+}
+
+.rel__tex {
+  font-size: 0.75rem;
+  color: var(--color-ink-soft);
 }
 
 .quick {

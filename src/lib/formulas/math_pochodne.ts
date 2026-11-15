@@ -42,7 +42,7 @@ const rownanieStycznej: FormulaDef = {
       values: [exactOf(m), exactOf(fx0), exactOf(bTang)],
       labels: ["m = f′(x₀)", "f(x₀)", "wyraz wolny stycznej"],
       steps: [
-        { title: "1. Pochodna", body: `f'(x) = 2ax + b \\\\Rightarrow f'(x_0) = ${L(m)}` },
+        { title: "1. Pochodna", body: `f'(x) = 2ax + b \\Rightarrow f'(x_0) = ${L(m)}` },
         { title: "2. Wartość w punkcie", body: `f(x_0) = ${L(fx0)}` },
         {
           title: "3. Równanie stycznej",
@@ -58,7 +58,7 @@ const monotonicznoscWielomianu: FormulaDef = {
   subject: "matematyka",
   topic: "Pochodne",
   name: "Monotoniczność i ekstrema wielomianu 3. stopnia",
-  latex: "f(x) = ax^3+bx^2+cx+d, \\\\; f'(x) = 3ax^2+2bx+c",
+  latex: "f(x) = ax^3+bx^2+cx+d, \\; f'(x) = 3ax^2+2bx+c",
   vars: [
     { id: "a", label: "a (x³)" },
     { id: "b", label: "b (x²)" },
@@ -88,10 +88,10 @@ const monotonicznoscWielomianu: FormulaDef = {
             title: "1. Pochodna",
             body: `f'(x) = ${L(A)}x^2 ${cmp(B, ZERO) >= 0 ? "+" : "-"} ${L(neg(B))}x ${cmp(C, ZERO) >= 0 ? "+" : "-"} ${L(neg(C))}`,
           },
-          { title: "2. Delta", body: `\\\\Delta < 0 \\\\Rightarrow f'(x) \\\\neq 0` },
+          { title: "2. Delta", body: `\\Delta < 0 \\Rightarrow f'(x) \\neq 0` },
           {
             title: "3. Monotoniczność",
-            body: `f'(x) ma stały znak — funkcja ${bodySign} w \\\\mathbb{R}`,
+            body: `f'(x) ma stały znak — funkcja ${bodySign} w \\mathbb{R}`,
           },
         ],
       };
@@ -110,12 +110,12 @@ const monotonicznoscWielomianu: FormulaDef = {
           },
           {
             title: "2. Punkt krytyczny",
-            body: `f'(x) = 0 \\\\Rightarrow x_0 = ${rl[0]}`,
+            body: `f'(x) = 0 \\Rightarrow x_0 = ${rl[0]}`,
             note: "pierwiastek podwójny",
           },
           {
             title: "3. Monotoniczność",
-            body: `f' nie zmienia znaku — brak ekstremów lokalnych, funkcja ${bodySign} w \\\\mathbb{R}`,
+            body: `f' nie zmienia znaku — brak ekstremów lokalnych, funkcja ${bodySign} w \\mathbb{R}`,
           },
         ],
       };
@@ -134,18 +134,18 @@ const monotonicznoscWielomianu: FormulaDef = {
         },
         {
           title: "2. Punkty krytyczne",
-          body: `x_1 = ${show(r1, places)}, \\\\; x_2 = ${show(r2, places)}`,
+          body: `x_1 = ${show(r1, places)}, \\; x_2 = ${show(r2, places)}`,
         },
         {
           title: "3. Monotoniczność",
-          body: `f ${bodySign} na \\\\left(-\\\\infty, ${show(r1, places)}\\\\right) \\\\cup \\\\left(${show(r2, places)}, +\\\\infty\\\\right), \\\\; f ${bodyOpp} na \\\\left(${show(r1, places)}, ${show(r2, places)}\\\\right)`,
+          body: `f ${bodySign} na \\left(-\\infty, ${show(r1, places)}\\right) \\cup \\left(${show(r2, places)}, +\\infty\\right), \\; f ${bodyOpp} na \\left(${show(r1, places)}, ${show(r2, places)}\\right)`,
         },
         {
           title: "4. Ekstrema lokalne",
           body:
             cmp(A, ZERO) > 0
-              ? `maximum lokalne w x = ${show(r1, places)}, \\\\; minimum lokalne w x = ${show(r2, places)}`
-              : `minimum lokalne w x = ${show(r1, places)}, \\\\; maximum lokalne w x = ${show(r2, places)}`,
+              ? `maximum lokalne w x = ${show(r1, places)}, \\; minimum lokalne w x = ${show(r2, places)}`
+              : `minimum lokalne w x = ${show(r1, places)}, \\; maximum lokalne w x = ${show(r2, places)}`,
         },
       ],
     };
@@ -158,7 +158,7 @@ const pochodnaIlorazIloczyn: FormulaDef = {
   topic: "Pochodne",
   name: "Pochodna ilorazu i iloczynu funkcji liniowych",
   latex:
-    "\\\\left(\\\\frac{ax+b}{cx+d}\\\\right)' = \\\\frac{ad-bc}{(cx+d)^2}, \\\\; \\\\left[(ax+b)(cx+d)\\\\right]' = ac\\\\cdot 2x + ad+bc",
+    "\\left(\\frac{ax+b}{cx+d}\\right)' = \\frac{ad-bc}{(cx+d)^2}, \\; \\left[(ax+b)(cx+d)\\right]' = ac\\cdot 2x + ad+bc",
   vars: [
     { id: "typ", label: "rodzaj", kind: "select", options: ["iloraz", "iloczyn"] },
     { id: "a", label: "a" },
@@ -185,7 +185,7 @@ const pochodnaIlorazIloczyn: FormulaDef = {
           { title: "1. Funkcja", body: `f(x) = (${L(a)}x + ${L(b)})(${L(c)}x + ${L(d)})` },
           {
             title: "2. Pochodna iloczynu",
-            body: `f'(x) = ${L(a)}(${L(c)}x + ${L(d)}) + ${L(c)}(${L(a)}x + ${L(b)}) = ${L(ac)}\\\\cdot 2x ${cmp(adbc, ZERO) >= 0 ? "+" : "-"} ${L(cmp(adbc, ZERO) >= 0 ? adbc : neg(adbc))}`,
+            body: `f'(x) = ${L(a)}(${L(c)}x + ${L(d)}) + ${L(c)}(${L(a)}x + ${L(b)}) = ${L(ac)}\\cdot 2x ${cmp(adbc, ZERO) >= 0 ? "+" : "-"} ${L(cmp(adbc, ZERO) >= 0 ? adbc : neg(adbc))}`,
           },
         ],
       };
@@ -195,7 +195,7 @@ const pochodnaIlorazIloczyn: FormulaDef = {
     const body =
       cmp(num, ZERO) === 0
         ? "f'(x) = 0 — funkcja stała"
-        : `f'(x) = \\\\frac{${L(num)}}{(${L(c)}x ${cmp(d, ZERO) >= 0 ? "+" : "-"} ${L(neg(d))})^2}`;
+        : `f'(x) = \\frac{${L(num)}}{(${L(c)}x ${cmp(d, ZERO) >= 0 ? "+" : "-"} ${L(neg(d))})^2}`;
     const signNote =
       cmp(num, ZERO) === 0
         ? undefined
@@ -208,10 +208,10 @@ const pochodnaIlorazIloczyn: FormulaDef = {
       steps: [
         {
           title: "1. Funkcja",
-          body: `f(x) = \\\\frac{${L(a)}x + ${L(b)}}{${L(c)}x ${cmp(d, ZERO) >= 0 ? "+" : "-"} ${L(neg(d))}}`,
+          body: `f(x) = \\frac{${L(a)}x + ${L(b)}}{${L(c)}x ${cmp(d, ZERO) >= 0 ? "+" : "-"} ${L(neg(d))}}`,
         },
         { title: "2. Pochodna ilorazu", body, note: signNote },
-        { title: "3. Wynik", body: `${L(a)}\\\\cdot${L(d)} - ${L(b)}\\\\cdot${L(c)} = ${L(num)}` },
+        { title: "3. Wynik", body: `${L(a)}\\cdot${L(d)} - ${L(b)}\\cdot${L(c)} = ${L(num)}` },
       ],
     };
   },

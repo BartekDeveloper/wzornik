@@ -90,8 +90,10 @@ export const SUBJECTS = [
   { id: "geografia", label: "Geografia" },
 ];
 
+const BY_KEY = new Map(FORMULAS.map((f) => [`${f.subject}/${f.id}`, f]));
+
 export function getFormula(subject: string, id: string): FormulaDef | undefined {
-  return FORMULAS.find((f) => f.subject === subject && f.id === id);
+  return BY_KEY.get(`${subject}/${id}`);
 }
 
 export function formulasBySubject(subject: string): FormulaDef[] {

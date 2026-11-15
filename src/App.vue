@@ -16,7 +16,11 @@ import NavRail from "./components/NavRail.vue";
       </router-link>
     </header>
     <main id="content" class="shell__content" tabindex="-1">
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <KeepAlive include="WzornikView">
+          <component :is="Component" />
+        </KeepAlive>
+      </router-view>
     </main>
     <NavRail />
   </div>

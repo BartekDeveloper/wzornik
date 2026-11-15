@@ -19,7 +19,7 @@ const wektory: FormulaDef = {
   topic: "Geometria analityczna",
   name: "Wektory: długość, iloczyn skalarny, ⊥ i ∥",
   latex:
-    "|\\\\vec{u}| = \\\\sqrt{x^2+y^2}, \\\\; \\\\vec{u}\\\\cdot\\\\vec{v} = x_1x_2+y_1y_2, \\\\; \\\\bot: \\\\vec{u}\\\\cdot\\\\vec{v} = 0, \\\\; \\\\parallel: x_1y_2 - x_2y_1 = 0",
+    "|\\vec{u}| = \\sqrt{x^2+y^2}, \\; \\vec{u}\\cdot\\vec{v} = x_1x_2+y_1y_2, \\; \\bot: \\vec{u}\\cdot\\vec{v} = 0, \\; \\parallel: x_1y_2 - x_2y_1 = 0",
   vars: [
     { id: "x1", label: "u = (x₁, y₁) → x₁" },
     { id: "y1", label: "u → y₁" },
@@ -47,17 +47,17 @@ const wektory: FormulaDef = {
       steps: [
         {
           title: "1. Długości",
-          body: `|\\\\vec{u}| = \\\\sqrt{${L(x1)}^2+${L(y1)}^2} = ${show(lu, places)}, \\\\; |\\\\vec{v}| = \\\\sqrt{${L(x2)}^2+${L(y2)}^2} = ${show(lv, places)}`,
+          body: `|\\vec{u}| = \\sqrt{${L(x1)}^2+${L(y1)}^2} = ${show(lu, places)}, \\; |\\vec{v}| = \\sqrt{${L(x2)}^2+${L(y2)}^2} = ${show(lv, places)}`,
         },
         {
           title: "2. Iloczyn skalarny",
-          body: `\\\\vec{u}\\\\cdot\\\\vec{v} = ${L(x1)}\\\\cdot${L(x2)} + ${L(y1)}\\\\cdot${L(y2)} = ${sum}`,
+          body: `\\vec{u}\\cdot\\vec{v} = ${L(x1)}\\cdot${L(x2)} + ${L(y1)}\\cdot${L(y2)} = ${sum}`,
         },
         {
           title: "3. Prostopadłość i równoległość",
           body: perp
-            ? "\\\\vec{u}\\\\cdot\\\\vec{v} = 0 \\\\Rightarrow \\\\vec{u}\\\\perp\\\\vec{v}"
-            : `\\\\vec{u}\\\\cdot\\\\vec{v} = ${sum} \\\\neq 0 \\\\Rightarrow \\\\vec{u}\\\\not\\\\perp\\\\vec{v}`,
+            ? "\\vec{u}\\cdot\\vec{v} = 0 \\Rightarrow \\vec{u}\\perp\\vec{v}"
+            : `\\vec{u}\\cdot\\vec{v} = ${sum} \\neq 0 \\Rightarrow \\vec{u}\\not\\perp\\vec{v}`,
           note: par
             ? "x₁y₂−x₂y₁ = 0 — wektory równoległe"
             : `x₁y₂−x₂y₁ = ${show(exactOf(cross), places)} — wektory nie są równoległe`,
@@ -72,7 +72,7 @@ const poleTrojkataPunkty: FormulaDef = {
   subject: "matematyka",
   topic: "Geometria analityczna",
   name: "Pole trójkąta z współrzędnych wierzchołków",
-  latex: "P = \\\\frac{1}{2}|x_A(y_B-y_C) + x_B(y_C-y_A) + x_C(y_A-y_B)|",
+  latex: "P = \\frac{1}{2}|x_A(y_B-y_C) + x_B(y_C-y_A) + x_C(y_A-y_B)|",
   vars: [
     { id: "xA", label: "A → x" },
     { id: "yA", label: "A → y" },
@@ -101,7 +101,7 @@ const poleTrojkataPunkty: FormulaDef = {
         { title: "1. Wyznacznik", body: `x_A(y_B-y_C)+x_B(y_C-y_A)+x_C(y_A-y_B) = ${L(P)}` },
         {
           title: "2. Pole",
-          body: `P = \\\\frac{1}{2}\\\\left|${L(P)}\\\\right| = ${show(exactOf(Pval), places)}`,
+          body: `P = \\frac{1}{2}\\left|${L(P)}\\right| = ${show(exactOf(Pval), places)}`,
           note: isZero(w) ? undefined : "punkty nie są współliniowe",
         },
       ],
@@ -114,7 +114,7 @@ const srodekCiezkosci: FormulaDef = {
   subject: "matematyka",
   topic: "Geometria analityczna",
   name: "Środek ciężkości trójkąta",
-  latex: "S = \\\\left(\\\\frac{x_A+x_B+x_C}{3}, \\\\; \\\\frac{y_A+y_B+y_C}{3}\\\\right)",
+  latex: "S = \\left(\\frac{x_A+x_B+x_C}{3}, \\; \\frac{y_A+y_B+y_C}{3}\\right)",
   vars: [
     { id: "xA", label: "A → x" },
     { id: "yA", label: "A → y" },
@@ -141,15 +141,15 @@ const srodekCiezkosci: FormulaDef = {
       steps: [
         {
           title: "1. Współrzędna x",
-          body: `S_x = \\\\frac{${L(xA)}+${L(xB)}+${L(xC)}}{3} = ${show(exactOf(sx), places)}`,
+          body: `S_x = \\frac{${L(xA)}+${L(xB)}+${L(xC)}}{3} = ${show(exactOf(sx), places)}`,
         },
         {
           title: "2. Współrzędna y",
-          body: `S_y = \\\\frac{${L(yA)}+${L(yB)}+${L(yC)}}{3} = ${show(exactOf(sy), places)}`,
+          body: `S_y = \\frac{${L(yA)}+${L(yB)}+${L(yC)}}{3} = ${show(exactOf(sy), places)}`,
         },
         {
           title: "3. Wynik",
-          body: `S = \\\\left(${show(exactOf(sx), places)}, \\\\; ${show(exactOf(sy), places)}\\\\right)`,
+          body: `S = \\left(${show(exactOf(sx), places)}, \\; ${show(exactOf(sy), places)}\\right)`,
         },
       ],
     };
@@ -161,7 +161,7 @@ const przeksztalcenia: FormulaDef = {
   subject: "matematyka",
   topic: "Geometria analityczna",
   name: "Przekształcenia punktu (przesunięcie, symetrie)",
-  latex: "(x,y) \\\\to (x+a, y+b), \\\\; s_X: (x,-y), \\\\; s_Y: (-x,y), \\\\; s_O: (-x,-y)",
+  latex: "(x,y) \\to (x+a, y+b), \\; s_X: (x,-y), \\; s_Y: (-x,y), \\; s_O: (-x,-y)",
   vars: [
     {
       id: "typ",
@@ -206,14 +206,14 @@ const przeksztalcenia: FormulaDef = {
           title: "1. Przekształcenie",
           body:
             typ === "przesuniecie"
-              ? "(x, y) \\\\to (x+a, \\\\; y+b)"
+              ? "(x, y) \\to (x+a, \\; y+b)"
               : typ === "symetria os X"
-                ? "s_X: \\\\; (x, y) \\\\to (x, \\\\; -y)"
+                ? "s_X: \\; (x, y) \\to (x, \\; -y)"
                 : typ === "symetria os Y"
-                  ? "s_Y: \\\\; (x, y) \\\\to (-x, \\\\; y)"
-                  : "s_O: \\\\; (x, y) \\\\to (-x, \\\\; -y)",
+                  ? "s_Y: \\; (x, y) \\to (-x, \\; y)"
+                  : "s_O: \\; (x, y) \\to (-x, \\; -y)",
         },
-        { title: "2. Wynik", body: `(x', y') = \\\\left(${nx}, \\\\; ${ny}\\\\right)` },
+        { title: "2. Wynik", body: `(x', y') = \\left(${nx}, \\; ${ny}\\right)` },
       ],
     };
   },
@@ -225,7 +225,7 @@ const prostaFormy: FormulaDef = {
   topic: "Geometria analityczna",
   name: "Prosta: postać ogólna ↔ kierunkowa i przecięcia",
   latex:
-    "Ax+By+C = 0 \\\\Rightarrow y = -\\\\frac{A}{B}x - \\\\frac{C}{B}, \\\\; x_0 = -\\\\frac{C}{A}, \\\\; y_0 = -\\\\frac{C}{B}",
+    "Ax+By+C = 0 \\Rightarrow y = -\\frac{A}{B}x - \\frac{C}{B}, \\; x_0 = -\\frac{C}{A}, \\; y_0 = -\\frac{C}{B}",
   vars: [
     { id: "A", label: "A" },
     { id: "B", label: "B" },
@@ -264,11 +264,11 @@ const prostaFormy: FormulaDef = {
           title: "2. Kierunkowa",
           body: isZero(B)
             ? "B = 0 — prosta pionowa x = " + show(exactOf(div(neg(C), A)), places)
-            : `y = -\\\\frac{${L(A)}}{${L(B)}}x - \\\\frac{${L(C)}}{${L(B)}} = ${results[0]}`,
+            : `y = -\\frac{${L(A)}}{${L(B)}}x - \\frac{${L(C)}}{${L(B)}} = ${results[0]}`,
         },
         {
           title: "3. Przecięcia z osiami",
-          body: results.slice(1).join(", \\\\; ") || "brak (prosta równoległa do OX)",
+          body: results.slice(1).join(", \\; ") || "brak (prosta równoległa do OX)",
         },
       ],
     };
@@ -281,7 +281,7 @@ const okragOgolna: FormulaDef = {
   topic: "Geometria analityczna",
   name: "Okrąg: postać ogólna ↔ kanoniczna",
   latex:
-    "x^2+y^2+Dx+Ey+F = 0 \\\\Rightarrow (x+\\\\frac{D}{2})^2 + (y+\\\\frac{E}{2})^2 = \\\\frac{D^2+E^2}{4} - F",
+    "x^2+y^2+Dx+Ey+F = 0 \\Rightarrow (x+\\frac{D}{2})^2 + (y+\\frac{E}{2})^2 = \\frac{D^2+E^2}{4} - F",
   vars: [
     { id: "D", label: "D" },
     { id: "E", label: "E" },
@@ -305,11 +305,11 @@ const okragOgolna: FormulaDef = {
       steps: [
         {
           title: "1. Środek",
-          body: `S = \\\\left(-\\\\frac{D}{2}, -\\\\frac{E}{2}\\\\right) = \\\\left(${show(exactOf(a), places)}, \\\\; ${show(exactOf(b), places)}\\\\right)`,
+          body: `S = \\left(-\\frac{D}{2}, -\\frac{E}{2}\\right) = \\left(${show(exactOf(a), places)}, \\; ${show(exactOf(b), places)}\\right)`,
         },
         {
           title: "2. Promień",
-          body: `R = \\\\sqrt{\\\\frac{D^2+E^2}{4} - F} = \\\\sqrt{${show(exactOf(R2), places)}} = ${show(R, places)}`,
+          body: `R = \\sqrt{\\frac{D^2+E^2}{4} - F} = \\sqrt{${show(exactOf(R2), places)}} = ${show(R, places)}`,
         },
         {
           title: "3. Postać kanoniczna",

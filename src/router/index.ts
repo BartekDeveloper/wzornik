@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { metaFor } from "../lib/seo";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,7 +57,8 @@ const router = createRouter({
   ],
 });
 
-router.afterEach((to) => {
+router.afterEach(async (to) => {
+  const { metaFor } = await import("../lib/seo");
   const meta = metaFor(to.name, to.params as Record<string, string | string[]>);
   document.title = meta.title;
   const setContent = (selector: string, content: string) =>

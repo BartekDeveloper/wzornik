@@ -1,14 +1,20 @@
 import { describe, expect, it } from "vitest";
 import {
+  absPlot,
+  homograficznaPlot,
   inequalityBands,
   initialView,
   linearPlot,
   niceStep,
   panView,
+  parabolaStycznaPlot,
   polyPlot,
   quadraticPlot,
+  quadraticReciprocalPlot,
+  rationalRootsOf,
   sampleY,
   trajectoryPlot,
+  ukladPlot,
   zoomView,
 } from "./plot";
 
@@ -133,6 +139,108 @@ describe("inequalityBands", () => {
 
   it("rejects a=0", () => {
     expect(inequalityBands(0, ">", [2])).toBeNull();
+  });
+});
+
+describe("rationalRootsOf", () => {
+  it("finds rational roots of a cubic", () => {
+    expect(rationalRootsOf([1, -6, 11, -6])).toEqual([1, 2, 3]);
+  });
+
+  it("handles zero constant term", () => {
+    expect(rationalRootsOf([1, -4, 0])).toEqual([0, 4]);
+  });
+
+  it("returns only roots, not other candidates", () => {
+    expect(rationalRootsOf([1, 1, 1])).toEqual([]);
+  });
+});
+
+describe("absPlot", () => {
+  it("draws |x-2| with line y=3 intersections", () => {
+    const p = absPlot(2, 3);
+    if (!p) throw new Error("expected plot");
+    expect(p.fn(5)).toBe(3);
+    expect(p.secondaryFn?.(10)).toBe(3);
+    const pts = p.points.filter((pt) => pt.kind === "zero");
+    expect(pts.map((pt) => pt.x).sort()).toEqual([-1, 5]);
+  });
+
+  it("rejects negative w", () => {
+    expect(absPlot(2, -1)).toBeNull();
+  });
+});
+
+describe("homograficznaPlot", () => {
+  it("draws (2x+1)/(x-3) with vertical asymptote", () => {
+    const p = homograficznaPlot(2, 1, 1, -3);
+    if (!p) throw new Error("expected plot");
+    expect(p.asymptotes).toEqual([3]);
+    expect(p.secondaryFn?.(100)).toBeCloseTo(2, 9);
+    expect(p.fn(3)).toBeNaN();
+    expect(p.fn(0)).toBeCloseTo(-1 / 3, 9);
+    const zero = p.points.find((pt) => pt.kind === "zero");
+    expect(zero?.x).toBeCloseTo(-0.5, 9);
+  });
+
+  it("rejects zero denominator polynomial", () => {
+    expect(homograficznaPlot(1, 1, 0, 0)).toBeNull();
+  });
+});
+
+describe("quadraticReciprocalPlot", () => {
+  it("draws 1/(x²-4) with asymptotes at ±2", () => {
+    const p = quadraticReciprocalPlot(1, 0, -4);
+    if (!p) throw new Error("expected plot");
+    expect(p.asymptotes!.map((a) => Math.abs(a)).sort()).toEqual([2, 2]);
+    expect(p.fn(0)).toBeCloseTo(-0.25, 9);
+    expect(p.fn(2)).toBeNaN();
+  });
+
+  it("has no asymptotes for Δ<0", () => {
+    const p = quadraticReciprocalPlot(1, 0, 4);
+    if (!p) throw new Error("expected plot");
+    expect(p.asymptotes).toEqual([]);
+  });
+});
+
+describe("ukladPlot", () => {
+  it("finds intersection of two lines", () => {
+    const p = ukladPlot(2, 3, 7, 1, -1, 1);
+    if (!p) throw new Error("expected plot");
+    const v = p.points.find((pt) => pt.kind === "vertex");
+    expect(v?.x).toBeCloseTo(2, 9);
+    expect(v?.y).toBeCloseTo(1, 9);
+    expect(p.secondaryFn).toBeDefined();
+    expect(p.fn(0)).toBeCloseTo(7 / 3, 9);
+    expect(p.secondaryFn?.(0)).toBeCloseTo(-1, 9);
+  });
+
+  it("handles a vertical line via asymptote", () => {
+    const p = ukladPlot(1, 0, 2, 0, 1, 3);
+    if (!p) throw new Error("expected plot");
+    expect(p.asymptotes).toEqual([2]);
+    expect(p.fn(0)).toBeCloseTo(3, 9);
+  });
+
+  it("rejects two vertical lines", () => {
+    expect(ukladPlot(1, 0, 2, 1, 0, 5)).toBeNull();
+  });
+});
+
+describe("parabolaStycznaPlot", () => {
+  it("adds tangent as dashed secondary and touch point", () => {
+    const p = parabolaStycznaPlot(1, -2, 3, 2);
+    if (!p) throw new Error("expected plot");
+    expect(p.secondaryFn?.(2)).toBeCloseTo(3, 9);
+    expect(p.secondaryFn?.(0)).toBeCloseTo(-1, 9);
+    const touch = p.points[p.points.length - 1]!;
+    expect(touch.x).toBeCloseTo(2, 9);
+    expect(touch.y).toBeCloseTo(3, 9);
+  });
+
+  it("rejects a=0", () => {
+    expect(parabolaStycznaPlot(0, 1, 1, 0)).toBeNull();
   });
 });
 

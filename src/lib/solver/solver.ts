@@ -21,6 +21,14 @@ function parseInput(label: string, raw: string): Exact {
   }
 }
 
+export function isVarVisible(
+  v: { showIf?: { select: string; values: string[] } },
+  selects: Record<string, string>,
+): boolean {
+  if (!v.showIf) return true;
+  return v.showIf.values.includes(selects[v.showIf.select] ?? "");
+}
+
 export function solveFormula(
   def: FormulaDef,
   raw: Record<string, string>,
@@ -42,6 +50,7 @@ export function solveFormula(
       const known: Record<string, Exact> = {};
       for (const v of def.vars) {
         if (v.kind === "select" || v.kind === "list") continue;
+        if (!isVarVisible(v, selects)) continue;
         const s = (raw[v.id] ?? "").trim();
         if (s === "") return { ok: false, error: `uzupełnij pole ${v.label}` };
         known[v.id] = parseInput(v.label, s);

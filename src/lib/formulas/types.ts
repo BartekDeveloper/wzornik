@@ -9,6 +9,7 @@ export interface FormulaVar {
   unit?: string;
   kind?: "text" | "select" | "list";
   options?: string[];
+  showIf?: { select: string; values: string[] };
 }
 
 export interface SolveStep {
